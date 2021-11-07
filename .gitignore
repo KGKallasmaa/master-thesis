@@ -4,5 +4,7 @@
 # next.js
 /.next
 /out
-#computer
+# computer
 .DS_STORE
+# python
+*.pyc
