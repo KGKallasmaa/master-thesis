@@ -1,40 +1,47 @@
 import { Row, Col } from "antd";
 import { ConceptCard } from "../common/card";
+import { useEffect, useState } from "react";
+import { http } from "../common/http";
 
 interface CorrectLabelingTaskProps {
   model: string;
   dataset: string;
+  label: string;
 }
 
 export function CorrectLabelingTask(props: CorrectLabelingTaskProps) {
+  const { model, dataset, label } = props;
+
+  const [image, setImage] = useState("");
+  const [imageIndex, setImageIndex] = useState(-1);
+  const [conceptsFromImage, setConceptsFromImage] = useState([]);
+
+  useEffect(() => {
+    const payload = {
+      label: label,
+    };
+    http("/label-image", payload)
+      .then((el) => el.json())
+      .then((data) => {
+        setImage(data.url);
+        setImageIndex(data.index);
+      });
+  });
+  useEffect(() => {
+    const payload = {
+      index: imageIndex,
+    };
+    http("/image-segments", payload)
+      .then((el) => el.json())
+      .then((data) => {
+        setConceptsFromImage(data.results);
+      });
+  }, [imageIndex]);
+
   function handleCategoryIsRelevant(name: string, decision: boolean) {}
 
   function handleConceptIsRelevant(name: string, decision: boolean) {}
 
-  // TODO: fetch real data
-  const imageUrl =
-    "https://media.architecturaldigest.com/photos/5eac5fa22105f13b72dede45/master/pass/111LexowAve_Aug18-1074.jpg";
-  const label = "Bed room";
-  const conceptsFromImage = [
-    {
-      conceptName: "Bed",
-      src: "https://www.godrejinterio.com/imagestore/B2C/56101515SD00434/56101515SD00434_01_803x602.png",
-    },
-    {
-      conceptName: "Lamp",
-      src: "https://cdn.ambientedirect.com/chameleon/mediapool/thumbs/e/14/Artemide_Choose-Tavolo-Tischleuchte_1200x630-ID1244137-6b26b748c53db9143ef4cc7a64deb941.jpg",
-    },
-    {
-      conceptName: "Window",
-      src: "https://lda.lowes.com/is/image/Lowes/DP18-161346_NPC_HT_MeasureWindows_AH?scl=1",
-    },
-    {
-      conceptName: "Mirror",
-      src: "https://m.media-amazon.com/images/I/51B0uz2znGL._AC_SX466_.jpg",
-    },
-  ];
-
-  const { model, dataset } = props;
   return (
     <>
       <h3>Label image association</h3>
@@ -43,7 +50,7 @@ export function CorrectLabelingTask(props: CorrectLabelingTaskProps) {
         <ConceptCard
           key={label}
           label={label}
-          imageUrl={imageUrl}
+          imageBase64={image}
           imageWidth={300}
           onSelected={handleCategoryIsRelevant}
         />
@@ -57,7 +64,7 @@ export function CorrectLabelingTask(props: CorrectLabelingTaskProps) {
       </p>
       <br />
       <Row>
-        {conceptsFromImage.map((el) => (
+        {conceptsFromImage?.map((el) => (
           <Col
             key={el.conceptName}
             span={8}
@@ -65,7 +72,7 @@ export function CorrectLabelingTask(props: CorrectLabelingTaskProps) {
           >
             <ConceptCard
               label={el.conceptName}
-              imageUrl={el.src}
+              imageBase64={el.src}
               imageWidth={200}
               onSelected={handleConceptIsRelevant}
             />
