@@ -5,6 +5,7 @@ import { BatchSelect } from "./batch_select";
 
 export default function Batch() {
   // TODO: get real data
+  const label = "coast";
   const allModels = ["model-1", "model-2", "model-3"];
   const allDataSets = ["dataset-1", "dataset-2", "dataset-3"];
 
@@ -25,7 +26,7 @@ export default function Batch() {
           />
         </Col>
         <Col span={16}>
-          <BatchSelect label={"Bed"} model={model} dataset={dataSet} />
+          <BatchSelect label={label} model={model} dataset={dataSet} />
         </Col>
       </Row>
     </>

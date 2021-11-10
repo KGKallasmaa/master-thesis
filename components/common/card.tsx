@@ -5,14 +5,15 @@ const { Meta } = Card;
 
 interface ConceptCardProps {
   label?: string;
-  imageUrl: string;
+  imageBase64: string;
   imageWidth: number;
 
   onSelected(name: string, isRelevant: boolean): void;
 }
 
 export function ConceptCard(props: ConceptCardProps) {
-  const { label, imageUrl, onSelected, imageWidth } = props;
+  const { label, imageBase64, onSelected, imageWidth } = props;
+  const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
   return (
     <>
       <Card
