@@ -11,7 +11,7 @@ export default function Batch() {
   const [model, setModel] = useState(allModels[0]);
   const [dataSet, setDataSet] = useState(allDataSets[0]);
 
-  const [currentLabel,setLabel] = useState("");
+  const [currentLabel, setLabel] = useState("");
 
   return (
     <>
