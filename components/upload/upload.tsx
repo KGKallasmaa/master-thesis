@@ -12,6 +12,9 @@ export default function Upload() {
   const [model, setModel] = useState(allModels[0]);
   const [dataSet, setDataSet] = useState(allDataSets[0]);
 
+  const [currentLabel,setLabel] = useState("");
+
+
   return (
     <>
       <br />
@@ -23,6 +26,7 @@ export default function Upload() {
             dataSets={allDataSets}
             onModelSelected={setModel}
             onDataSetSelected={setDataSet}
+            onLabelSelected={setLabel}
           />
         </Col>
         <Col span={16}>

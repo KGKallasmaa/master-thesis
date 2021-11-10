@@ -1,4 +1,6 @@
 import { Select } from "antd";
+import {useEffect, useState} from "react";
+import {http} from "../common/http";
 
 const { Option } = Select;
 
@@ -7,15 +9,44 @@ interface SelectModelProps {
   dataSets: string[];
 
   onModelSelected(newModel: string): void;
-
+  onLabelSelected(newLabel:string):void;
   onDataSetSelected(newModel: string): void;
 }
 
 export function SelectSection(props: SelectModelProps) {
-  const { models, dataSets, onModelSelected, onDataSetSelected } = props;
+  const { models, dataSets, onModelSelected, onDataSetSelected,onLabelSelected } = props;
+
+  const [labels,setLabels] = useState([])
+
+    useEffect(() => {
+        http("/all-labels",{})
+            .then((el) => el.json())
+            .then((data) => {
+                setLabels(data.labels)
+            });
+    },[]);
+
 
   return (
     <>
+        {
+            labels && (
+                <>
+                    <Select
+                        defaultValue={labels[0]}
+                        onChange={(value) => onLabelSelected(value)}
+                    >
+                        {labels.map((label) => (
+                            <Option key={label} value={label}>
+                                {label}
+                            </Option>
+                        ))}
+                    </Select>
+                    <br />
+                    <br />
+                </>
+            )
+        }
       <Select
         defaultValue={models[0]}
         onChange={(value) => onModelSelected(value)}
