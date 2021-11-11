@@ -5,7 +5,6 @@ import { UploadTask } from "./upload_task";
 
 export default function Upload() {
   // TODO: get real data
-  const concept = "Bed";
   const allModels = ["model-1", "model-2", "model-3"];
   const allDataSets = ["dataset-1", "dataset-2", "dataset-3"];
 
@@ -29,7 +28,7 @@ export default function Upload() {
           />
         </Col>
         <Col span={16}>
-          <UploadTask label={concept} />
+          <UploadTask label={currentLabel} />
         </Col>
       </Row>
     </>
