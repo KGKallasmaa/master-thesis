@@ -37,7 +37,7 @@ export function BatchSelect(props: BatchSelectProps) {
       <Row>
         {images?.map((el, i) => (
           <Col
-            key={el.index}
+            key={i}
             span={8}
             style={{ marginRight: 50, marginBottom: 20 }}
           >

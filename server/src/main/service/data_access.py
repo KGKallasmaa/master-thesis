@@ -1,3 +1,6 @@
+from typing import List
+
+import PIL
 import numpy as np
 import pickle
 import pandas as pd
@@ -13,7 +16,7 @@ with open('src/data/classes.pkl', 'rb') as f:
 def get_masks():
     return masks
 
-
+# TODO: add type pil
 def get_images():
     return imgs
 

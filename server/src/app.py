@@ -1,9 +1,9 @@
 from sanic import Sanic
 from sanic.response import json
 
-from service.data_access import get_labels
-from service.index_segments import image_segments
-from service.lable_image import label_example_image, label_all_images
+from main.service.data_access import get_labels
+from main.service.index_segments import image_segments
+from main.service.lable_image import label_example_image, label_all_images
 
 app = Sanic("Master thesis service")
 
@@ -17,6 +17,8 @@ async def all_labels_view(request):
 @app.route("/label-image", methods=["POST"])
 async def label_image_view(request):
     label = request.json["label"]
+    if len(label) == 0:
+        return json({"index": -1, "url": "", "label": label})
     index, url = label_example_image(label)
     return json({"index": index, "url": url, "label": label})
 
@@ -33,7 +35,7 @@ async def image_segment_view(request):
 @app.route("/label-all-images", methods=["POST"])
 async def label_all_image_view(request):
     label = request.json["label"]
-    results = label_all_images(label)
+    results = label_all_images(label) if len(label) > 0 else []
     return json({"results": results})
 
 
