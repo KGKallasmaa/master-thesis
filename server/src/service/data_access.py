@@ -2,11 +2,11 @@ import numpy as np
 import pickle
 import pandas as pd
 
-with open('data/masks.pkl', 'rb') as f:
+with open('src/data/masks.pkl', 'rb') as f:
     masks = pickle.load(f)
-with open('data/resized_imgs.pkl', 'rb') as f:
+with open('src/data/resized_imgs.pkl', 'rb') as f:
     imgs = pickle.load(f)
-with open('data/classes.pkl', 'rb') as f:
+with open('src/data/classes.pkl', 'rb') as f:
     labels = np.array(pickle.load(f))
 
 
@@ -23,7 +23,7 @@ def get_labels() -> np.array:
 
 
 def get_segments(img, mask, threshold=0.05):
-    ade_classes = pd.read_csv('data/objectInfo150.csv')
+    ade_classes = pd.read_csv('src/data/objectInfo150.csv')
     segs = np.unique(mask)
     segments = []
     total = mask.shape[0] * mask.shape[1]
