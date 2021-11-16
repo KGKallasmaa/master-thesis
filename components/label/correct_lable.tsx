@@ -42,26 +42,26 @@ export function CorrectLabelingTask(props: CorrectLabelingTaskProps) {
 
   function handleConceptIsRelevant(name: string, decision: boolean) {}
 
-    const explanationImg = "https://help.sap.com/saphelp_nw73/helpdata/de/99/02f1afe99c46cda61f1363755101e9/loiod486240f89a849a2bf9ed8622553b6a9_LowRes.png"
+  const explanationImg =
+    "https://help.sap.com/saphelp_nw73/helpdata/de/99/02f1afe99c46cda61f1363755101e9/loiod486240f89a849a2bf9ed8622553b6a9_LowRes.png";
 
   return (
     <>
       <h3>Label image association</h3>
       <p>Can this image be associated with this concept</p>
       <Row>
-          <Col span={8}>
-              <ConceptCard
-                  key={label}
-                  label={label}
-                  imageBase64={image}
-                  imageWidth={300}
-                  onSelected={handleCategoryIsRelevant}
-              />
-
-          </Col>
-          <Col span={8}>
-              <img src={explanationImg}/>
-          </Col>
+        <Col span={8}>
+          <ConceptCard
+            key={label}
+            label={label}
+            imageBase64={image}
+            imageWidth={300}
+            onSelected={handleCategoryIsRelevant}
+          />
+        </Col>
+        <Col span={8}>
+          <img src={explanationImg} />
+        </Col>
       </Row>
 
       <br />
