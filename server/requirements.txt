@@ -1,5 +1,6 @@
-sanic == 21.9.1
-pillow == 6.2.2
-scikit-learn ==  1.0.1
-numpy == 1.21.4
-pandas~=0.25.1
+sanic
+pillow
+numpy
+pandas
+scipy
+scikit-learn
