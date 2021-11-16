@@ -5,11 +5,9 @@ from main.service.data_access import get_labels
 from main.service.index_segments import image_segments
 from main.service.lable_image import label_example_image, label_all_images
 
-
 app = Sanic("Master thesis service")
 
 cors_header = {"Access-Control-Allow-Origin": "*"}
-
 
 
 @app.route("/all-labels", methods=["POST"])
@@ -44,4 +42,4 @@ async def label_all_image_view(request):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False, access_log=False)
