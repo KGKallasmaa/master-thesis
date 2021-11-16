@@ -8,6 +8,16 @@ img_path = "main/data/resized_imgs.pkl"
 labels_path = "main/data/classes.pkl"
 ade_path = "main/data/objectInfo150.csv"
 
+"""
+use them for local development
+"""
+"""
+masks_path = "src/main/data/masks.pkl"
+img_path = "src/main/data/resized_imgs.pkl"
+labels_path = "src/main/data/classes.pkl"
+ade_path = "src/main/data/objectInfo150.csv"
+"""
+
 with open(masks_path, 'rb') as f:
     masks = pickle.load(f)
 with open(img_path, 'rb') as f:
