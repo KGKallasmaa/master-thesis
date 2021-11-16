@@ -36,11 +36,7 @@ export function BatchSelect(props: BatchSelectProps) {
       <br />
       <Row>
         {images?.map((el, i) => (
-          <Col
-            key={i}
-            span={8}
-            style={{ marginRight: 50, marginBottom: 20 }}
-          >
+          <Col key={i} span={8} style={{ marginRight: 50, marginBottom: 20 }}>
             <ConceptCard
               imageBase64={el.src}
               imageWidth={200}

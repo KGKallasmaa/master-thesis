@@ -13,12 +13,15 @@ def serve_pil_image(img: PIL) -> str:
     base64_str = base64.b64encode(byte_data)
     return base64_str.decode("utf-8")
 
-def array_to_image(ar:np.array) -> PIL:
+
+def array_to_image(ar: np.array) -> PIL:
     return Image.fromarray(np.uint8(ar)).convert('RGB')
 
-def resize_img(img,width=100,height=100) -> PIL:
+
+def resize_img(img, width=100, height=100) -> PIL:
     return img.resize((width, height), Image.ANTIALIAS)
 
-def base64_hash(img:str)->str:
+
+def base64_hash(img: str) -> str:
     result = hashlib.md5(img.encode())
     return result.hexdigest()

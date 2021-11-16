@@ -38,12 +38,10 @@ def cluster_images(image_map, k=10) -> Dict[int, str]:
                 best_distance = distance_from_center
                 best_img = img
 
-        bestimg_cluster[cluster_index] = best_img
+        bestimg_cluster[cluster_index] = serve_pil_image(resize_lookup[str(best_img)])
 
-    for key, value in bestimg_cluster.items():
-        bestimg_cluster[key] = serve_pil_image(resize_lookup[str(value)])
     return bestimg_cluster
 
 
 def euclidean_distance(a: np.array, b: np.array) -> float:
-    return np.linalg.norm(a - b)
+    return np.sqrt(np.sum(np.square(a - b)))

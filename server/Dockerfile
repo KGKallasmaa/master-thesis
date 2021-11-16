@@ -1,5 +1,4 @@
-FROM python:3.9.5-slim-buster
-RUN apt-get update && apt-get -y install gcc
+FROM python:3.9.8-alpine3.14
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r requirements.txt

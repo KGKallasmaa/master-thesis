@@ -23,4 +23,4 @@ def label_all_images(label: str) -> List[any]:
 
     cluster_image_result = cluster_images(image_lookup)
 
-    return [{"hash":base64_hash(img), "src": img} for index, img in cluster_image_result.items()]
+    return [{"hash": base64_hash(img), "src": img} for index, img in cluster_image_result.items()]

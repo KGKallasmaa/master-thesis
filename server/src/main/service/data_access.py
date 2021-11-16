@@ -1,15 +1,16 @@
-from typing import List
-
-import PIL
 import numpy as np
 import pickle
 import pandas as pd
 
-with open('src/data/masks.pkl', 'rb') as f:
+masks_path = "main/data/masks.pkl"
+img_path = "main/data/resized_imgs.pkl"
+labels_path = "main/data/classes.pkl"
+
+with open(masks_path , 'rb') as f:
     masks = pickle.load(f)
-with open('src/data/resized_imgs.pkl', 'rb') as f:
+with open(img_path, 'rb') as f:
     imgs = pickle.load(f)
-with open('src/data/classes.pkl', 'rb') as f:
+with open(labels_path , 'rb') as f:
     labels = np.array(pickle.load(f))
 
 
@@ -26,7 +27,7 @@ def get_labels() -> np.array:
 
 
 def get_segments(img, mask, threshold=0.05):
-    ade_classes = pd.read_csv('src/data/objectInfo150.csv')
+    ade_classes = pd.read_csv('src/main/data/objectInfo150.csv')
     segs = np.unique(mask)
     segments = []
     total = mask.shape[0] * mask.shape[1]
