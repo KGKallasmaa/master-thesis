@@ -12,7 +12,7 @@ CORS(app)
 
 
 @app.route("/all-labels", methods=["POST"])
-async def all_labels_view():
+def all_labels_view():
     labels = list(set(get_labels().tolist()))
     return jsonify({"labels": labels})
 
