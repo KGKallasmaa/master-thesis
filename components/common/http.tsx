@@ -1,5 +1,5 @@
 export function http(url: string, payload: any) {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = "http://164.92.248.201:5000";
   return fetch(baseUrl + url, {
     method: "POST",
     headers: {

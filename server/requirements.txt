@@ -4,4 +4,4 @@ numpy
 pandas
 scipy
 scikit-learn
-sanic_cors
+flask-cors
