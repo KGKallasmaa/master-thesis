@@ -4,8 +4,11 @@ from sanic.response import json
 from main.service.data_access import get_labels
 from main.service.index_segments import image_segments
 from main.service.lable_image import label_example_image, label_all_images
+from sanic_cors import CORS
+
 
 app = Sanic("Master thesis service")
+CORS(app)
 
 
 @app.route("/all-labels", methods=["POST"])
