@@ -11,6 +11,11 @@ app = Flask(__name__)
 CORS(app)
 
 
+@app.route("/health", methods=["GET"])
+def health_view():
+    return jsonify({"hello": "world"})
+
+
 @app.route("/all-labels", methods=["POST"])
 def all_labels_view():
     labels = list(set(get_labels().tolist()))
