@@ -1,19 +1,42 @@
-import numpy as np
 import pickle
+
+import numpy as np
 import pandas as pd
 
-with open('src/data/masks.pkl', 'rb') as f:
+masks_path = "main/data/masks.pkl"
+img_path = "main/data/resized_imgs.pkl"
+labels_path = "main/data/classes.pkl"
+ade_path = "main/data/objectInfo150.csv"
+
+"""
+use them for local development
+"""
+"""
+masks_path = "src/main/data/masks.pkl"
+img_path = "src/main/data/resized_imgs.pkl"
+labels_path = "src/main/data/classes.pkl"
+ade_path = "src/main/data/objectInfo150.csv"
+"""
+
+with open(masks_path, 'rb') as f:
     masks = pickle.load(f)
-with open('src/data/resized_imgs.pkl', 'rb') as f:
+with open(img_path, 'rb') as f:
     imgs = pickle.load(f)
-with open('src/data/classes.pkl', 'rb') as f:
+with open(labels_path, 'rb') as f:
     labels = np.array(pickle.load(f))
+
+ade_classes = pd.read_csv(ade_path)
+
+
+def get_ade_classes():
+    return ade_classes
 
 
 def get_masks():
     return masks
 
 
+# TODO: add type pil
 def get_images():
     return imgs
 
@@ -23,7 +46,7 @@ def get_labels() -> np.array:
 
 
 def get_segments(img, mask, threshold=0.05):
-    ade_classes = pd.read_csv('src/data/objectInfo150.csv')
+    ade_classes = get_ade_classes()
     segs = np.unique(mask)
     segments = []
     total = mask.shape[0] * mask.shape[1]
