@@ -1,5 +1,7 @@
 import pickle
+from typing import List
 
+import PIL
 import numpy as np
 import pandas as pd
 
@@ -37,7 +39,7 @@ def get_masks():
 
 
 # TODO: add type pil
-def get_images():
+def get_images()->List[PIL.Image.Image]:
     return imgs
 
 

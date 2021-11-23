@@ -31,7 +31,7 @@ export function CorrectLabelingTask(props: CorrectLabelingTaskProps) {
     const payload = {
       index: imageIndex,
     };
-    http("/image-segments", payload)
+    http("/image-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
         setConceptsFromImage(data.results);
