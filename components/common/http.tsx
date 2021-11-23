@@ -9,6 +9,6 @@ export function http(path: string, payload: any) {
   });
 }
 
-export function getBaseUrl(){
-  return "http://localhost:5000"
+export function getBaseUrl() {
+  return "http://localhost:5000";
 }
