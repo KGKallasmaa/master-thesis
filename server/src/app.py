@@ -80,7 +80,9 @@ def label_all_image_view():
 # TODO: this is used
 @api.route("/center-most-concepts", methods=["POST"])
 def label_concepts_view():
-    return jsonify({"results": CENTER_MOST_CONCEPTS})
+    payload = request.get_json()
+    label = payload["label"]
+    return jsonify({"results": CENTER_MOST_CONCEPTS.get(label, [])})
 
 
 # TODO: this is used
