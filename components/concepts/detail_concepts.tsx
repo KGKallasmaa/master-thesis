@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
+import {ExplainableHeader} from "../common/header";
 
 export default function DetailedConcept(props: { name: string }) {
   const { name } = props;
@@ -28,6 +29,7 @@ export default function DetailedConcept(props: { name: string }) {
 
   return (
     <Row>
+      <p>Please review more images from this concepts</p>
       {images.map((el, i) => (
         <Col span={8} key={i} style={{ marginRight: 50, marginBottom: 20 }}>
           <ConceptCard

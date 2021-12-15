@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
+import DetailedConcept from "./detail_concepts";
+import {ExplainableHeader} from "../common/header";
 
 export default function CenterConcepts(props: { index: number }) {
   const { index } = props;
   const [images, setImage] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
 
   useEffect(() => {
     http("/center-most-concepts", {})
@@ -25,9 +28,11 @@ export default function CenterConcepts(props: { index: number }) {
   }
 
   function handleConceptWillBeUsed(name: string, decision: boolean) {
-    console.log(name);
-    console.log(decision);
+    if (decision){
+      setSelectedConcepts([name])
+    }
   }
+
 
   return (
     <Row>
@@ -40,6 +45,7 @@ export default function CenterConcepts(props: { index: number }) {
             imageWidth={200}
             onSelected={handleConceptWillBeUsed}
           />
+          {selectedConcepts.includes(el.conceptName) && <DetailedConcept name={el.conceptName}/>}
         </Col>
       ))}
     </Row>

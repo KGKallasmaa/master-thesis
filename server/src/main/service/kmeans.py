@@ -11,7 +11,6 @@ def cluster_images(image_map, k=10) -> Dict[int, str]:
     image_val = list(image_map.values())
 
     resized_images = [resize_img(pic) for pic in image_val]
-
     resize_lookup = {str(resize): original for resize, original in zip(resized_images, image_map.values())}
 
     to_be_clustered_images = np.array([np.array(pic).flatten().tolist() for pic in resized_images])
@@ -140,9 +139,7 @@ def concept_representatives(k=5) -> Dict[str, List[any]]:
     return all_results
 
 
-# TODO: rename
-
-def kmean_segments(images, masks, k=10):
+def kmean_segments(images, masks, k=8):
     training_data = []
 
     segment_lookup = {}
@@ -155,11 +152,8 @@ def kmean_segments(images, masks, k=10):
 
         for s in segss:
             to_img = array_to_image(s)
-
             s = np.array(resize_img(to_img)).flatten()
-
             segment_lookup[str(s)] = np.array(resize_img(to_img))
-
             training_data.append(np.array(s))
 
         my_labels.extend(seg_class)
@@ -169,22 +163,12 @@ def kmean_segments(images, masks, k=10):
     label_bestimg = {}
 
     for label_index, segment in zip(kmeans.labels_, training_data):
-
         conceptName = my_labels[label_index]
-
         currentSegment, currentDistance = label_bestimg.get(conceptName, (None, float('inf')))
-
-        distance = euclidean_distance(segment, kmeans.cluster_centers_[label_index])
+        distance = euclidean_distance(kmeans.cluster_centers_[label_index],segment)
 
         if distance < currentDistance:
-
-            lookup = segment_lookup[str(segment)]
-
-            if lookup is None:
-                continue
-
-            segment_as_arr = array_to_image(lookup)
-
+            segment_as_arr = array_to_image(segment_lookup[str(segment)])
             label_bestimg[conceptName] = (serve_pil_image(segment_as_arr), distance)
 
     results = []
