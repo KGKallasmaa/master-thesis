@@ -122,14 +122,15 @@ def concept_representatives(k=5) -> Dict[str, List[any]]:
     Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
     Our task is to find k=5 best representatives from the given concept. E.g. we find the k top beds from our dataset
     """
-
-    all_concepts = [el["conceptName"] for el in CENTER_MOST_CONCEPTS]
+    all_concepts = []
+    for label, values in CENTER_MOST_CONCEPTS.items():
+        all_concepts.extend([el["conceptName"] for el in values])
 
     all_results = {}
     all_images = get_images()
     all_masks = get_masks()
 
-    for name in all_concepts:
+    for name in set(all_concepts):
         training_data = []
         segment_lookup = {}
         my_labels = []

@@ -81,7 +81,8 @@ def label_all_image_view():
 @api.route("/center-most-concepts", methods=["POST"])
 def label_concepts_view():
     payload = request.get_json()
-    label = payload["label"]
+    index = payload["index"]
+    label = get_labels()[index]
     return jsonify({"results": CENTER_MOST_CONCEPTS.get(label, [])})
 
 

@@ -3,7 +3,6 @@ import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
 import DetailedConcept from "./detail_concepts";
-import { ExplainableHeader } from "../common/header";
 
 export default function CenterConcepts(props: { index: number }) {
   const { index } = props;
@@ -12,7 +11,10 @@ export default function CenterConcepts(props: { index: number }) {
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
 
   useEffect(() => {
-    http("/center-most-concepts", {})
+    const payload = {
+      index: index,
+    };
+    http("/center-most-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
         setImage(data.results);
