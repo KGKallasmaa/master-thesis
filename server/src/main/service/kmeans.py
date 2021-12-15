@@ -88,7 +88,6 @@ def center_most_concepts(k=10) -> Dict[str, List[any]]:
     Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
     Our task is to give user top k(k=10) segments that best describe the image.
     """
-    max_images_per_label = 300
 
     all_labels = get_labels()
     all_images = get_images()
@@ -109,10 +108,7 @@ def center_most_concepts(k=10) -> Dict[str, List[any]]:
 
     all_results = {}
     for label in list(set(all_labels)):
-        relevant_images = label_images[label]
-        relevant_masks = label_masks[label]
-        all_results[label] = kmean_segments(relevant_images[:max_images_per_label],
-                                            relevant_masks[:max_images_per_label], k)
+        all_results[label] = kmean_segments(label_images[label], label_masks[label], k)
 
     return all_results
 
