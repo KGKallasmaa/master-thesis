@@ -3,7 +3,7 @@ import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
 import DetailedConcept from "./detail_concepts";
-import {ExplainableHeader} from "../common/header";
+import { ExplainableHeader } from "../common/header";
 
 export default function CenterConcepts(props: { index: number }) {
   const { index } = props;
@@ -28,11 +28,10 @@ export default function CenterConcepts(props: { index: number }) {
   }
 
   function handleConceptWillBeUsed(name: string, decision: boolean) {
-    if (decision){
-      setSelectedConcepts([name])
+    if (decision) {
+      setSelectedConcepts([name]);
     }
   }
-
 
   return (
     <Row>
@@ -45,7 +44,9 @@ export default function CenterConcepts(props: { index: number }) {
             imageWidth={200}
             onSelected={handleConceptWillBeUsed}
           />
-          {selectedConcepts.includes(el.conceptName) && <DetailedConcept name={el.conceptName}/>}
+          {selectedConcepts.includes(el.conceptName) && (
+            <DetailedConcept name={el.conceptName} />
+          )}
         </Col>
       ))}
     </Row>

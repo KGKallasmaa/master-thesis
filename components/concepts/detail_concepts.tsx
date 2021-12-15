@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
-import {ExplainableHeader} from "../common/header";
+import { ExplainableHeader } from "../common/header";
 
 export default function DetailedConcept(props: { name: string }) {
   const { name } = props;
