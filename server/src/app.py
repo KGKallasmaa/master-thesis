@@ -17,6 +17,7 @@ from main.service.pre_explanation.lable_image import label_example_image, label_
 api = Flask(__name__)
 CORS(api)
 
+client = get_client()
 
 # TODO: this is used
 @api.route("/health", methods=["GET"])
@@ -82,12 +83,12 @@ def edit_concept_constraint_view():
     viable_concepts = payload["concepts"]
     id = payload["id"]
     if viable_concepts is not None and id is not None:
-        client = get_client()
         db = ExplanationRequirementDb(client)
         constraint = db.get_explanation_requirement(id)
         constraint.set_available_concepts(viable_concepts)
         db.update_explanation_requirement(constraint)
-        client.close()
+        return '', 204
+    return '', 400
 
 # TODO: this is used
 @api.route("/explain-using-concepts", methods=["POST"])
