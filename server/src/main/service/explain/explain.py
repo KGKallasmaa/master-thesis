@@ -29,15 +29,12 @@ def explain_using_concepts(id: str, img_index: int) -> List[any]:
     training_labels = []
     pred_data = []
 
-    index = 0
-    for label, pic, mask in zip(get_labels(), get_images(), get_masks()):
+    for index, (label, pic, mask) in enumerate(zip(get_labels(), get_images(), get_masks())):
         row = get_training_row(available_concepts, pic, mask)
         training_labels.append(np.array(label))
         training_data.append(row)
         if index == img_index:
             pred_data.append(row)
-        index += 1
-
     clf = train_decision_tree(np.array(training_data), np.array(training_labels))
     return explain(clf, [pred_data])
 
@@ -61,27 +58,8 @@ def train_decision_tree(X, y):
 def explain(estimator, X_test):
     results = []
 
-    n_nodes = estimator.tree_.node_count
-    children_left = estimator.tree_.children_left
-    children_right = estimator.tree_.children_right
     feature = estimator.tree_.feature
     threshold = estimator.tree_.threshold
-
-    # The tree structure can be traversed to compute various properties such
-    # as the depth of each node and whether or not it is a leaf.
-    node_depth = np.zeros(shape=n_nodes, dtype=np.int64)
-    is_leaves = np.zeros(shape=n_nodes, dtype=bool)
-    stack = [(0, -1)]  # seed is the root node id and its parent depth
-    while len(stack) > 0:
-        node_id, parent_depth = stack.pop()
-        node_depth[node_id] = parent_depth + 1
-
-        # If we have a test node
-        if children_left[node_id] != children_right[node_id]:
-            stack.append((children_left[node_id], parent_depth + 1))
-            stack.append((children_right[node_id], parent_depth + 1))
-        else:
-            is_leaves[node_id] = True
 
     node_indicator = estimator.decision_path(X_test)
     leave_id = estimator.apply(X_test)
@@ -101,7 +79,7 @@ def explain(estimator, X_test):
                 node_id,
                 sample_id,
                 feature[node_id],
-                X_test[sample_id, feature[node_id]],  # <-- changed i to sample_id
+                X_test[sample_id, feature[node_id]],
                 threshold_sign,
                 threshold[node_id]
             )
