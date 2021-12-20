@@ -3,7 +3,7 @@ import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
 import DetailedConcept from "./detail_concepts";
-import {getId} from "../common/storage";
+import { getId } from "../common/storage";
 
 export default function CenterConcepts(props: { index: number }) {
   const { index } = props;
@@ -29,15 +29,13 @@ export default function CenterConcepts(props: { index: number }) {
   useEffect(() => {
     const payload = {
       id: getId(),
-      concepts:selectedConcepts,
+      concepts: selectedConcepts,
     };
     http("/concept-constraint", payload)
-        .then((el) => el.json())
-        .then(() => {})
-        .catch(() => {});
-    
+      .then((el) => el.json())
+      .then(() => {})
+      .catch(() => {});
   }, [selectedConcepts]);
-
 
   if (isLoading) {
     return <Skeleton active />;
