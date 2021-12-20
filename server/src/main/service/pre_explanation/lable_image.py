@@ -1,8 +1,8 @@
 from typing import Optional, Tuple, List
 
-from main.service.common import serve_pil_image, base64_hash
-from main.service.data_access import get_labels, get_images
-from main.service.kmeans import cluster_images
+from main.service.pre_explanation.common import serve_pil_image, base64_hash
+from main.service.pre_explanation.data_access import get_labels, get_images
+from main.service.pre_explanation.kmeans import cluster_images
 
 
 def label_example_image(label: str) -> Tuple[int, Optional[str]]:
