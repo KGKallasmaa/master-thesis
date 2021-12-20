@@ -15,4 +15,4 @@ class ExplanationRequirementDb:
         return value
 
     def update_explanation_requirement(self, obj: ExplanationRequirement):
-        self.collection.update_one({'id': obj.id}, {'$set': obj.to_db_value()})
+        self.collection.update_one({'id': obj.id}, {'$set': obj.to_db_value()}, upsert=True)
