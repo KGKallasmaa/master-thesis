@@ -6,6 +6,7 @@ RUN pip install -r requirements.txt
 
 WORKDIR /src
 COPY src/ .
+COPY .env/ .
 
 EXPOSE 5000
 
