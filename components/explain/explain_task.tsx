@@ -3,6 +3,8 @@ import { CurrentStep, ExplainableSteps } from "../common/steps";
 import { Col, Row } from "antd";
 import { getId } from "../common/storage";
 import CurrentImage from "../concepts/current_image";
+import { useEffect, useState } from "react";
+import { http } from "../common/http";
 
 export default function ExplainTask(index: number) {
   const title = "Explain";
@@ -26,10 +28,40 @@ export default function ExplainTask(index: number) {
     </>
   );
 }
+
 function MachineLearningExplanation(props: { index: number }) {
-  const payload = {
-    id: getId(),
-    index: props.index,
-  };
-  return <b>implement ML explanation here</b>;
+  const [isLoading, setLoading] = useState(true);
+  const [mlExplanations, setExplanations] = useState<string[]>([]);
+  useEffect(() => {
+    const payload = {
+      img: props.index,
+      id: getId(),
+    };
+    http("/explain-using-concepts", payload)
+      .then((el) => el.json())
+      .then((data) => {
+        console.log(data);
+        setExplanations(data.explanation);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        console.log("Explaining failed");
+      });
+  }, [props.index]);
+
+  if (isLoading) {
+    return <p>loading ...</p>;
+  }
+
+  return (
+    <div>
+      {mlExplanations.map((el) => (
+        <div>
+          <p>{el}</p>
+          <br />
+        </div>
+      ))}
+    </div>
+  );
 }

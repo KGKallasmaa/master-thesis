@@ -104,6 +104,8 @@ def explain_using_concepts_view():
     return jsonify({"explanation": explanation})
 
 
+
+"""
 @api.route("/all-labels", methods=["POST"])
 def all_labels_view():
     labels = list(set(get_labels().tolist()))
@@ -126,6 +128,8 @@ def label_all_image_view():
     label = payload["label"]
     results = label_all_images(label) if len(label) > 0 else []
     return jsonify({"results": results})
+
+"""
 
 if __name__ == '__main__':
     api.run(host='0.0.0.0', port=5000)
