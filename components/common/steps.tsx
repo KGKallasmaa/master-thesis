@@ -5,6 +5,7 @@ const { Step } = Steps;
 export enum CurrentStep {
   Upload,
   SelectConcepts,
+    ExplainModels
 }
 
 export function ExplainableSteps(props: { step: CurrentStep }) {
@@ -15,7 +16,7 @@ export function ExplainableSteps(props: { step: CurrentStep }) {
         <Steps size="small" current={props.step}>
           <Step title="Upload image" />
           <Step title="Select concepts" />
-          <Step title="Verify concepts" />
+          <Step title="Explain models" />
         </Steps>
       </Col>
       <Col span={2} />

@@ -11,7 +11,6 @@ from main.service.pre_explanation.common import serve_pil_image
 from main.service.pre_explanation.data_access import get_labels, get_images
 from main.service.pre_explanation.image_index import find_image_index
 from main.service.pre_explanation.index_segments import image_segments
-from main.service.pre_explanation.kmeans import CENTER_MOST_CONCEPTS, concept_representatives
 from main.service.pre_explanation.kmeans import concept_representatives, CENTER_MOST_CONCEPTS
 from main.service.pre_explanation.lable_image import label_example_image, label_all_images
 
@@ -127,17 +126,6 @@ def label_all_image_view():
     label = payload["label"]
     results = label_all_images(label) if len(label) > 0 else []
     return jsonify({"results": results})
-
-
-
-# TODO: this is used
-@api.route("/explain-using-concepts", methods=["POST"])
-def explain_using_concepts_view():
-    payload = request.get_json()
-    img_id = payload["img"]
-    id = payload["id"]
-    explanation = explain_using_concepts(id, img_id)
-    return jsonify({"explanation": explanation})
 
 if __name__ == '__main__':
     api.run(host='0.0.0.0', port=5000)
