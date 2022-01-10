@@ -1,14 +1,12 @@
 import { ExplainableHeader } from "../common/header";
 import { CurrentStep, ExplainableSteps } from "../common/steps";
 import { Col, Row } from "antd";
-import CurrentImage from "./current_image";
-import CenterConcepts from "./center_concepts";
-import TriggerExplain from "../explain/trigger_explain";
+import { getId } from "../common/storage";
+import CurrentImage from "../concepts/current_image";
 
-export default function ConceptsTask(index: number) {
-  const title = "Concepts";
-  const description =
-    "Please select concepts that will be used to describe this label";
+export default function ExplainTask(index: number) {
+  const title = "Explain";
+  const description = "Explaining this image using a decision tree";
   return (
     <>
       <br />
@@ -21,12 +19,17 @@ export default function ConceptsTask(index: number) {
         <Col span={8}>
           <CurrentImage index={index} />
           <br />
-          <TriggerExplain index={index} />
-          <br />
-          <CenterConcepts index={index} />
+          <MachineLearningExplanation index={index} />
         </Col>
         <Col span={8} />
       </Row>
     </>
   );
+}
+function MachineLearningExplanation(props: { index: number }) {
+  const payload = {
+    id: getId(),
+    index: props.index,
+  };
+  return <b>implement ML explanation here</b>;
 }

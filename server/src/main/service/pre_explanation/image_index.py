@@ -1,7 +1,7 @@
 import numpy as np
 
-from main.service.data_access import get_images
-from main.service.kmeans import euclidean_distance
+from main.service.pre_explanation.data_access import get_images
+from main.service.pre_explanation.kmeans import euclidean_distance
 
 
 def find_image_index(image: np.array) -> int:

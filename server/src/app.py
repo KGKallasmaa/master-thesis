@@ -94,6 +94,15 @@ def edit_concept_constraint_view():
         return '', 204
     return '', 400
 
+# TODO: this is used
+@api.route("/explain-using-concepts", methods=["POST"])
+def explain_using_concepts_view():
+    payload = request.get_json()
+    img_id = payload["img"]
+    id = payload["id"]
+    explanation = explain_using_concepts(id, img_id)
+    return jsonify({"explanation": explanation})
+
 
 @api.route("/all-labels", methods=["POST"])
 def all_labels_view():
@@ -117,17 +126,6 @@ def label_all_image_view():
     label = payload["label"]
     results = label_all_images(label) if len(label) > 0 else []
     return jsonify({"results": results})
-
-
-# TODO: this is used
-@api.route("/explain-using-concepts", methods=["POST"])
-def explain_using_concepts_view():
-    payload = request.get_json()
-    img_id = payload["img"]
-    id = payload["id"]
-    explanation = explain_using_concepts(id, img_id)
-    return jsonify({"explanation": explanation})
-
 
 if __name__ == '__main__':
     api.run(host='0.0.0.0', port=5000)

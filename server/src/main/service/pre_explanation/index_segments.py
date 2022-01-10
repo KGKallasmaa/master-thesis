@@ -3,8 +3,8 @@ from typing import List
 import numpy as np
 from PIL import Image
 
-from main.service.common import serve_pil_image
-from main.service.data_access import get_images, get_masks, get_segments
+from main.service.pre_explanation.common import serve_pil_image
+from main.service.pre_explanation.data_access import get_images, get_masks, get_segments
 
 
 def image_segments(index: int) -> List[any]:

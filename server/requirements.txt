@@ -5,3 +5,5 @@ pandas
 scipy
 scikit-learn
 flask-cors
+pymongo[srv,tls] == 3.12.1
+python-dotenv
