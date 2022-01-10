@@ -113,7 +113,7 @@ def center_most_concepts(k=10) -> Dict[str, List[any]]:
     return all_results
 
 
-def concept_representatives(name: str, k=5) -> List[any]:
+def concept_representatives(my_concept: str, k=5) -> List[any]:
     """
     Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
     Our task is to find k=5 best representatives from the given concept. E.g. we find the k top beds from our dataset
@@ -124,32 +124,39 @@ def concept_representatives(name: str, k=5) -> List[any]:
     training_data = []
     segment_lookup = {}
     my_labels = []
+
     for pic, mask in zip(all_images, all_masks):
         segss, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
-        segss = [s for index, s in enumerate(segss) if seg_class[index] == name]
+        segss = [s for index, s in enumerate(segss) if seg_class[index] == my_concept]
 
         for s in segss:
             to_img = array_to_image(s)
             s = np.array(resize_img(to_img)).flatten()
             segment_lookup[str(s)] = np.array(resize_img(to_img))
             training_data.append(np.array(s))
-            my_labels.append(name)
-
-    kmeans = KMeans(n_clusters=min(len(training_data), k), random_state=0).fit(training_data)
-
-    all_distances = [euclidean_distance(segment, kmeans.cluster_centers_[label_index]) for label_index, segment in
-                     zip(kmeans.labels_, training_data)]
-    all_distances.sort()
-    smallest_distances = all_distances[:k]
+            my_labels.append(my_concept)
 
     results = []
 
+    kmeans = KMeans(n_clusters=min(len(training_data), k), random_state=0).fit(training_data)
+
+    label_index_segment_distance_map = {}
     for label_index, segment in zip(kmeans.labels_, training_data):
         distance = euclidean_distance(segment, kmeans.cluster_centers_[label_index])
-        if distance in smallest_distances:
-            lookup = segment_lookup[str(segment)]
-            segment_as_arr = array_to_image(lookup)
-            results.append({"conceptName": name, "src": serve_pil_image(segment_as_arr)})
+        key = "{}___{}".format(label_index, segment)
+        label_index_segment_distance_map[key] = distance
+
+    label_index_segment_distance_map = dict(sorted(label_index_segment_distance_map.items(), key=lambda item: item[1]))
+
+    i = 0
+    for key, distance in label_index_segment_distance_map.items():
+        if i > k:
+            continue
+        i += 1
+        label_index, segment = key.split("___")
+        lookup = segment_lookup[str(segment)]
+        segment_as_arr = array_to_image(lookup)
+        results.append({"conceptName": my_concept, "src": serve_pil_image(segment_as_arr)})
 
     return results
 
