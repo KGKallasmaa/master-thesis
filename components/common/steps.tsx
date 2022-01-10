@@ -5,7 +5,7 @@ const { Step } = Steps;
 export enum CurrentStep {
   Upload,
   SelectConcepts,
-    ExplainModels
+  ExplainModels,
 }
 
 export function ExplainableSteps(props: { step: CurrentStep }) {
