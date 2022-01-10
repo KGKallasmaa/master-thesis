@@ -1,35 +1,29 @@
-import { useState } from "react";
 import { Col, Row } from "antd";
-import { SelectSection } from "../label/select";
 import { UploadTask } from "./upload_task";
+import { CurrentStep, ExplainableSteps } from "../common/steps";
+import { ExplainableHeader } from "../common/header";
 
 export default function Upload() {
-  // TODO: get real data
-  const allModels = ["model-1", "model-2", "model-3"];
-  const allDataSets = ["dataset-1", "dataset-2", "dataset-3"];
+  const title = "Upload";
+  const description = "Upload the mage you would like us to explain";
 
-  const [model, setModel] = useState(allModels[0]);
-  const [dataSet, setDataSet] = useState(allDataSets[0]);
-
-  const [currentLabel, setLabel] = useState("");
+  function handleSuccessfulUpload(img_index: number) {
+    window.location.replace("/concepts/" + img_index);
+  }
 
   return (
     <>
       <br />
+      <ExplainableHeader title={title} description={description} />
+      <br />
+      <ExplainableSteps step={CurrentStep.Upload} />
+      <br />
       <Row>
-        <Col span={1} />
-        <Col span={7}>
-          <SelectSection
-            models={allModels}
-            dataSets={allDataSets}
-            onModelSelected={setModel}
-            onDataSetSelected={setDataSet}
-            onLabelSelected={setLabel}
-          />
+        <Col span={8} />
+        <Col span={8}>
+          <UploadTask uploadComplete={handleSuccessfulUpload} />
         </Col>
-        <Col span={16}>
-          <UploadTask label={currentLabel} />
-        </Col>
+        <Col span={8} />
       </Row>
     </>
   );

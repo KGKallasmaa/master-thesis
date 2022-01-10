@@ -28,6 +28,7 @@ export default function DetailedConcept(props: { name: string }) {
 
   return (
     <Row>
+      <p>Please review more images from this concepts</p>
       {images.map((el, i) => (
         <Col span={8} key={i} style={{ marginRight: 50, marginBottom: 20 }}>
           <ConceptCard

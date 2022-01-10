@@ -3,14 +3,19 @@ import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
 import DetailedConcept from "./detail_concepts";
+import { getId } from "../common/storage";
 
 export default function CenterConcepts(props: { index: number }) {
   const { index } = props;
   const [images, setImage] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
 
   useEffect(() => {
-    http("/center-most-concepts", {})
+    const payload = {
+      index: index,
+    };
+    http("/center-most-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
         setImage(data.results);
@@ -20,15 +25,27 @@ export default function CenterConcepts(props: { index: number }) {
         setIsLoading(false);
       });
   }, [index]);
-  const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
 
-  function handleConceptWillBeUsed(name: string, decision: boolean) {
-    if (decision == true) {
-      setSelectedConcepts(selectedConcepts.concat(name));
-    }
+  useEffect(() => {
+    const payload = {
+      id: getId(),
+      concepts: selectedConcepts,
+    };
+    http("/concept-constraint", payload)
+      .then((el) => el.json())
+      .then(() => {})
+      .catch(() => {});
+  }, [selectedConcepts]);
+
+  if (isLoading) {
+    return <Skeleton active />;
   }
 
-  if (isLoading) return <Skeleton active />;
+  function handleConceptWillBeUsed(name: string, decision: boolean) {
+    if (decision) {
+      setSelectedConcepts([name]);
+    }
+  }
 
   return (
     <Row>

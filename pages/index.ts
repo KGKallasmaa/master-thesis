@@ -1,2 +1,2 @@
-import Home from "../components/home/home";
-export default Home;
+import Upload from "../components/upload/upload";
+export default Upload;
