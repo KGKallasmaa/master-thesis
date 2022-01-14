@@ -12,7 +12,6 @@ from main.service.pre_explanation.data_access import get_labels, get_images
 from main.service.pre_explanation.image_index import find_image_index
 from main.service.pre_explanation.index_segments import image_segments
 from main.service.pre_explanation.kmeans import concept_representatives, CENTER_MOST_CONCEPTS
-from main.service.pre_explanation.lable_image import label_example_image, label_all_images
 
 api = Flask(__name__)
 CORS(api)
@@ -63,9 +62,9 @@ def label_concepts_view():
     payload = request.get_json()
     index = payload["index"]
     if index is None:
-        return jsonify({"results":[]})
+        return jsonify({"results": []})
     label = get_labels()[index]
-    center_concepts = CENTER_MOST_CONCEPTS.get(label,[])
+    center_concepts = CENTER_MOST_CONCEPTS.get(label, [])
     return jsonify({"results": center_concepts})
 
 
@@ -94,42 +93,16 @@ def edit_concept_constraint_view():
         return '', 204
     return '', 400
 
+
 # TODO: this is used
 @api.route("/explain-using-concepts", methods=["POST"])
 def explain_using_concepts_view():
     payload = request.get_json()
     img_id = payload["img"]
     id = payload["id"]
-    explanation = explain_using_concepts(id, img_id)
-    return jsonify({"explanation": explanation})
+    true_label, predicted_label, explanations = explain_using_concepts(id, img_id)
+    return jsonify({"trueLabel": true_label, "predictedLabel": predicted_label, "explanations": explanations})
 
-
-
-"""
-@api.route("/all-labels", methods=["POST"])
-def all_labels_view():
-    labels = list(set(get_labels().tolist()))
-    return jsonify({"labels": labels})
-
-
-@api.route("/label-image", methods=["POST"])
-def label_image_view():
-    payload = request.get_json()
-    label = payload["label"]
-    if len(label) == 0:
-        return jsonify({"index": -1, "url": "", "label": label})
-    index, url = label_example_image(label)
-    return jsonify({"index": index, "url": url, "label": label})
-
-
-@api.route("/label-all-images", methods=["POST"])
-def label_all_image_view():
-    payload = request.get_json()
-    label = payload["label"]
-    results = label_all_images(label) if len(label) > 0 else []
-    return jsonify({"results": results})
-
-"""
 
 if __name__ == '__main__':
     api.run(host='0.0.0.0', port=5000)

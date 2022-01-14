@@ -14,7 +14,7 @@ export default function ExplainTask(index: number) {
       <br />
       <ExplainableHeader title={title} description={description} />
       <br />
-      <ExplainableSteps step={CurrentStep.SelectConcepts} />
+      <ExplainableSteps step={CurrentStep.ExplainModels} />
       <br />
       <Row>
         <Col span={8} />
@@ -31,7 +31,13 @@ export default function ExplainTask(index: number) {
 
 function MachineLearningExplanation(props: { index: number }) {
   const [isLoading, setLoading] = useState(true);
-  const [mlExplanations, setExplanations] = useState<string[]>([]);
+  const[errorMessage,setErrorMessage] = useState(null);
+
+  const [explanations, setExplanations] = useState<string[]>([]);
+  const [trueLabel, setTrueLabel] = useState<string>("");
+  const [predictedLabel, setPredictedLabel] = useState<string>("");
+
+
   useEffect(() => {
     const payload = {
       img: props.index,
@@ -40,23 +46,37 @@ function MachineLearningExplanation(props: { index: number }) {
     http("/explain-using-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
-        console.log(data);
-        setExplanations(data.explanation);
-        setLoading(false);
+        setTrueLabel(data.trueLabel);
+        setPredictedLabel(data.predictedLabel)
+        setExplanations(data.explanations);
       })
-      .catch(() => {
-        setLoading(false);
-        console.log("Explaining failed");
-      });
+      .catch((err) => {
+        setErrorMessage(err.message);
+      })
+        .finally(()=>{
+            setLoading(false);
+        })
   }, [props.index]);
 
   if (isLoading) {
-    return <p>loading ...</p>;
+    return <p>generating an explanation ...</p>;
+  }
+  if (errorMessage){
+      return (
+          <div>
+              <h3>Explanation has failed</h3>
+              <p>{errorMessage}</p>
+          </div>
+      )
   }
 
   return (
     <div>
-      {mlExplanations.map((el) => (
+        <h3>{trueLabel}</h3>
+        <br/>
+        <h3>{predictedLabel}</h3>
+        <br/>
+      {explanations.map((el) => (
         <div>
           <p>{el}</p>
           <br />
