@@ -31,12 +31,11 @@ export default function ExplainTask(index: number) {
 
 function MachineLearningExplanation(props: { index: number }) {
   const [isLoading, setLoading] = useState(true);
-  const[errorMessage,setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const [explanations, setExplanations] = useState<string[]>([]);
   const [trueLabel, setTrueLabel] = useState<string>("");
   const [predictedLabel, setPredictedLabel] = useState<string>("");
-
 
   useEffect(() => {
     const payload = {
@@ -47,35 +46,35 @@ function MachineLearningExplanation(props: { index: number }) {
       .then((el) => el.json())
       .then((data) => {
         setTrueLabel(data.trueLabel);
-        setPredictedLabel(data.predictedLabel)
+        setPredictedLabel(data.predictedLabel);
         setExplanations(data.explanations);
       })
       .catch((err) => {
         setErrorMessage(err.message);
       })
-        .finally(()=>{
-            setLoading(false);
-        })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [props.index]);
 
   if (isLoading) {
     return <p>generating an explanation ...</p>;
   }
-  if (errorMessage){
-      return (
-          <div>
-              <h3>Explanation has failed</h3>
-              <p>{errorMessage}</p>
-          </div>
-      )
+  if (errorMessage) {
+    return (
+      <div>
+        <h3>Explanation has failed</h3>
+        <p>{errorMessage}</p>
+      </div>
+    );
   }
 
   return (
     <div>
-        <h3>{trueLabel}</h3>
-        <br/>
-        <h3>{predictedLabel}</h3>
-        <br/>
+      <h3>{trueLabel}</h3>
+      <br />
+      <h3>{predictedLabel}</h3>
+      <br />
       {explanations.map((el) => (
         <div>
           <p>{el}</p>
