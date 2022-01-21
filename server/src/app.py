@@ -100,8 +100,12 @@ def explain_using_concepts_view():
     payload = request.get_json()
     img_id = payload["img"]
     id = payload["id"]
-    true_label, predicted_label, explanations = explain_using_concepts(id, img_id)
-    return jsonify({"trueLabel": true_label, "predictedLabel": predicted_label, "explanations": explanations})
+    if img_id is None:
+        return 'Image number is missing', 400
+    if id is None:
+        return 'Explanation id is missing', 400
+    explanation = explain_using_concepts(id, img_id)
+    return jsonify(explanation)
 
 
 if __name__ == '__main__':

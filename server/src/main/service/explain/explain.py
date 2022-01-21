@@ -1,19 +1,20 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+from sklearn import preprocessing
 
 from main.database.client import get_client
 from main.database.explanation_requirement import ExplanationRequirementDb
-from main.service.explain.human_readable_explanation import HumanReadableExplanation
+from main.service.explain.human_readable_explanation import HumanReadableExplanationService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks, get_segments
 
 MONGO_CLIENT = get_client()
 
 
 # TODO: improve it. It's not very good, because we don't distunish between images. we should find the essence of the img
-def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int) -> Tuple[str, str, List[str]]:
+def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
     requirement_db = ExplanationRequirementDb(MONGO_CLIENT)
     requirement = requirement_db.get_explanation_requirement(explanation_id)
 
@@ -23,28 +24,34 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
     if len(available_concepts) == 0:
         RuntimeError("Explanation can not be provided, because we can not use any concepts")
 
-    label_nr, nr_label = build_label_maps()
-    nr_feature = build_feature_names(available_concepts)
+    label_encoder = encode_categorical_values(get_labels())
+    feature_encoder = encode_categorical_values(available_concepts)
 
     training_data, training_labels, testing_data, testing_labels = [], [], [], []
 
     for index, (label, pic, mask) in enumerate(zip(get_labels(), get_images(), get_masks())):
         row = get_training_row(available_concepts, pic, mask)
-        label_as_nr = label_nr[label]
+        label_as_nr = label_encoder.transform([label])
 
         if index == to_be_explained_image_index:
-            testing_data.append(row.tolist())
-            testing_labels.append(np.array([label_as_nr]))
+            testing_labels.append(label_as_nr)
+            testing_data.append(row)
         else:
-            training_labels.append(np.array([label_as_nr]))
+            training_labels.append(label_as_nr)
             training_data.append(row)
 
     clf = train_decision_tree(np.array(training_data), np.array(training_labels))
-    hre = HumanReadableExplanation(nr_label=nr_label, nr_feature=nr_feature, estimator=clf)
-    return hre.human_readable_explanation(testing_data, testing_labels)
+    predictions = clf.predict(testing_data)
+
+    hre = HumanReadableExplanationService(label_encoder=label_encoder,
+                                          feature_encoder=feature_encoder,
+                                          estimator=clf)
+    return hre.human_readable_explanation(x_test=testing_data,
+                                          y_test=predictions,
+                                          y_true=testing_labels)
 
 
-def get_training_row(available_concepts, pic, mask) -> np.array:
+def get_training_row(available_concepts: List[str], pic, mask) -> np.array:
     row = np.zeros(len(available_concepts))
     segss, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
     for index, el in enumerate(available_concepts):
@@ -53,24 +60,14 @@ def get_training_row(available_concepts, pic, mask) -> np.array:
     return row
 
 
-def train_decision_tree(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+def train_decision_tree(X, y) -> DecisionTreeClassifier:
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
     clf = DecisionTreeClassifier()
     clf.fit(X_train, y_train)
     return clf
 
 
-def build_label_maps() -> Tuple[Dict[str, int], Dict[int, str]]:
-    i = 0
-    label_nr, nr_label = {}, {}
-    for label in get_labels():
-        if label not in label_nr:
-            label_nr[label] = i
-        nr_label[i] = label
-        i += 1
-
-    return label_nr, nr_label
-
-
-def build_feature_names(features: List[str]) -> Dict[int, str]:
-    return {i: features for i, feature in enumerate(features)}
+def encode_categorical_values(values: List[str]) -> preprocessing.LabelEncoder:
+    le = preprocessing.LabelEncoder()
+    le.fit(values)
+    return le
