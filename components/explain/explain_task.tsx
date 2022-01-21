@@ -54,11 +54,10 @@ function MachineLearningExplanation(props: { index: number }) {
     http("/explain-using-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
-        setTrueLabel(escape(data.trueLabel));
-        setPredictedLabel(escape(data.predictedLabel));
-        setExplanations(data.explanations.map((el) => escape(el)));
-        setPlainTreeExplanation(data.plainTextTree.map((el) => escape(el)));
-        console.log("hii");
+        setTrueLabel(data.trueLabel);
+        setPredictedLabel(data.predictedLabel);
+        setExplanations(data.explanations);
+        setPlainTreeExplanation(data.plainTextTree);
       })
       .catch((err) => {
         setErrorMessage(err.message);
@@ -71,7 +70,7 @@ function MachineLearningExplanation(props: { index: number }) {
   if (isLoading) {
     return <p>generating an explanation ...</p>;
   }
-  if (errorMessage) {
+  if (errorMessage && !explanations) {
     return (
       <div>
         <h3>Explanation has failed</h3>
@@ -82,9 +81,9 @@ function MachineLearningExplanation(props: { index: number }) {
 
   return (
     <div>
-      <h3>True label:{trueLabel}</h3>
+      <h3>{trueLabel}</h3>
       <br />
-      <h3>Predicted label:{predictedLabel}</h3>
+      <h3>{predictedLabel}</h3>
       <br />
       <h3>Path explanations</h3>
       <br />
@@ -98,10 +97,21 @@ function MachineLearningExplanation(props: { index: number }) {
       <br />
       {plainTreeExplanation.map((el) => (
         <div>
-          <p>{el}</p>
+          <p>{extraSpace(el)}{el}</p>
           <br />
         </div>
       ))}
     </div>
   );
+}
+function extraSpace(row) {
+    const extraSpace = Array(3).fill('\xa0').join('');
+    const indexLevelSymbol = "|";
+    const nrOfAccourances = (row.split(indexLevelSymbol).length - 1) //4
+
+    let space = "";
+    for (let i = 0; i < nrOfAccourances-1; i++) {
+        space += extraSpace;
+    }
+    return space;
 }
