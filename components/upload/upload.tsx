@@ -5,7 +5,7 @@ import { ExplainableHeader } from "../common/header";
 
 export default function Upload() {
   const title = "Upload";
-  const description = "Upload the mage you would like us to explain";
+  const description = "Upload the image you would like us to explain";
 
   function handleSuccessfulUpload(img_index: number) {
     window.location.replace("/concepts/" + img_index);

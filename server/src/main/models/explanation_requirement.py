@@ -2,8 +2,8 @@ from typing import Dict
 
 
 class ExplanationRequirement:
-    def __init__(self, id: str):
-        self.id = id
+    def __init__(self, explanation_requirement_id: str):
+        self.id = explanation_requirement_id
         self.available_concepts = []
 
     def set_available_concepts(self, available_concepts: list):

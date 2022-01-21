@@ -42,7 +42,7 @@ export default function CenterConcepts(props: { index: number }) {
   }
 
   function handleConceptWillBeUsed(name: string, decision: boolean) {
-    const currentValues = selectedConcepts;
+    let currentValues = selectedConcepts;
     if (decision) {
       currentValues.push(name);
     } else {
@@ -53,27 +53,39 @@ export default function CenterConcepts(props: { index: number }) {
   }
 
   return (
-    <Row>
-      {images.map((el, i) => (
-        <Col span={8} key={i} style={{ marginRight: 50, marginBottom: 20 }}>
-          <ConceptCard
-            key={i}
-            label={el.conceptName}
-            imageBase64={el.src}
-            imageWidth={200}
-            onSelected={handleConceptWillBeUsed}
-          />
-          {selectedConcepts.includes(el.conceptName) && (
-            <DetailedConcept name={el.conceptName} />
-          )}
-        </Col>
-      ))}
-    </Row>
+    <>
+      <Row>
+        <p>Selected concepts:</p>
+        <br />
+        {selectedConcepts.map((el) => (
+          <div>
+            <p>{el}</p>
+            <br />
+          </div>
+        ))}
+      </Row>
+      <Row>
+        {images.map((el, i) => (
+          <Col span={8} key={i} style={{ marginRight: 50, marginBottom: 20 }}>
+            <ConceptCard
+              key={i}
+              label={el.conceptName}
+              imageBase64={el.src}
+              imageWidth={200}
+              onSelected={handleConceptWillBeUsed}
+            />
+            {selectedConcepts.includes(el.conceptName) && (
+              <DetailedConcept name={el.conceptName} />
+            )}
+          </Col>
+        ))}
+      </Row>
+    </>
   );
 }
 
 function removeElFromArray(arr: string[], value: string): string[] {
-  var i = 0;
+  let i = 0;
   while (i < arr.length) {
     if (arr[i] === value) {
       arr.splice(i, 1);

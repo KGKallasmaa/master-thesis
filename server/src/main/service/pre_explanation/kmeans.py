@@ -118,14 +118,12 @@ def concept_representatives(my_concept: str, k=5) -> List[any]:
     Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
     Our task is to find k=5 best representatives from the given concept. E.g. we find the k top beds from our dataset
     """
-    all_images = get_images()
-    all_masks = get_masks()
 
     training_data = []
     segment_lookup = {}
     my_labels = []
 
-    for pic, mask in zip(all_images, all_masks):
+    for pic, mask in zip(get_images(), get_masks()):
         segss, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
         segss = [s for index, s in enumerate(segss) if seg_class[index] == my_concept]
 
@@ -135,8 +133,6 @@ def concept_representatives(my_concept: str, k=5) -> List[any]:
             segment_lookup[str(s)] = np.array(resize_img(to_img))
             training_data.append(np.array(s))
             my_labels.append(my_concept)
-
-    results = []
 
     kmeans = KMeans(n_clusters=min(len(training_data), k), random_state=0).fit(training_data)
 
@@ -149,6 +145,7 @@ def concept_representatives(my_concept: str, k=5) -> List[any]:
     label_index_segment_distance_map = dict(sorted(label_index_segment_distance_map.items(), key=lambda item: item[1]))
 
     i = 0
+    results = []
     for key, distance in label_index_segment_distance_map.items():
         if i > k:
             continue
