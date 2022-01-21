@@ -97,7 +97,10 @@ function MachineLearningExplanation(props: { index: number }) {
       <br />
       {plainTreeExplanation.map((el) => (
         <div>
-          <p>{extraSpace(el)}{el}</p>
+          <p>
+            {extraSpace(el)}
+            {el}
+          </p>
           <br />
         </div>
       ))}
@@ -105,13 +108,13 @@ function MachineLearningExplanation(props: { index: number }) {
   );
 }
 function extraSpace(row) {
-    const extraSpace = Array(3).fill('\xa0').join('');
-    const indexLevelSymbol = "|";
-    const nrOfAccourances = (row.split(indexLevelSymbol).length - 1) //4
+  const extraSpace = Array(3).fill("\xa0").join("");
+  const indexLevelSymbol = "|";
+  const nrOfAccourances = row.split(indexLevelSymbol).length - 1; //4
 
-    let space = "";
-    for (let i = 0; i < nrOfAccourances-1; i++) {
-        space += extraSpace;
-    }
-    return space;
+  let space = "";
+  for (let i = 0; i < nrOfAccourances - 1; i++) {
+    space += extraSpace;
+  }
+  return space;
 }
