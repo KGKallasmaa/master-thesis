@@ -42,9 +42,8 @@ function MachineLearningExplanation(props: { index: number }) {
 
   useEffect(() => {
     const { index } = props;
-    if (index == null) {
+    if (!index) {
       setErrorMessage("Image index not found");
-      setLoading(false);
       return;
     }
     const payload = {
