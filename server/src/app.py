@@ -9,7 +9,7 @@ from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.explain import explain_using_concepts
 from main.service.pre_explanation.common import serve_pil_image
 from main.service.pre_explanation.data_access import get_labels, get_images
-from main.service.pre_explanation.image_index import find_image_index
+from main.service.pre_explanation.image_index import attach_image_to_explanation, find_closest_image_index
 from main.service.pre_explanation.index_segments import image_segments
 from main.service.pre_explanation.kmeans import concept_representatives, CENTER_MOST_CONCEPTS
 
@@ -30,7 +30,9 @@ def health_view():
 def upload_images_view():
     image = request.files['file'].read()
     image_as_ar = np.fromstring(image, np.uint8)
-    index = find_image_index(image_as_ar)
+    explanation_id = request.args.get('id')
+    attach_image_to_explanation(image, explanation_id)
+    index = find_closest_image_index(image_as_ar)
     return jsonify({"index": index})
 
 
@@ -46,7 +48,19 @@ def image_by_index_view():
     return jsonify({"url": serve_pil_image(img), "label": label})
 
 
-@api.route("/image-segments", methods=["POST"])
+# TODO: this is used
+@api.route("/original-image", methods=["POST"])
+def original_image():
+    payload = request.get_json()
+    explanation_id = payload["id"]
+    if explanation_id is None:
+        return jsonify({"url": ""})
+    database = ExplanationRequirementDb()
+    image = database.get_explanation_requirement(explanation_id).original_image
+    return jsonify({"url": image})
+
+
+@api.route("/user_uploaded_image-segments", methods=["POST"])
 def image_segment_view():
     payload = request.get_json()
     index = payload["index"]
@@ -109,4 +123,4 @@ def explain_using_concepts_view():
 
 
 if __name__ == '__main__':
-    api.run(host='0.0.0.0', port=5000)
+    api.run(host='0.0.0.0', port=8000)

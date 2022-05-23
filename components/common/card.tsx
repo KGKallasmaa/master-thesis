@@ -7,17 +7,18 @@ interface ConceptCardProps {
   label?: string;
   imageBase64: string;
   imageWidth: number;
-
   onSelected?(name: string, isRelevant: boolean): void;
+  title:string;
 }
 
 export function ConceptCard(props: ConceptCardProps) {
-  const { label, imageBase64, onSelected, imageWidth } = props;
+  const { label, imageBase64, onSelected, imageWidth,title } = props;
   const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
   if (onSelected == null) {
     return (
       <Card
         style={{ width: 300 }}
+        title={title}
         cover={
           <img
             alt="to-be-labeled-image"

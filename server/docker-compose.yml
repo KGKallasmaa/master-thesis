@@ -4,4 +4,4 @@ services:
     build: .
     container_name: "master_thesis_server"
     ports:
-      - "5000:5000"
+      - "8000:8000"
