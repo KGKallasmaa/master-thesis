@@ -1,7 +1,7 @@
 import { ExplainableHeader } from "../common/header";
 import { CurrentStep, ExplainableSteps } from "../common/steps";
 import { Col, Row } from "antd";
-import {CurrentImage, OriginalImage} from "./current_image";
+import { CurrentImage, OriginalImage } from "./current_image";
 import CenterConcepts from "./center_concepts";
 import TriggerExplain from "../explain/trigger_explain";
 
@@ -21,8 +21,8 @@ export default function ConceptsTask(index: number) {
         <Col span={8}>
           <CurrentImage index={index} />
           <br />
-            <OriginalImage/>
-            <br />
+          <OriginalImage />
+          <br />
           <TriggerExplain index={index} />
           <br />
           <CenterConcepts index={index} />

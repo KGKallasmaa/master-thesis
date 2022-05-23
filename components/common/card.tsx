@@ -8,11 +8,11 @@ interface ConceptCardProps {
   imageBase64: string;
   imageWidth: number;
   onSelected?(name: string, isRelevant: boolean): void;
-  title:string;
+  title: string;
 }
 
 export function ConceptCard(props: ConceptCardProps) {
-  const { label, imageBase64, onSelected, imageWidth,title } = props;
+  const { label, imageBase64, onSelected, imageWidth, title } = props;
   const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
   if (onSelected == null) {
     return (

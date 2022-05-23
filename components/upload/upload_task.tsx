@@ -1,7 +1,7 @@
 import { Upload, message, Col } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import {SERVER_URL} from "../common/http";
-import {getId} from "../common/storage";
+import { SERVER_URL } from "../common/http";
+import { getId } from "../common/storage";
 
 const { Dragger } = Upload;
 
@@ -10,7 +10,7 @@ interface UploadTaskProps {
 }
 
 export function UploadTask(props: UploadTaskProps) {
-  const url = SERVER_URL+"/upload-image?id="+getId()
+  const url = SERVER_URL + "/upload-image?id=" + getId();
 
   const draggerProps = {
     name: "file",

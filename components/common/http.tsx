@@ -9,4 +9,4 @@ export function http(path: string, payload: any) {
   });
 }
 
-export const SERVER_URL = "http://localhost:8000"
+export const SERVER_URL = "http://localhost:8000";
