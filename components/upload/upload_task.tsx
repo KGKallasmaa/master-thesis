@@ -1,6 +1,7 @@
-import { Upload, message, Row, Col } from "antd";
+import { Upload, message, Col } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import { getBaseUrl } from "../common/http";
+import { SERVER_URL } from "../common/http";
+import { getId } from "../common/storage";
 
 const { Dragger } = Upload;
 
@@ -9,11 +10,13 @@ interface UploadTaskProps {
 }
 
 export function UploadTask(props: UploadTaskProps) {
+  const url = SERVER_URL + "/upload-image?id=" + getId();
+
   const draggerProps = {
     name: "file",
     multiple: false,
     accept: ".jpg",
-    action: getBaseUrl() + "/upload-image",
+    action: url,
     onChange(info) {
       if (info.file.status === "done") {
         message.success(`${info.file.name} file uploaded successfully`);

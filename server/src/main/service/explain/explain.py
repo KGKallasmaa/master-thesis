@@ -22,7 +22,7 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
     available_concepts.sort()
 
     if len(available_concepts) == 0:
-        RuntimeError("Explanation can not be provided, because we can not use any concepts")
+        raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
 
     label_encoder = encode_categorical_values(get_labels())
     feature_encoder = encode_categorical_values(available_concepts)
