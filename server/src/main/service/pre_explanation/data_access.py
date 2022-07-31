@@ -4,11 +4,11 @@ from typing import List
 import PIL
 import numpy as np
 import pandas as pd
-
-masks_path = "main/data/masks.pkl"
-img_path = "main/data/resized_imgs.pkl"
-labels_path = "main/data/classes.pkl"
-ade_path = "main/data/objectInfo150.csv"
+base_path = "/Users/karl-gustav.kallasmaa/Documents/Projects/master-thesis/server/src/"
+masks_path = "{}main/data/masks.pkl".format(base_path)
+img_path = "{}main/data/resized_imgs.pkl".format(base_path)
+labels_path = "{}main/data/classes.pkl".format(base_path)
+ade_path = "{}main/data/objectInfo150.csv".format(base_path)
 
 
 with open(masks_path, 'rb') as f:

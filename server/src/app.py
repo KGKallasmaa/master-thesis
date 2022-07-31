@@ -41,9 +41,7 @@ def upload_images_view():
 
     image_as_ar = np.array(base64_to_pil(base_64_image))[0]
     index = find_closest_image_index(image_as_ar)
-    print("closest img")
-    print(index)
-
+    
     return jsonify({"index": index})
 
 
