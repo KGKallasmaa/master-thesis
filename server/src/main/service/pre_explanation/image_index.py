@@ -1,11 +1,11 @@
 import numpy as np
-import base64
-from main.database.explanation_requirement import ExplanationRequirementDb
-from main.service.pre_explanation.data_access import get_images
-from main.service.pre_explanation.kmeans import euclidean_distance
+from src.main.database.explanation_requirement import ExplanationRequirementDb
+from src.main.service.pre_explanation.data_access import get_images
+from src.main.service.pre_explanation.kmeans import euclidean_distance
+from skimage.feature import hog
 
 
-def find_closest_image_index(image: np.array) -> int:
+def find_closest_image_index_old(image: np.array) -> int:
     """Finding the closest index to the uploaded user_uploaded_image"""
     to_be_compared_image_as_histogram = np.histogram(image.flatten(), bins=256, range=(0, 255))[0]
     all_images = get_images()
@@ -21,7 +21,33 @@ def find_closest_image_index(image: np.array) -> int:
     return index
 
 
-def attach_image_to_explanation(image: any, explanation_id: str):
+def find_closest_image_index(image: np.array) -> int:
+    """Finding the closest index to the uploaded user_uploaded_image"""
+    print("input image", flush=True)
+    print(image.shape, flush=True)
+    print(image[0], flush=True)
+    target_image_hog = get_hog(image)
+    print("are we here?")
+    index = -1
+    best_distance = float('inf')
+    for i, img in enumerate(get_images()):
+        img_as_hog = get_hog(img)
+        distance = euclidean_distance(target_image_hog, img_as_hog, allow_not_equal=True)
+        if distance < best_distance:
+            index = i
+            best_distance = distance
+        if distance == 0:
+            return index
+    return index
+
+
+def get_hog(image: np.array):
+    return hog(image,
+               orientations=8,
+               pixels_per_cell=(16, 16),
+               cells_per_block=(1, 1))
+
+
+def attach_image_to_explanation(image: str, explanation_id: str):
     database = ExplanationRequirementDb()
-    image_safe = base64.b64encode(image).decode("utf-8")
-    database.add_original_image_to_explanation(image_safe, explanation_id)
+    database.add_original_image_to_explanation(image, explanation_id)

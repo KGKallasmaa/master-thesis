@@ -25,3 +25,10 @@ def resize_img(img, width=100, height=100) -> PIL:
 def base64_hash(img: str) -> str:
     result = hashlib.md5(img.encode())
     return result.hexdigest()
+
+
+def base64_to_pil(base64_str: str) -> PIL:
+    image = base64.b64decode(base64_str)
+    image = BytesIO(image)
+    image = Image.open(image)
+    return image

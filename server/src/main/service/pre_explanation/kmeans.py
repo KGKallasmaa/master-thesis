@@ -186,8 +186,15 @@ def kmean_segments(images, masks, k=8):
     return results
 
 
-def euclidean_distance(a: np.array, b: np.array) -> float:
-    return np.linalg.norm(a - b)
+def euclidean_distance(a: np.array, b: np.array, allow_not_equal=False) -> float:
+    a_copy = a
+    b_copy = b
+    if allow_not_equal:
+        if a.size > b.size:
+            a_copy = a[0:b.size]
+        else:
+            b_copy = b[0:a.size]
+    return np.linalg.norm(a_copy - b_copy)
 
 
 def cosine_similarity(a: np.array, b: np.array) -> float:

@@ -1,13 +1,19 @@
+from io import BytesIO
+
 import numpy as np
+from PIL import Image
 from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_cors import CORS
+import base64
+
+from numpy import asarray
 
 from main.database.client import get_client
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.explain import explain_using_concepts
-from main.service.pre_explanation.common import serve_pil_image
+from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
 from main.service.pre_explanation.image_index import attach_image_to_explanation, find_closest_image_index
 from main.service.pre_explanation.index_segments import image_segments
@@ -29,10 +35,15 @@ def health_view():
 @api.route("/upload-image", methods=["POST"])
 def upload_images_view():
     image = request.files['file'].read()
-    image_as_ar = np.fromstring(image, np.uint8)
     explanation_id = request.args.get('id')
-    attach_image_to_explanation(image, explanation_id)
+    base_64_image = base64.b64encode(image).decode("utf-8")
+    attach_image_to_explanation(base_64_image, explanation_id)
+
+    image_as_ar = np.array(base64_to_pil(base_64_image))[0]
     index = find_closest_image_index(image_as_ar)
+    print("closest img")
+    print(index)
+
     return jsonify({"index": index})
 
 
