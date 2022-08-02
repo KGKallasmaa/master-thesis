@@ -43,12 +43,8 @@ def cluster_images(image_map, k=10) -> Dict[int, str]:
     return bestimg_cluster
 
 
+"""
 def center_most_concepts(k=10) -> List[any]:
-    """
-    Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
-    Our task is to give user top k(k=10) segments that best describe the image.
-    """
-
     training_data = []
     segment_lookup = {}
 
@@ -81,6 +77,7 @@ def center_most_concepts(k=10) -> List[any]:
         results.append({"conceptName": label, "src": segment})
 
     return results
+"""
 
 
 def center_most_concepts(k=10) -> Dict[str, List[any]]:
@@ -89,14 +86,13 @@ def center_most_concepts(k=10) -> Dict[str, List[any]]:
     Our task is to give user top k(k=10) segments that best describe the image.
     """
 
-    all_labels = get_labels()
-    all_images = get_images()
-    all_maks = get_masks()
-
     label_images = {}
     label_masks = {}
 
-    for label, image, mask in zip(all_labels, all_images, all_maks):
+    # TODO: remove this afterwars
+    print("WE HAVE {} labels in our trainingset", len(get_labels()))
+
+    for label, image, mask in zip(get_labels(), get_images(), get_masks()):
         current_images = label_images.get(label, [])
         current_maks = label_masks.get(label, [])
 
@@ -106,11 +102,10 @@ def center_most_concepts(k=10) -> Dict[str, List[any]]:
         label_images[label] = current_images
         label_masks[label] = current_maks
 
-    all_results = {}
-    for label in list(set(all_labels)):
-        all_results[label] = kmean_segments(label_images[label], label_masks[label], k)
-
-    return all_results
+    return {
+        label: kmean_segments(label_images[label], label_masks[label], k)
+        for label in list(label_images.keys())
+    }
 
 
 def concept_representatives(my_concept: str, k=5) -> List[any]:
@@ -158,7 +153,7 @@ def concept_representatives(my_concept: str, k=5) -> List[any]:
     return results
 
 
-def kmean_segments(images, masks, k=8):
+def kmean_segments(images, masks, k=10):
     training_data = []
     segment_lookup = {}
     my_labels = []

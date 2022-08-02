@@ -39,7 +39,7 @@ def upload_images_view():
     base_64_image = base64.b64encode(image).decode("utf-8")
     attach_image_to_explanation(base_64_image, explanation_id)
 
-    image_as_ar = np.array(base64_to_pil(base_64_image))[0]
+    image_as_ar = np.array(base64_to_pil(base_64_image))
     index = find_closest_image_index(image_as_ar)
     
     return jsonify({"index": index})
