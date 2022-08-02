@@ -8,7 +8,7 @@ from skimage.feature import hog
 
 base_path = ""
 # TODO: use this bath when testing code locally
-# base_path = "/Users/karl-gustav.kallasmaa/Documents/Projects/master-thesis/server/src/"
+#base_path = "/Users/karl-gustav.kallasmaa/Documents/Projects/master-thesis/server/src/"
 masks_path = "{}main/data/masks.pkl".format(base_path)
 img_path = "{}main/data/resized_imgs.pkl".format(base_path)
 labels_path = "{}main/data/classes.pkl".format(base_path)
@@ -64,6 +64,3 @@ def get_hog(image: np.array):
     fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
                         cells_per_block=(1, 1), visualize=True, channel_axis=-1)
     return hog_image
-
-
-HOGS = [get_hog(i) for i in get_images()]

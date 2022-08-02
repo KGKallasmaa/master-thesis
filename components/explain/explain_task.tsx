@@ -2,9 +2,9 @@ import { ExplainableHeader } from "../common/header";
 import { CurrentStep, ExplainableSteps } from "../common/steps";
 import { Col, Row } from "antd";
 import { getId } from "../common/storage";
-import CurrentImage from "../concepts/current_image";
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
+import {CurrentImage} from "../concepts/current_image";
 
 export default function ExplainTask(index: number) {
   const title = "Explain";
