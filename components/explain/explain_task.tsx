@@ -4,7 +4,7 @@ import { Col, Row } from "antd";
 import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
-import {CurrentImage} from "../concepts/current_image";
+import { CurrentImage } from "../concepts/current_image";
 
 export default function ExplainTask(index: number) {
   const title = "Explain";
