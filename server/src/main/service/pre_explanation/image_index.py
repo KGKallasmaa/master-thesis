@@ -9,10 +9,11 @@ def find_closest_image_index(image: np.array) -> int:
     target_image_hog = get_hog(image)
     index = -1
     best_distance = float('inf')
-    for i, imgage in enumerate(get_images()):
-        distance = euclidean_distance(target_image_hog, get_hog(image), allow_not_equal=True)
+    # TODO: do we really need to use hogs?
+    for i, img in enumerate(get_images()):
+        distance = euclidean_distance(target_image_hog, get_hog(img), allow_not_equal=True)
         if distance == 0:
-            return index
+            return i
         if distance < best_distance:
             index = i
             best_distance = distance

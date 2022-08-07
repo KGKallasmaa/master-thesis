@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 from main.service.pre_explanation.common import serve_pil_image, resize_img, array_to_image
-from main.service.pre_explanation.data_access import get_masks, get_images, get_segments, get_labels
+from main.service.pre_explanation.data_access import get_masks, get_images, get_segments
 
 
 def cluster_images(image_map, k=10) -> Dict[int, str]:
