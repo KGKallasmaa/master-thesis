@@ -24,7 +24,9 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
     if len(available_concepts) == 0:
         raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
 
+    # ["office","beach","mountain"] office = 1, beach = 2
     label_encoder = encode_categorical_values(get_labels())
+    # [0,0,0,0]  [1,1,0,0]  [0,0,0,0]
     feature_encoder = encode_categorical_values(available_concepts)
 
     training_data, training_labels, testing_data, testing_labels = [], [], [], []
@@ -71,3 +73,9 @@ def encode_categorical_values(values: List[str]) -> preprocessing.LabelEncoder:
     le = preprocessing.LabelEncoder()
     le.fit(values)
     return le
+
+# TODO: generate counter facturals
+"""
+We know the current label (sunrise) and we know the desired label (beach).
+Using the concepts the user has given to us, tell us how this image (sunrise) could be a beach
+"""

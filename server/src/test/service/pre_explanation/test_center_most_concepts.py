@@ -3,12 +3,13 @@ from main.service.pre_explanation.center_most_concepts import CENTER_MOST_CONCEP
 
 def test_center_most_concepts_finding_works():
     # when
-    center_concepts = CENTER_MOST_CONCEPTS
-    for image_label, concepts in center_concepts.items():
-        clean_concepts = [c["conceptName"]for c in concepts]
+    label_concepts = {}
+    for image_label, concepts in CENTER_MOST_CONCEPTS.items():
+        clean_concepts = [c["conceptName"] for c in concepts]
+        label_concepts[image_label] = clean_concepts
         print("label: {} concepts: {}".format(image_label, clean_concepts))
     # then
-    assert [] == center_concepts
+    assert label_concepts.get("attic") == ['cabinet', 'ceiling', 'floor;flooring', 'lamp', 'windowpane;window', 'wall']
 
 
 if __name__ == '__main__':
