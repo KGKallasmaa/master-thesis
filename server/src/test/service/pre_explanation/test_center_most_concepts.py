@@ -9,7 +9,7 @@ def test_center_most_concepts_finding_works():
         label_concepts[image_label] = clean_concepts
         print("label: {} concepts: {}".format(image_label, clean_concepts))
     # then
-    assert label_concepts.get("attic") == ['cabinet', 'ceiling', 'floor;flooring', 'lamp', 'windowpane;window', 'wall']
+    assert label_concepts.get("attic") == ['floor;flooring', 'windowpane;window', 'wall', 'cabinet', 'ceiling', 'lamp']
 
 
 if __name__ == '__main__':
