@@ -1,4 +1,3 @@
-
 import numpy as np
 from flask import Flask
 from flask import jsonify
@@ -8,6 +7,7 @@ import base64
 
 from main.database.client import get_client
 from main.database.explanation_requirement import ExplanationRequirementDb
+from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.explain import explain_using_concepts
 from main.service.pre_explanation.center_most_concepts import CENTER_MOST_CONCEPTS
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
@@ -20,6 +20,7 @@ api = Flask(__name__)
 CORS(api)
 
 client = get_client()
+counterfactual_explanation_service = CounterFactualExplanationService(client)
 
 
 # TODO: this is used
@@ -38,7 +39,7 @@ def upload_images_view():
 
     image_as_ar = np.array(base64_to_pil(base_64_image))
     index = find_closest_image_index(image_as_ar)
-    
+
     return jsonify({"index": index})
 
 
@@ -102,13 +103,19 @@ def concept_representative_view():
 # TODO: this is used
 @api.route("/concept-constraint", methods=["POST"])
 def edit_concept_constraint_view():
+    # TOOD: we should do some validation before sumitting data
     payload = request.get_json()
     viable_concepts = payload["concepts"]
-    id = payload["id"]
-    if viable_concepts is not None and id is not None:
+    counter_factual = payload["counterFactual"]
+    explanation_id = payload["id"]
+    image_id = payload["img"]
+    if viable_concepts is not None and explanation_id is not None:
+        viable_concepts.sort()
         db = ExplanationRequirementDb(client)
-        constraint = db.get_explanation_requirement(id)
+        constraint = db.get_explanation_requirement(explanation_id)
         constraint.available_concepts = viable_concepts
+        constraint.counter_factual = counter_factual
+        constraint.original_image_id = image_id
         db.update_explanation_requirement(constraint)
         return '', 204
     return '', 400
@@ -119,13 +126,22 @@ def edit_concept_constraint_view():
 def explain_using_concepts_view():
     payload = request.get_json()
     img_id = payload["img"]
-    id = payload["id"]
+    explanation_id = payload["id"]
     if img_id is None:
         return 'Image number is missing', 400
-    if id is None:
+    if explanation_id is None:
         return 'Explanation id is missing', 400
-    explanation = explain_using_concepts(id, img_id)
+    explanation = explain_using_concepts(explanation_id, img_id)
     return jsonify(explanation)
+
+
+# TODO: this is used
+@api.route("/counter-factual-explanation", methods=["POST"])
+def counterfactual_explanation_view():
+    payload = request.get_json()
+    explanation_id = payload["id"]
+    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id)
+    return jsonify(counter_factual)
 
 
 if __name__ == '__main__':

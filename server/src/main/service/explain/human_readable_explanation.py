@@ -13,7 +13,9 @@ class HumanReadableExplanationService:
         self.feature_encoder = feature_encoder
         self.estimator = estimator
 
-    def human_readable_explanation(self, x_test, y_test, y_true) -> Dict[str, any]:
+    def human_readable_explanation(self, x_test, y_test, y_true, excluded_nodes=None) -> Dict[str, any]:
+        if excluded_nodes is None:
+            excluded_nodes = []
         features = self.estimator.tree_.feature
         thresholds = self.estimator.tree_.threshold
         node_indicator = self.estimator.decision_path(x_test)
@@ -26,6 +28,8 @@ class HumanReadableExplanationService:
         explanations = []
 
         for node_id in node_index:
+            if node_id in excluded_nodes:
+                continue
             if leave_id[sample_id] == node_id:
                 readable_node = self.label_encoder.inverse_transform([y_test])[0]
                 exp = "leaf node: {}".format(readable_node)
