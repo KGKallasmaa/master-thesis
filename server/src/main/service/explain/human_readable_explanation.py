@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 from sklearn import tree
 from sklearn import preprocessing
 from sklearn.tree import DecisionTreeClassifier
@@ -13,9 +13,7 @@ class HumanReadableExplanationService:
         self.feature_encoder = feature_encoder
         self.estimator = estimator
 
-    def human_readable_explanation(self, x_test, y_test, y_true, excluded_nodes=None) -> Dict[str, any]:
-        if excluded_nodes is None:
-            excluded_nodes = []
+    def human_readable_explanation(self, x_test, y_test, y_true) -> Dict[str, any]:
         features = self.estimator.tree_.feature
         thresholds = self.estimator.tree_.threshold
         node_indicator = self.estimator.decision_path(x_test)
@@ -28,8 +26,6 @@ class HumanReadableExplanationService:
         explanations = []
 
         for node_id in node_index:
-            if node_id in excluded_nodes:
-                continue
             if leave_id[sample_id] == node_id:
                 readable_node = self.label_encoder.inverse_transform([y_test])[0]
                 exp = "leaf node: {}".format(readable_node)
@@ -57,16 +53,38 @@ class HumanReadableExplanationService:
         predicted_label_message = "Predicted label for this image: {}".format(
             self.label_encoder.inverse_transform([y_test])[0]
         )
-
         # Draw graph
         plain_text_tree = tree.export_text(self.estimator)
+        explanation_tree_as_list = self.format_plain_text_tree(plain_text_tree)
 
-        return HumanReadableExplanation(
+        human_readable_explain = HumanReadableExplanation(
             true_label=true_label_message,
             predicted_label=predicted_label_message,
-            plain_text=self.format_plain_text_tree(plain_text_tree),
+            plain_text=explanation_tree_as_list,
             explanations=explanations
-        ).to_db_format()
+        )
+        return human_readable_explain.to_db_format()
+
+    def human_readable_counterfactual_explanation(self, y_true,counterfacutal_label:str, excluded_nodes=List[int]) -> Dict[str, any]:
+        true_label_message = "True label for this image: {}".format(self.label_encoder.inverse_transform(y_true)[0])
+        predicted_label_message = "Counter factual class: {}".format(counterfacutal_label)
+        # Draw graph
+        plain_text_tree = tree.export_text(self.estimator)
+        explanation_tree_as_list = self.format_plain_text_tree(plain_text_tree)
+
+        human_readable_explain = HumanReadableExplanation(
+            true_label=true_label_message,
+            predicted_label=predicted_label_message,
+            plain_text=explanation_tree_as_list,
+            explanations=None
+        )
+
+        if len(excluded_nodes) > 0:
+            human_readable_explain.plain_text = [n for n in explanation_tree_as_list if n not in excluded_nodes]
+        if len(excluded_nodes) == 0:
+            human_readable_explain.plain_text = 'Not possible'
+
+        return human_readable_explain.to_db_format()
 
     def format_plain_text_tree(self, plain_tree) -> List[str]:
         as_array = []
@@ -96,7 +114,7 @@ class HumanReadableExplanation:
                  true_label: str,
                  predicted_label: str,
                  plain_text: any,
-                 explanations: List[str]):
+                 explanations: Optional[List[str]]):
         self.true_label = true_label
         self.predicted_label = predicted_label
         self.plain_text = plain_text
