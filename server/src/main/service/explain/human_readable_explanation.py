@@ -65,24 +65,24 @@ class HumanReadableExplanationService:
         )
         return human_readable_explain.to_db_format()
 
-    def human_readable_counterfactual_explanation(self, y_true,counterfacutal_label:str, excluded_nodes=List[int]) -> Dict[str, any]:
-        true_label_message = "True label for this image: {}".format(self.label_encoder.inverse_transform(y_true)[0])
+    def human_readable_counterfactual_explanation(self, counterfacutal_label: str, excluded_nodes=List[int]) -> Dict[
+        str, any]:
         predicted_label_message = "Counter factual class: {}".format(counterfacutal_label)
         # Draw graph
         plain_text_tree = tree.export_text(self.estimator)
         explanation_tree_as_list = self.format_plain_text_tree(plain_text_tree)
 
         human_readable_explain = HumanReadableExplanation(
-            true_label=true_label_message,
+            true_label=None,
             predicted_label=predicted_label_message,
             plain_text=explanation_tree_as_list,
             explanations=None
         )
-
+        print("total number of nodes", flush=True)
+        print(len(explanation_tree_as_list), flush=True)
         if len(excluded_nodes) > 0:
-            human_readable_explain.plain_text = [n for n in explanation_tree_as_list if n not in excluded_nodes]
-        if len(excluded_nodes) == 0:
-            human_readable_explain.plain_text = 'Not possible'
+            human_readable_explain.plain_text = [node for i, node in enumerate(explanation_tree_as_list) if
+                                                 i not in excluded_nodes]
 
         return human_readable_explain.to_db_format()
 
@@ -111,7 +111,7 @@ class HumanReadableExplanationService:
 
 class HumanReadableExplanation:
     def __init__(self,
-                 true_label: str,
+                 true_label: Optional[str],
                  predicted_label: str,
                  plain_text: any,
                  explanations: Optional[List[str]]):
@@ -121,9 +121,13 @@ class HumanReadableExplanation:
         self.explanations = explanations
 
     def to_db_format(self) -> Dict[str, any]:
-        return {
+        payload = {
             "trueLabel": self.true_label,
             "predictedLabel": self.predicted_label,
             "explanations": self.explanations,
             "plainTextTree": self.plain_text
         }
+        to_be_deleted = [key for key, value in payload.items() if value is None]
+        for key in to_be_deleted:
+            del payload[key]
+        return payload
