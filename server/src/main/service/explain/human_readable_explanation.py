@@ -13,6 +13,11 @@ class HumanReadableExplanationService:
         self.feature_encoder = feature_encoder
         self.estimator = estimator
 
+    value_greater_than_threshold = {
+        True: ">",
+        False: "<="
+    }
+
     def human_readable_explanation(self, x_test, y_test, y_true) -> Dict[str, any]:
         features = self.estimator.tree_.feature
         thresholds = self.estimator.tree_.threshold
@@ -30,11 +35,9 @@ class HumanReadableExplanationService:
                 readable_node = self.label_encoder.inverse_transform([y_test])[0]
                 exp = f"leaf node: {readable_node}"
             else:
-                if x_test[sample_id][features[node_id]] <= thresholds[node_id]:
-                    threshold_sign = "<="
-                else:
-                    threshold_sign = ">"
-
+                threshold_sign = self.value_greater_than_threshold[
+                    x_test[sample_id][features[node_id]] <= thresholds[node_id]
+                    ]
                 readable_feature = self.feature_encoder.inverse_transform([features[node_id]])[0]
 
                 # wall [1.0] >= 0.5
@@ -95,8 +98,8 @@ class HumanReadableExplanationService:
                                                       self.feature_encoder.inverse_transform([feature_nr])[0])
 
             for label_nr in sorted_nr_label:
-                formatted_row = formatted_row.replace(f"class: {label_nr}", f"class: {self.label_encoder.inverse_transform([label_nr])[0]}")
-
+                formatted_row = formatted_row.replace(f"class: {label_nr}",
+                                                      f"class: {self.label_encoder.inverse_transform([label_nr])[0]}")
 
             as_array.append(formatted_row)
         return as_array
