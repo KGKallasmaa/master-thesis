@@ -28,7 +28,7 @@ class HumanReadableExplanationService:
         for node_id in node_index:
             if leave_id[sample_id] == node_id:
                 readable_node = self.label_encoder.inverse_transform([y_test])[0]
-                exp = "leaf node: {}".format(readable_node)
+                exp = f"leaf node: {readable_node}"
             else:
                 if x_test[sample_id][features[node_id]] <= thresholds[node_id]:
                     threshold_sign = "<="
@@ -39,7 +39,6 @@ class HumanReadableExplanationService:
 
                 # wall [1.0] >= 0.5
                 exp = f"{readable_feature}[{x_test[sample_id][features[node_id]]}] {threshold_sign} {thresholds[node_id]}"
-
 
             explanations.append(exp)
 
@@ -59,9 +58,9 @@ class HumanReadableExplanationService:
         )
         return human_readable_explain.to_db_format()
 
-    def human_readable_counterfactual_explanation(self, counterfacutal_label: str, excluded_nodes=List[int]) -> Dict[
+    def human_readable_counterfactual_explanation(self, counterfactual_label: str, excluded_nodes=List[int]) -> Dict[
         str, any]:
-        predicted_label_message = f"Counter factual class: {counterfacutal_label}"
+        predicted_label_message = f"Counter factual class: {counterfactual_label}"
         # Draw graph
         plain_text_tree = tree.export_text(self.estimator)
         explanation_tree_as_list = self.format_plain_text_tree(plain_text_tree)
@@ -92,12 +91,12 @@ class HumanReadableExplanationService:
         for row in plain_tree.split("\n"):
             formatted_row = row
             for feature_nr in sorted_nr_feature:
-                formatted_row = formatted_row.replace(f"feature_{feature_nr}", self.feature_encoder.inverse_transform([feature_nr])[0])
+                formatted_row = formatted_row.replace(f"feature_{feature_nr}",
+                                                      self.feature_encoder.inverse_transform([feature_nr])[0])
 
             for label_nr in sorted_nr_label:
-                formatted_row = formatted_row.replace("class: {}".format(label_nr),
-                                                      "class: {}".format(
-                                                          self.label_encoder.inverse_transform([label_nr])[0]))
+                formatted_row = formatted_row.replace(f"class: {label_nr}", f"class: {self.label_encoder.inverse_transform([label_nr])[0]}")
+
 
             as_array.append(formatted_row)
         return as_array
