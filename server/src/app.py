@@ -103,18 +103,18 @@ def concept_representative_view():
 # TODO: this is used
 @api.route("/concept-constraint", methods=["POST"])
 def edit_concept_constraint_view():
-    # TOOD: we should do some validation before sumitting data
+    # TODO: we should do some validation before sumitting data
     payload = request.get_json()
     viable_concepts = payload["concepts"]
-    counter_factual = payload["counterFactual"]
     explanation_id = payload["id"]
-    image_id = payload["img"]
     if viable_concepts is not None and explanation_id is not None:
         viable_concepts.sort()
         db = ExplanationRequirementDb(client)
         constraint = db.get_explanation_requirement(explanation_id)
         constraint.available_concepts = viable_concepts
+        counter_factual = payload["counterFactual"]
         constraint.counter_factual = counter_factual
+        image_id = payload["img"]
         constraint.original_image_id = image_id
         db.update_explanation_requirement(constraint)
         return '', 204
@@ -140,7 +140,8 @@ def explain_using_concepts_view():
 def counterfactual_explanation_view():
     payload = request.get_json()
     explanation_id = payload["id"]
-    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id)
+    img_id = payload["img"]
+    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id,img_id)
     return jsonify(counter_factual)
 
 

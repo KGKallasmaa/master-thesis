@@ -61,6 +61,7 @@ class HumanReadableExplanationService:
         )
         return human_readable_explain.to_db_format()
 
+    # TODO: we might not need it
     def human_readable_counterfactual_explanation(self, counterfactual_label: str, excluded_nodes=List[int]) -> Dict[
         str, any]:
         predicted_label_message = f"Counter factual class: {counterfactual_label}"
