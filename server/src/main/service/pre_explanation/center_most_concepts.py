@@ -66,9 +66,10 @@ def kmean_segments(images, masks, k=10):
             segment_as_arr = array_to_image(segment_lookup[str(segment)])
             segment_best_example_map[segment_name] = (serve_pil_image(segment_as_arr), distance)
 
-    results = []
-    for segment_name, (segment_value, smallest_distance_to_center) in segment_best_example_map.items():
-        results.append({"conceptName": segment_name, "src": segment_value, "distance": smallest_distance_to_center})
+    results = [
+        {"conceptName": segment_name, "src": segment_value, "distance": smallest_distance_to_center}
+        for segment_name, (segment_value, smallest_distance_to_center) in segment_best_example_map.items()
+    ]
 
     results.sort(key=lambda x: x["distance"])
 

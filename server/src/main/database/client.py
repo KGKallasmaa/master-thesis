@@ -8,6 +8,7 @@ load_dotenv()
 
 ca = certifi.where()
 
+
 def get_client() -> MongoClient:
     """Returns the MongoDB client"""
     url = os.getenv("DB_URL")

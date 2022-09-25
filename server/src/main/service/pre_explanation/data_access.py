@@ -9,10 +9,10 @@ from skimage.feature import hog
 base_path = ""
 # TODO: use this bath when testing code locally
 #base_path = "/Users/karl-gustav.kallasmaa/Documents/Projects/master-thesis/server/src/"
-masks_path = "{}main/data/masks.pkl".format(base_path)
-img_path = "{}main/data/resized_imgs.pkl".format(base_path)
-labels_path = "{}main/data/classes.pkl".format(base_path)
-ade_path = "{}main/data/objectInfo150.csv".format(base_path)
+masks_path = f"{base_path}main/data/masks.pkl"
+img_path = f"{base_path}main/data/resized_imgs.pkl"
+labels_path = f"{base_path}main/data/classes.pkl"
+ade_path = f"{base_path}main/data/objectInfo150.csv"
 
 with open(masks_path, 'rb') as f:
     masks = pickle.load(f)
