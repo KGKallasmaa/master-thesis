@@ -38,21 +38,15 @@ class HumanReadableExplanationService:
                 readable_feature = self.feature_encoder.inverse_transform([features[node_id]])[0]
 
                 # wall [1.0] >= 0.5
-                exp = "{}[{}] {} {}".format(
-                    readable_feature,
-                    x_test[sample_id][features[node_id]],
-                    threshold_sign,
-                    thresholds[node_id]
-                )
+                exp = f"{readable_feature}[{x_test[sample_id][features[node_id]]}] {threshold_sign} {thresholds[node_id]}"
+
 
             explanations.append(exp)
 
-        true_label_message = "True label for this image: {}".format(
-            self.label_encoder.inverse_transform(y_true)[0]
-        )
-        predicted_label_message = "Predicted label for this image: {}".format(
-            self.label_encoder.inverse_transform([y_test])[0]
-        )
+        true_label_message = f"True label for this image: {self.label_encoder.inverse_transform(y_true)[0]}"
+
+        predicted_label_message = f"Predicted label for this image: {self.label_encoder.inverse_transform([y_test])[0]}"
+
         # Draw graph
         plain_text_tree = tree.export_text(self.estimator)
         explanation_tree_as_list = self.format_plain_text_tree(plain_text_tree)
@@ -67,7 +61,7 @@ class HumanReadableExplanationService:
 
     def human_readable_counterfactual_explanation(self, counterfacutal_label: str, excluded_nodes=List[int]) -> Dict[
         str, any]:
-        predicted_label_message = "Counter factual class: {}".format(counterfacutal_label)
+        predicted_label_message = f"Counter factual class: {counterfacutal_label}"
         # Draw graph
         plain_text_tree = tree.export_text(self.estimator)
         explanation_tree_as_list = self.format_plain_text_tree(plain_text_tree)
@@ -98,8 +92,8 @@ class HumanReadableExplanationService:
         for row in plain_tree.split("\n"):
             formatted_row = row
             for feature_nr in sorted_nr_feature:
-                formatted_row = formatted_row.replace("feature_{}".format(feature_nr),
-                                                      self.feature_encoder.inverse_transform([feature_nr])[0])
+                formatted_row = formatted_row.replace(f"feature_{feature_nr}", self.feature_encoder.inverse_transform([feature_nr])[0])
+
             for label_nr in sorted_nr_label:
                 formatted_row = formatted_row.replace("class: {}".format(label_nr),
                                                       "class: {}".format(

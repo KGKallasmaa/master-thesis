@@ -6,6 +6,7 @@ from PIL import Image
 from main.service.pre_explanation.common import serve_pil_image
 from main.service.pre_explanation.data_access import get_images, get_masks, get_segments
 
+
 def image_segments(index: int) -> List[any]:
     img, msk = get_images()[index], get_masks()[index]
     segss, seg_class = get_segments(np.array(img), msk, threshold=0.005)
@@ -17,5 +18,3 @@ def image_segments(index: int) -> List[any]:
         }
         for i, imgg in enumerate(segss)
     ]
-
-
