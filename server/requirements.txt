@@ -11,3 +11,4 @@ python-dotenv >= 0.*
 dnspython == 2.2.1
 scikit-image == 0.19.3
 pytest == 7.1.2
+dice-ml == 0.8
