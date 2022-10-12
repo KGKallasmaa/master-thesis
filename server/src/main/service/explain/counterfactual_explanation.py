@@ -1,4 +1,3 @@
-import math
 from typing import List
 
 import dice_ml
@@ -7,7 +6,6 @@ from pymongo import MongoClient
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.explanation_requirement import ExplanationRequirement
 from main.service.explain.explain import encode_categorical_values, get_training_row, train_decision_tree
-from main.service.explain.human_readable_explanation import HumanReadableExplanationService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 import numpy as np
 
@@ -18,10 +16,14 @@ class CounterFactualExplanationService:
     def __init__(self, client: MongoClient):
         self.explanation_requirement_db = ExplanationRequirementDb(client)
 
-    def counterfactual_explanation(self, explanation_id: str, to_be_explained_image_index: int):
+    def counterfactual_explanation(self,
+                                   explanation_id: str,
+                                   to_be_explained_image_index: int,
+                                   counter_factual_class: str):
         explanation_requirement = self.explanation_requirement_db.get_explanation_requirement(explanation_id)
 
         label_encoder, X, y, decision_tree = self.__regular_explain_tree(explanation_requirement)
+        decision_tree.fit(X, y)
 
         # 1. Initialize dice
         dice_explanation = dice_ml.Model(model=decision_tree, backend="sklearn")
@@ -30,23 +32,37 @@ class CounterFactualExplanationService:
             explanation_requirement.available_concepts,
             label_encoder
         )
+
         dice_data = dice_ml.Data(dataframe=dice_transformed_data,
                                  continuous_features=explanation_requirement.available_concepts,
                                  outcome_name="label")
 
-        # 2. Initialize the explain
+        # 2. Initialize the explainer
         exp = dice_ml.Dice(dice_data, dice_explanation, method="random")
 
         # 3. Generate the counterfactual
+        # to_be_explained_instance = dice_transformed_data.iloc[to_be_explained_image_index].to_dict()
         to_be_explained_instance = dice_transformed_data.to_dict(orient='records')[to_be_explained_image_index]
 
-        # dice_transformed_data.iloc[to_be_explained_image_index]
-        counterfactual = exp.generate_counterfactuals(
-            to_be_explained_instance,
-            total_CFs=1,
-            desired_class=explanation_requirement.counter_factual
-        )
-        return counterfactual.visualize_as_list()
+        original_class = to_be_explained_instance["label"]
+        del to_be_explained_instance["label"]
+        to_be_explained_instance = pd.DataFrame(to_be_explained_instance, index=[0])
+
+        try:
+            counterfactual = exp.generate_counterfactuals(query_instances=to_be_explained_instance,
+                                                          total_CFs=1,
+                                                          desired_class=counter_factual_class)
+            return {
+                "originalClass": original_class,
+                "counterFactualExplanation": counterfactual.visualize_as_list(),
+            }
+        except Exception as e:
+            print(e, flush=True)
+            return {
+                "originalClass": "",
+                "counterFactualExplanation": [],
+                "error": "Could not generate counterfactuals. %s" % e
+            }
 
     @staticmethod
     def __transform_data_for_dice(X, y, concepts: List[str], label_encoder):

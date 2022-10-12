@@ -5,7 +5,6 @@ class ExplanationRequirement:
     def __init__(self, json: Dict[str, any]):
         self.id = json["_id"]
         self.available_concepts = json.get("available_concepts", [])
-        self.counter_factual = json.get("counter_factual")
         self.original_image = json.get("original_image", "")
         self.original_image_id = json.get("original_image_id")
 
@@ -13,7 +12,6 @@ class ExplanationRequirement:
         return {
             '_id': self.id,
             'available_concepts': self.available_concepts,
-            'counter_factual': self.counter_factual,
             'original_image': self.original_image,
             'original_image_id': self.original_image_id
         }
