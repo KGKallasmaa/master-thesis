@@ -9,9 +9,11 @@ export default function Footer() {
   };
   return (
     <>
-     <h2>Explanation Id {getId()}</h2>
-     <br/>
-     <Button onClick={handleReset} type="danger">Reset</Button>
+      <h2>Explanation Id {getId()}</h2>
+      <br />
+      <Button onClick={handleReset} type="danger">
+        Reset
+      </Button>
     </>
-  )
+  );
 }
