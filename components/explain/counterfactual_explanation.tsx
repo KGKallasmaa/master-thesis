@@ -1,10 +1,8 @@
-import {  Select } from "antd";
+import { Select } from "antd";
 import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 const { Option } = Select;
-
-// TODO: fetch these labels from the server
 
 export default function CounterFactualExplanation({
   index,
@@ -29,10 +27,10 @@ export default function CounterFactualExplanation({
   if (counterFactualLabels.length === 0) {
     return <>Loading ...</>;
   }
-  
+
   return (
     <>
-    <Select
+      <Select
         defaultValue={counterFactualLabels[0]}
         style={{ width: 120 }}
         onChange={(value) => setCounterFactualClass(value)}
@@ -42,8 +40,13 @@ export default function CounterFactualExplanation({
         })}
       </Select>
 
-    {counterFactualClass && <Counterfactual imageIndex={index} desiredCounterFactualClass={counterFactualClass} />}
-  </>
+      {counterFactualClass && (
+        <Counterfactual
+          imageIndex={index}
+          desiredCounterFactualClass={counterFactualClass}
+        />
+      )}
+    </>
   );
 }
 function Counterfactual({

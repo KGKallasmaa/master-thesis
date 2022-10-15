@@ -54,11 +54,13 @@ class CounterFactualExplanationService:
             return {
                 "error": "",
                 "originalClass": original_class,
+                "counterfactualClass": counter_factual_class,
                 "counterFactualExplanation": counterfactual.visualize_as_list(),
             }
         except Exception as e:
             return {
                 "originalClass": original_class,
+                "counterfactualClass": counter_factual_class,
                 "counterFactualExplanation": [],
                 "error": "%s" % e
             }
