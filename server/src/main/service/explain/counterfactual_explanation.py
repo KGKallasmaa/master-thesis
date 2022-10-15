@@ -23,7 +23,6 @@ class CounterFactualExplanationService:
         explanation_requirement = self.explanation_requirement_db.get_explanation_requirement(explanation_id)
 
         label_encoder, X, y, decision_tree = self.__regular_explain_tree(explanation_requirement)
-        decision_tree.fit(X, y)
 
         # 1. Initialize dice
         dice_explanation = dice_ml.Model(model=decision_tree, backend="sklearn")

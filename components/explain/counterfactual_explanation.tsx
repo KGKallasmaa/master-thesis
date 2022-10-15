@@ -14,29 +14,6 @@ export default function CounterFactualExplanation({
 }: {
   index: number;
 }) {
-  const title = "Counterfactual Explanation";
-  const description = "Counterfactual explanation of this image";
-  return (
-    <>
-      <br />
-      <ExplainableHeader title={title} description={description} />
-      <br />
-      <ExplainableSteps step={CurrentStep.ExplainModels} />
-      <br />
-      <Row>
-        <Col span={8} />
-        <Col span={8}>
-          <CurrentImage index={index} />
-          <br />
-          <CounterFactualWrapper index={index} />
-        </Col>
-        <Col span={8} />
-      </Row>
-    </>
-  );
-}
-
-function CounterFactualWrapper(props: { index: number }) {
   const [counterFactualClass, setCounterFactualClass] = useState<string>("");
   const [counterFactualLabels, setCouterFactualLabels] = useState<string[]>([]);
 
@@ -44,7 +21,7 @@ function CounterFactualWrapper(props: { index: number }) {
     httpGet("/all-labels")
       .then((el) => el.json())
       .then((data) => {
-        setCouterFactualLabels(data.counterFactualLabels);
+        setCouterFactualLabels(data.labels);
       })
       .catch((err) => {
         console.error(err);
@@ -72,7 +49,7 @@ function CounterFactualWrapper(props: { index: number }) {
 
   return (
     <Counterfactual
-      imageIndex={props.index}
+      imageIndex={index}
       desiredCounterFactualClass={counterFactualClass}
     />
   );
@@ -89,8 +66,12 @@ function Counterfactual({
   >([]);
   const [originalClass, setOriginalClass] = useState<string>("");
   const [isLoading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   if (isLoading) {
     return <p>Loading...</p>;
+  }
+  if (error !== "") {
+    return <p>{error}</p>;
   }
   useEffect(() => {
     const payload = {
@@ -107,6 +88,7 @@ function Counterfactual({
       })
       .catch((err) => {
         console.error(err);
+        setError(err.message);
       })
       .finally(() => {
         setLoading(false);

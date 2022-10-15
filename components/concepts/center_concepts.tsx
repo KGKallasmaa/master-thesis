@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
-import DetailedConcept from "./detail_concepts";
 import { getId } from "../common/storage";
 
 export default function CenterConcepts(props: { index: number }) {
@@ -74,9 +73,7 @@ export default function CenterConcepts(props: { index: number }) {
               imageWidth={200}
               onSelected={handleConceptWillBeUsed}
             />
-            {selectedConcepts.includes(el.conceptName) && (
-              <DetailedConcept name={el.conceptName} />
-            )}
+           
           </Col>
         ))}
       </Row>

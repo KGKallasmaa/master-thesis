@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
-
+/*
 export default function DetailedConcept(props: { name: string }) {
   const { name } = props;
   const [images, setImage] = useState([]);
@@ -43,3 +43,4 @@ export default function DetailedConcept(props: { name: string }) {
     </Row>
   );
 }
+*/
