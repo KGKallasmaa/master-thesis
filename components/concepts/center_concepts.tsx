@@ -28,6 +28,7 @@ export default function CenterConcepts(props: { index: number }) {
   useEffect(() => {
     const payload = {
       id: getId(),
+      img: index,
       concepts: selectedConcepts,
     };
     http("/concept-constraint", payload)
@@ -73,7 +74,6 @@ export default function CenterConcepts(props: { index: number }) {
               imageWidth={200}
               onSelected={handleConceptWillBeUsed}
             />
-           
           </Col>
         ))}
       </Row>

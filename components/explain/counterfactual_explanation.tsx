@@ -1,10 +1,7 @@
-import { ExplainableHeader } from "../common/header";
-import { CurrentStep, ExplainableSteps } from "../common/steps";
-import { Col, Row, Select } from "antd";
+import {  Select } from "antd";
 import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
-import { CurrentImage } from "../concepts/current_image";
 const { Option } = Select;
 
 // TODO: fetch these labels from the server
@@ -32,10 +29,10 @@ export default function CounterFactualExplanation({
   if (counterFactualLabels.length === 0) {
     return <>Loading ...</>;
   }
-
-  if (counterFactualClass === "") {
-    return (
-      <Select
+  
+  return (
+    <>
+    <Select
         defaultValue={counterFactualLabels[0]}
         style={{ width: 120 }}
         onChange={(value) => setCounterFactualClass(value)}
@@ -44,14 +41,9 @@ export default function CounterFactualExplanation({
           return <Option value={label}>{label}</Option>;
         })}
       </Select>
-    );
-  }
 
-  return (
-    <Counterfactual
-      imageIndex={index}
-      desiredCounterFactualClass={counterFactualClass}
-    />
+    {counterFactualClass && <Counterfactual imageIndex={index} desiredCounterFactualClass={counterFactualClass} />}
+  </>
   );
 }
 function Counterfactual({
@@ -67,33 +59,39 @@ function Counterfactual({
   const [originalClass, setOriginalClass] = useState<string>("");
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-  if (error !== "") {
-    return <p>{error}</p>;
-  }
+
   useEffect(() => {
     const payload = {
       img: imageIndex,
       id: getId(),
       counterFactualClass: desiredCounterFactualClass,
     };
-    http("/counterfactual-explanation", payload)
+    http("/counter-factual-explanation", payload)
       .then((el) => el.json())
       .then((data) => {
-        console.log(data);
+        setError(data.error);
         setCounterFactualExplanation(data.counterFactualExplanation);
         setOriginalClass(data.originalClass);
+        setLoading(false);
       })
       .catch((err) => {
         console.error(err);
         setError(err.message);
-      })
-      .finally(() => {
         setLoading(false);
       });
-  }, [imageIndex, desiredCounterFactualClass]);
+  }, []);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+  if (error || counterFactualExplanation.length === 0) {
+    return (
+      <>
+        <p>Could not generate counterfactuals.</p>
+        <p>{error}</p>
+      </>
+    );
+  }
 
   return (
     <>

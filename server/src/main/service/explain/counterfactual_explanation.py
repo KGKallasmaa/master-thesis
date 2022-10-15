@@ -52,15 +52,15 @@ class CounterFactualExplanationService:
                                                           total_CFs=1,
                                                           desired_class=counter_factual_class)
             return {
+                "error": "",
                 "originalClass": original_class,
                 "counterFactualExplanation": counterfactual.visualize_as_list(),
             }
         except Exception as e:
-            print(e, flush=True)
             return {
-                "originalClass": "",
+                "originalClass": original_class,
                 "counterFactualExplanation": [],
-                "error": "Could not generate counterfactuals. %s" % e
+                "error": "%s" % e
             }
 
     @staticmethod
