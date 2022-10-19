@@ -10,7 +10,7 @@ interface UploadTaskProps {
 }
 
 export function UploadTask(props: UploadTaskProps) {
-  const url = SERVER_URL + "/upload-image?id=" + getId();
+  const url = `${SERVER_URL}/upload-image?id=${getId()}`;
 
   const draggerProps = {
     name: "file",

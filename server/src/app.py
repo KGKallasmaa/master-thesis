@@ -112,8 +112,6 @@ def edit_concept_constraint_view():
         db = ExplanationRequirementDb(client)
         constraint = db.get_explanation_requirement(explanation_id)
         constraint.available_concepts = viable_concepts
-        counter_factual = payload["counterFactual"]
-        constraint.counter_factual = counter_factual
         image_id = payload["img"]
         constraint.original_image_id = image_id
         db.update_explanation_requirement(constraint)
@@ -142,13 +140,17 @@ def counterfactual_explanation_view():
     explanation_id = payload["id"]
     img_id = payload["img"]
     counter_factual_class = payload["counterFactualClass"]
-    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id,img_id,counter_factual_class)
+    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id, img_id,
+                                                                                    counter_factual_class)
     return jsonify(counter_factual)
+
 
 # TODO: this is used
 @api.route("/all-labels", methods=["GET"])
 def all_labels_view():
-    return jsonify({"labels": list(get_labels())})
+    labels = list(set(list(get_labels())))
+    labels.sort()
+    return jsonify({"labels": labels})
 
 
 if __name__ == '__main__':

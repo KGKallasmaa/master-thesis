@@ -73,9 +73,3 @@ def encode_categorical_values(values: List[str]) -> preprocessing.LabelEncoder:
     le = preprocessing.LabelEncoder()
     le.fit(values)
     return le
-
-# TODO: generate counter facturals
-"""
-We know the current label (sunrise) and we know the desired label (beach).
-Using the concepts the user has given to us, tell us how this image (sunrise) could be a beach
-"""

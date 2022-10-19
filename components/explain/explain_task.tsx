@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CurrentImage } from "../concepts/current_image";
 import CounterFactualExplanation from "./counterfactual_explanation";
 import MachineLearningExplanation from "./machine_learning_explanation";
+import { Button } from "antd";
 
 export default function ExplainTask(index: number) {
   const title = "Explain";
@@ -43,7 +44,10 @@ export default function ExplainTask(index: number) {
             <CounterFactualExplanation index={index} />
           )}
           <br />
-          <button onClick={handleStepChange}>{buttonText}</button>
+          <br />
+          <Button onClick={handleStepChange} type="primary">
+            {buttonText}
+          </Button>
         </Col>
         <Col span={8} />
       </Row>

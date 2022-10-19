@@ -1,42 +1,15 @@
-import { ExplainableHeader } from "../common/header";
-import { CurrentStep, ExplainableSteps } from "../common/steps";
-import { Col, Row, Select } from "antd";
+import { Select, Table } from "antd";
 import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
-import { CurrentImage } from "../concepts/current_image";
+import { CounterfactualExplanation } from "./models/counterfactual_model";
 const { Option } = Select;
-
-// TODO: fetch these labels from the server
 
 export default function CounterFactualExplanation({
   index,
 }: {
   index: number;
 }) {
-  const title = "Counterfactual Explanation";
-  const description = "Counterfactual explanation of this image";
-  return (
-    <>
-      <br />
-      <ExplainableHeader title={title} description={description} />
-      <br />
-      <ExplainableSteps step={CurrentStep.ExplainModels} />
-      <br />
-      <Row>
-        <Col span={8} />
-        <Col span={8}>
-          <CurrentImage index={index} />
-          <br />
-          <CounterFactualWrapper index={index} />
-        </Col>
-        <Col span={8} />
-      </Row>
-    </>
-  );
-}
-
-function CounterFactualWrapper(props: { index: number }) {
   const [counterFactualClass, setCounterFactualClass] = useState<string>("");
   const [counterFactualLabels, setCouterFactualLabels] = useState<string[]>([]);
 
@@ -44,7 +17,7 @@ function CounterFactualWrapper(props: { index: number }) {
     httpGet("/all-labels")
       .then((el) => el.json())
       .then((data) => {
-        setCouterFactualLabels(data.counterFactualLabels);
+        setCouterFactualLabels(data.labels);
       })
       .catch((err) => {
         console.error(err);
@@ -56,8 +29,8 @@ function CounterFactualWrapper(props: { index: number }) {
     return <>Loading ...</>;
   }
 
-  if (counterFactualClass === "") {
-    return (
+  return (
+    <>
       <Select
         defaultValue={counterFactualLabels[0]}
         style={{ width: 120 }}
@@ -67,14 +40,18 @@ function CounterFactualWrapper(props: { index: number }) {
           return <Option value={label}>{label}</Option>;
         })}
       </Select>
-    );
-  }
 
-  return (
-    <Counterfactual
-      imageIndex={props.index}
-      desiredCounterFactualClass={counterFactualClass}
-    />
+      {counterFactualClass && (
+        <>
+          <br />
+          <br />
+          <Counterfactual
+            imageIndex={index}
+            desiredCounterFactualClass={counterFactualClass}
+          />
+        </>
+      )}
+    </>
   );
 }
 function Counterfactual({
@@ -84,47 +61,95 @@ function Counterfactual({
   imageIndex: number;
   desiredCounterFactualClass: string;
 }) {
-  const [counterFactualExplanation, setCounterFactualExplanation] = useState<
-    string[]
-  >([]);
-  const [originalClass, setOriginalClass] = useState<string>("");
+  const [counterFactualExplanation, setCounterFactualExplanation] =
+    useState<CounterfactualExplanation>(null);
   const [isLoading, setLoading] = useState(true);
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  const [error, setError] = useState("");
+
   useEffect(() => {
+    setLoading(true);
     const payload = {
       img: imageIndex,
       id: getId(),
       counterFactualClass: desiredCounterFactualClass,
     };
-    http("/counterfactual-explanation", payload)
+
+    http("/counter-factual-explanation", payload)
       .then((el) => el.json())
       .then((data) => {
-        console.log(data);
-        setCounterFactualExplanation(data.counterFactualExplanation);
-        setOriginalClass(data.originalClass);
+        setCounterFactualExplanation(data);
+        setError(data.error);
+        setLoading(false);
       })
       .catch((err) => {
         console.error(err);
-      })
-      .finally(() => {
+        setError(err.message);
         setLoading(false);
       });
-  }, [imageIndex, desiredCounterFactualClass]);
+  }, []);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+  if (error) {
+    return (
+      <>
+        <p>Could not generate counterfactuals.</p>
+        <p>{error}</p>
+      </>
+    );
+  }
+
+  const renderedOriginalInstanceColumns = Object.entries(
+    counterFactualExplanation.original.values
+  ).map(([feature, _]) => {
+    return { title: feature, dataIndex: feature, key: feature };
+  });
+  const renderedOriginalInstanceValues = [
+    counterFactualExplanation.original.values,
+  ];
+
+  const counterfactualColumns = Object.entries(
+    counterFactualExplanation.counterfactuals[0].values
+  ).map(([feature, _]) => {
+    return { title: feature, dataIndex: feature, key: feature };
+  });
+
+  const renderedCounterfactualValues = Object.entries(
+    counterFactualExplanation.counterfactuals
+  ).map(([_, counterfactual]) => {
+    return counterfactual.values;
+  });
+  const renderedCounterfactualDif = Object.entries(
+    counterFactualExplanation.counterfactuals
+  ).map(([_, counterfactual]) => {
+    return counterfactual.dif;
+  });
 
   return (
     <>
-      <p>OriginalClass {originalClass}</p>
+      <p>OriginalClass {counterFactualExplanation.original.class}</p>
+      <Table
+        columns={renderedOriginalInstanceColumns}
+        dataSource={renderedOriginalInstanceValues}
+        pagination={false}
+      />
       <br />
       <p>Counter_factual: {desiredCounterFactualClass}</p>
       <br />
-      {counterFactualExplanation.length === 0 && (
-        <p>Counterfactual explanation not found</p>
-      )}
-      {counterFactualExplanation.map((el) => {
-        return <p>{el}</p>;
-      })}
+      <p>Raw counterfactual values</p>
+      <Table
+        columns={counterfactualColumns}
+        dataSource={renderedCounterfactualValues}
+        pagination={false}
+      />
+      <br />
+      <p>Diff counterfactual values</p>
+      <Table
+        columns={counterfactualColumns}
+        dataSource={renderedCounterfactualDif}
+        pagination={false}
+      />
     </>
   );
 }

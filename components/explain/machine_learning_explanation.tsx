@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { http } from "../common/http";
+import { getId } from "../common/storage";
+
 export default function MachineLearningExplanation(props: { index: number }) {
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
