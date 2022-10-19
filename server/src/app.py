@@ -140,20 +140,9 @@ def counterfactual_explanation_view():
     explanation_id = payload["id"]
     img_id = payload["img"]
     counter_factual_class = payload["counterFactualClass"]
-    # TODO: delete this hack
-    for label in list(set(list(get_labels()))):
-        counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id, img_id,
-                                                                                        label)
-        if counter_factual["error"] == "":
-            return jsonify(counter_factual)
-
-    return jsonify({"error": "No counterfactual explanation found"})
-
-    """
     counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id, img_id,
                                                                                     counter_factual_class)
     return jsonify(counter_factual)
-    """
 
 
 # TODO: this is used
