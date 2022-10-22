@@ -1,4 +1,4 @@
-from typing import List
+from typing import Optional
 
 from main.database.client import get_client
 from main.models.closest_label import ClosestLabel
@@ -9,11 +9,11 @@ class ClosestLabelsDb:
         self.database = client.get_database("closest_labels")
         self.collection = self.database["closest_labels"]
 
-    def get_closest_labels(self, label: str) -> List[str]:
-        value = self.collection.find_one({'label': label})
+    def get_by_image_id(self, image_id: int) -> Optional[ClosestLabel]:
+        value = self.collection.find_one({'image_index': image_id})
         if value is None:
-            return []
-        return ClosestLabel(value).closest
+            return None
+        return ClosestLabel(value)
 
     def update_closest_labels(self, obj: ClosestLabel):
         self.collection.update_one({'_id': obj.id}, {'$set': obj.to_db_value()}, upsert=True)

@@ -5,35 +5,37 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import preprocessing
 
-from main.database.client import get_client
+from main.database.closest_labels import ClosestLabelsDb
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.human_readable_explanation import HumanReadableExplanationService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks, get_segments
 
-MONGO_CLIENT = get_client()
+requirement_db = ExplanationRequirementDb()
+closest_label_db = ClosestLabelsDb()
 
 
 # TODO: improve it. It's not very good, because we don't distunish between images. we should find the essence of the img
 def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
-    requirement_db = ExplanationRequirementDb(MONGO_CLIENT)
-    requirement = requirement_db.get_explanation_requirement(explanation_id)
-
-    available_concepts = requirement.available_concepts
-    available_concepts.sort()
-
-    if len(available_concepts) == 0:
+    user_specified_concepts = requirement_db.get_explanation_requirement(explanation_id).user_specified_concepts
+    user_specified_concepts.sort()
+    if len(user_specified_concepts) == 0:
         raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
+    closest = closest_label_db.get_by_image_id(to_be_explained_image_index)
+    valid_labels = [closest.label] + closest.closest
+
 
     # ["office","beach","mountain"] office = 1, beach = 2
     label_encoder = encode_categorical_values(get_labels())
     # [0,0,0,0]  [1,1,0,0]  [0,0,0,0]
-    feature_encoder = encode_categorical_values(available_concepts)
+    feature_encoder = encode_categorical_values(user_specified_concepts)
 
     training_data, training_labels, testing_data, testing_labels = [], [], [], []
 
     # TDO: we should not loop over every single image
     for index, (label, pic, mask) in enumerate(zip(get_labels(), get_images(), get_masks())):
-        row = get_training_row(available_concepts, pic, mask)
+        if label not in valid_labels:
+            continue
+        row = get_training_row(user_specified_concepts, pic, mask)
         label_as_nr = label_encoder.transform([label])
 
         if index == to_be_explained_image_index:

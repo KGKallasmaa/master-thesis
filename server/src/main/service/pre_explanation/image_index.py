@@ -35,15 +35,18 @@ def find_closest_image_index(image: np.array, k_closest=5) -> int:
     sorted_label_presence_count_dict = sort_dictionary(label_presence_count_dict, by_value=True)
     most_popular_label = sorted_label_presence_count_dict[0][0]
 
-    closest_label = ClosestLabel({
-        "label": most_popular_label,
-        "closest": [label for label, count in sorted_label_presence_count_dict[1:]]
-    })
-    closest_label_repository.update_closest_labels(closest_label)
-
     for image_index, _ in image_index_distance_dict.items():
-        if image_index_label_dict[image_index] == most_popular_label:
-            return image_index
+        if image_index_label_dict[image_index] != most_popular_label:
+            continue
+        closest_label = ClosestLabel({
+            "image_index": image_index,
+            "label": most_popular_label,
+            "closest": [label for label, count in sorted_label_presence_count_dict[1:]]
+        })
+        closest_label_repository.update_closest_labels(closest_label)
+
+        return image_index
+
 
 
 def attach_image_to_explanation(image: str, explanation_id: str):
