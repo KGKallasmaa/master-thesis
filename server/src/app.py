@@ -18,6 +18,8 @@ from main.service.pre_explanation.kmeans import concept_representatives
 api = Flask(__name__)
 CORS(api)
 
+explanation_requirement_db = ExplanationRequirementDb()
+
 counterfactual_explanation_service = CounterFactualExplanationService()
 
 
@@ -109,12 +111,11 @@ def edit_concept_constraint_view():
     explanation_id = payload["id"]
     if viable_concepts is not None and explanation_id is not None:
         viable_concepts.sort()
-        db = ExplanationRequirementDb(client)
-        constraint = db.get_explanation_requirement(explanation_id)
+        constraint = explanation_requirement_db.get_explanation_requirement(explanation_id)
         constraint.user_specified_concepts = viable_concepts
         image_id = payload["img"]
         constraint.original_image_id = image_id
-        db.update_explanation_requirement(constraint)
+        explanation_requirement_db.update_explanation_requirement(constraint)
         return '', 204
     return '', 400
 

@@ -104,15 +104,9 @@ class CounterFactualExplanationService:
     def __transform_data_for_dice(X, y, concepts: List[str]):
         data = {}
         for x_i, y_i in zip(X, y):
-            # TODO: could this be a one liner
-            current_y_values = data.get("label", [])
-            current_y_values.append(y_i)
-            data["label"] = current_y_values
-
+            data["label"] = data.get("label", []) + [y_i]
             for i, c in enumerate(concepts):
-                current_c_values = data.get(c, [])
-                current_c_values.append(x_i[i])
-                data[c] = current_c_values
+                data[c] = data.get(c, []) + [x_i[i]]
         return pd.DataFrame(data=data)
 
     @staticmethod
