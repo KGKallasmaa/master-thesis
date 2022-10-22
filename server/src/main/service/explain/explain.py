@@ -23,7 +23,6 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
     closest = closest_label_db.get_by_image_id(to_be_explained_image_index)
     valid_labels = [closest.label] + closest.closest
 
-
     # ["office","beach","mountain"] office = 1, beach = 2
     label_encoder = encode_categorical_values(get_labels())
     # [0,0,0,0]  [1,1,0,0]  [0,0,0,0]
@@ -58,10 +57,12 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
 
 def get_training_row(user_selected_concepts: List[str], pic, mask) -> np.array:
     row = np.zeros(len(user_selected_concepts))
-    segss, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
+    pic_as_array = np.array(pic)
+    segss, seg_class = get_segments(pic_as_array, mask, threshold=0.005)
     for index, el in enumerate(user_selected_concepts):
         if el in seg_class:
-            row[index] = 1.0
+            segment = segss[seg_class.index(el)]
+            row[index] = get_segment_relative_size(segment, pic_as_array)
     return row
 
 
@@ -76,3 +77,12 @@ def encode_categorical_values(values: List[str]) -> preprocessing.LabelEncoder:
     le = preprocessing.LabelEncoder()
     le.fit(values)
     return le
+
+
+def get_segment_relative_size(segment: np.array, picture: np.array) -> float:
+    segment_area = float(segment.shape[0] * segment.shape[1])
+    picture_area = float(picture.shape[0] * picture.shape[1])
+    # TODO: we should be excluding the are in the image that's completely black
+    # we can do that by counting the number of black pixels in the segment and subtracting it from the segment area
+    black_segment_area_size = 0
+    return round((segment_area-black_segment_area_size) / picture_area,2)
