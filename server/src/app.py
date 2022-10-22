@@ -86,6 +86,8 @@ def label_concepts_view():
         return jsonify({"results": []})
     label = get_labels()[index]
     center_concepts = CENTER_MOST_CONCEPTS.get(label, [])
+    if len(center_concepts) == 0:
+        return '', 400
     return jsonify({"results": center_concepts})
 
 
@@ -111,7 +113,7 @@ def edit_concept_constraint_view():
         viable_concepts.sort()
         db = ExplanationRequirementDb(client)
         constraint = db.get_explanation_requirement(explanation_id)
-        constraint.available_concepts = viable_concepts
+        constraint.user_specified_concepts = viable_concepts
         image_id = payload["img"]
         constraint.original_image_id = image_id
         db.update_explanation_requirement(constraint)
