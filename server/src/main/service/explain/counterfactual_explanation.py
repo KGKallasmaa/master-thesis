@@ -30,15 +30,13 @@ class CounterFactualExplanationService:
         if len(available_concepts) == 0:
             raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
 
-        label_encoder, X, y, decision_tree = self.__regular_explain_tree(available_concepts,counter_factual_class)
+        label_encoder, X, y, black_box_model = self.__regular_explain_tree(available_concepts,counter_factual_class)
 
         # 1. Initialize dice
-        dice_explanation = dice_ml.Model(model=decision_tree, backend="sklearn")
+        dice_explanation = dice_ml.Model(model=black_box_model, backend="sklearn")
         dice_transformed_data = self.__transform_data_for_dice(
             X, y,
-            explanation_requirement.available_concepts,
-            label_encoder
-        )
+            explanation_requirement.available_concepts)
 
         dice_data = dice_ml.Data(dataframe=dice_transformed_data,
                                  continuous_features=available_concepts,
@@ -52,7 +50,7 @@ class CounterFactualExplanationService:
         to_be_explained_instance_as_dict = copy.deepcopy(to_be_explained_instance)
         to_be_explained_instance_as_dict["label"] = label_encoder.inverse_transform([to_be_explained_instance_as_dict["label"]])[0]
 
-        original_class = to_be_explained_instance["label"]
+        counterfctual_class_as_nr = to_be_explained_instance["label"]
         del to_be_explained_instance["label"]
         to_be_explained_instance = pd.DataFrame(to_be_explained_instance, index=[0])
 
@@ -62,11 +60,11 @@ class CounterFactualExplanationService:
         for minimum_acceptance_probability in self.minimum_counterfactual_probability:
             try:
                 counterfactual = exp.generate_counterfactuals(query_instances=to_be_explained_instance,
-                                                              total_CFs=1,
+                                                              total_CFs=2,
                                                               stopping_threshold=minimum_acceptance_probability,
                                                               permitted_range=permitted_range,
                                                               verbose=True,
-                                                              desired_class=22).to_json()
+                                                              desired_class=counterfctual_class_as_nr).to_json()
                 counterfactual = json.loads(counterfactual)
                 test_instance_as_array = counterfactual["test_data"][0][0]
 
@@ -83,7 +81,7 @@ class CounterFactualExplanationService:
                 return {
                     "error": "",
                     "original": {
-                        "class": original_class,
+                        "class": counterfctual_class_as_nr,
                         "values": to_be_explained_instance_as_dict
                     },
                     "counterFactualClass": counter_factual_class,
@@ -95,7 +93,7 @@ class CounterFactualExplanationService:
                 error_output = {
                     "error": "%s" % e,
                     "original": {
-                        "class": original_class,
+                        "class": counterfctual_class_as_nr,
                         "values": to_be_explained_instance_as_dict
                     },
                     "minimumAcceptanceProbability": minimum_acceptance_probability,
@@ -105,11 +103,10 @@ class CounterFactualExplanationService:
         return error_output
 
     @staticmethod
-    def __transform_data_for_dice(X, y, concepts: List[str],label_encoder):
+    def __transform_data_for_dice(X, y, concepts: List[str]):
         data = {}
         for x_i, y_i in zip(X, y):
             current_y_values = data.get("label", [])
-            #current_y_values.append(label_encoder.inverse_transform([y_i])[0])
             current_y_values.append(y_i)
             data["label"] = current_y_values
 
