@@ -5,7 +5,6 @@ from flask import request
 from flask_cors import CORS
 import base64
 
-from main.database.client import get_client
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.explain import explain_using_concepts
@@ -19,8 +18,7 @@ from main.service.pre_explanation.kmeans import concept_representatives
 api = Flask(__name__)
 CORS(api)
 
-client = get_client()
-counterfactual_explanation_service = CounterFactualExplanationService(client)
+counterfactual_explanation_service = CounterFactualExplanationService()
 
 
 # TODO: this is used
