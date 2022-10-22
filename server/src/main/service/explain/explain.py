@@ -82,4 +82,4 @@ def encode_categorical_values(values: List[str]) -> preprocessing.LabelEncoder:
 def get_segment_relative_size(segment: np.array, picture: np.array) -> float:
     segment_area = float(segment.shape[0] * segment.shape[1])
     picture_area = float(picture.shape[0] * picture.shape[1])
-    return round(segment_area / picture_area,2)
+    return round(segment_area / picture_area, 2)
