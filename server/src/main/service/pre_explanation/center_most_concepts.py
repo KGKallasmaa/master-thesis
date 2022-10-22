@@ -79,12 +79,12 @@ def kmean_segments(images, masks, k=10):
 def most_popular_concepts(images, masks, k) -> List[str]:
     segment_count = {}
     for pic, mask in zip(images, masks):
-        # TODO: we're feeding garbage into this
         _, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
         for s in seg_class:
             segment_count[s] = segment_count.get(s, 0) + 1
     segment_count = sort_dictionary(segment_count)
-    return list(segment_count.keys())[:k]
+    segments = [s for s, _ in segment_count[:k]]
+    return segments
 
 
 CENTER_MOST_CONCEPTS = center_most_concepts()

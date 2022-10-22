@@ -31,6 +31,7 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
 
     training_data, training_labels, testing_data, testing_labels = [], [], [], []
 
+    # TDO: we should not loop over every single image
     for index, (label, pic, mask) in enumerate(zip(get_labels(), get_images(), get_masks())):
         row = get_training_row(available_concepts, pic, mask)
         label_as_nr = label_encoder.transform([label])
@@ -53,10 +54,10 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
                                           y_true=testing_labels)
 
 
-def get_training_row(available_concepts: List[str], pic, mask) -> np.array:
-    row = np.zeros(len(available_concepts))
+def get_training_row(user_selected_concepts: List[str], pic, mask) -> np.array:
+    row = np.zeros(len(user_selected_concepts))
     segss, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
-    for index, el in enumerate(available_concepts):
+    for index, el in enumerate(user_selected_concepts):
         if el in seg_class:
             row[index] = 1.0
     return row

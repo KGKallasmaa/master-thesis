@@ -1,25 +1,49 @@
 import numpy as np
+
+from main.database.closest_labels import ClosestLabelsDb
 from main.database.explanation_requirement import ExplanationRequirementDb
-from main.service.pre_explanation.data_access import get_hog, get_images
+from main.models.closest_label import ClosestLabel
+from main.service.pre_explanation.data_access import get_hog, get_images, get_labels
 from main.service.pre_explanation.kmeans import euclidean_distance
+from main.service.utils.dictionary import sort_dictionary
+
+closest_label_repository = ClosestLabelsDb()
 
 
-def find_closest_image_index(image: np.array) -> int:
+def find_closest_image_index(image: np.array, k_closest=5) -> int:
     """Finding the closest index to the uploaded user_uploaded_image"""
+    # k = how many images we're using for closeness
     target_image_hog = get_hog(image)
-    index = -1
-    best_distance = float('inf')
-    # TODO: do we really need to use hogs?
-    for i, img in enumerate(get_images()):
-        distance = euclidean_distance(target_image_hog, get_hog(img), allow_not_equal=True)
-        if distance == 0:
-            return i
-        if distance < best_distance:
-            index = i
-            best_distance = distance
-    if index == -1:
-        raise ValueError("Failed to find closest image")
-    return index
+
+    image_index_distance_dict = {}
+    image_index_label_dict = {}
+
+    i = 0
+    for img, label in zip(get_images(), get_labels()):
+        img_hog = get_hog(img)
+        image_index_distance_dict[i] = euclidean_distance(target_image_hog, img_hog, allow_not_equal=True)
+        image_index_label_dict[i] = label
+        i += 1
+
+    sorted_image_index_distance_dict = sort_dictionary(image_index_distance_dict, reverse=False, by_value=True)
+    label_presence_count_dict = {}
+
+    for image_index, _ in sorted_image_index_distance_dict[:k_closest]:
+        label = image_index_label_dict[image_index]
+        label_presence_count_dict[label] = label_presence_count_dict.get(label, 0) + 1
+
+    sorted_label_presence_count_dict = sort_dictionary(label_presence_count_dict, by_value=True)
+    most_popular_label = sorted_label_presence_count_dict[0][0]
+
+    closest_label = ClosestLabel({
+        "label": most_popular_label,
+        "closest": [label for label, count in sorted_label_presence_count_dict[1:]]
+    })
+    closest_label_repository.update_closest_labels(closest_label)
+
+    for image_index, _ in image_index_distance_dict.items():
+        if image_index_label_dict[image_index] == most_popular_label:
+            return image_index
 
 
 def attach_image_to_explanation(image: str, explanation_id: str):

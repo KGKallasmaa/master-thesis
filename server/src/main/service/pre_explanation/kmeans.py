@@ -89,9 +89,11 @@ def concept_representatives(my_concept: str, k=5) -> List[any]:
 
 
 def euclidean_distance(a: np.array, b: np.array, allow_not_equal=False) -> float:
-    if allow_not_equal is False:
-        assert a.shape == b.shape
+    if a.shape == b.shape:
         return np.linalg.norm(a - b)
+    if allow_not_equal is False and a.shape != b.shape:
+        raise ValueError("Images must have the same shape")
+
     a_number_of_rows, a_number_of_col = a.shape
     b_number_of_rows, b_number_of_col = b.shape
 

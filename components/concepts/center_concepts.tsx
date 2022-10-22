@@ -11,9 +11,7 @@ export default function CenterConcepts(props: { index: number }) {
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
 
   useEffect(() => {
-    const payload = {
-      index: index,
-    };
+    const payload = {index};
     http("/center-most-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
