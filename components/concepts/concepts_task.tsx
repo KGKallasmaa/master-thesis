@@ -1,20 +1,19 @@
 import { ExplainableHeader } from "../common/header";
-import { CurrentStep, ExplainableSteps } from "../common/steps";
 import { Col, Row } from "antd";
 import { CurrentImage, OriginalImage } from "./current_image";
 import CenterConcepts from "./center_concepts";
-import TriggerExplain from "../explain/trigger_explain";
 
-export default function ConceptsTask(index: number) {
+export default function ConceptsTask(
+  index: number,
+  explanation_type: string,
+  onComplete: () => void
+) {
   const title = "Concepts";
-  const description =
-    "Please select concepts that will be used to describe this label";
+  const description = "Please select concepts that will be used";
   return (
     <>
       <br />
       <ExplainableHeader title={title} description={description} />
-      <br />
-      <ExplainableSteps step={CurrentStep.SelectConcepts} />
       <br />
       <Row>
         <Col span={8} />
@@ -23,9 +22,12 @@ export default function ConceptsTask(index: number) {
           <br />
           <OriginalImage />
           <br />
-          <TriggerExplain index={index} />
           <br />
-          <CenterConcepts index={index} />
+          <CenterConcepts
+            index={index}
+            explanation_type={explanation_type}
+            onComplete={onComplete}
+          />
         </Col>
         <Col span={8} />
       </Row>

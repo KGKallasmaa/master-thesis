@@ -6,7 +6,8 @@ import pandas as pd
 
 from main.database.closest_labels import ClosestLabelsDb
 from main.database.explanation_requirement import ExplanationRequirementDb
-from main.service.explain.explain import get_training_row, train_decision_tree, encode_categorical_values
+from main.service.explain.decision_tree_explanation import get_training_row, train_decision_tree, \
+    encode_categorical_values
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 import json
 
@@ -27,21 +28,28 @@ class CounterFactualExplanationService:
                                    to_be_explained_image_index: int,
                                    counter_factual_class: str):
 
-        explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
-        user_specified_concepts = explanation_requirement.user_specified_concepts
-        if len(user_specified_concepts) == 0:
+        user_specified_concepts = explanation_requirement_db.get_explanation_requirement(
+            explanation_id).user_specified_concepts
+        decision_tree_concepts = user_specified_concepts.get("decision_tree", [])
+        counter_factual_concepts = user_specified_concepts.get("counter_factual", [])
+
+        if len(counter_factual_concepts) == 0:
             raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
 
-        X, y, black_box_model = self.__find_blackbox_model(user_specified_concepts,
+        available_concepts = decision_tree_concepts + counter_factual_concepts
+        available_concepts = list(set(available_concepts))
+        available_concepts.sort()
+
+        X, y, black_box_model = self.__find_blackbox_model(available_concepts,
                                                            counter_factual_class,
                                                            to_be_explained_image_index)
 
         # 1. Initialize dice
         dice_explanation = dice_ml.Model(model=black_box_model, backend="sklearn")
-        dice_transformed_data = self.__transform_data_for_dice(X, y, user_specified_concepts)
+        dice_transformed_data = self.__transform_data_for_dice(X, y, available_concepts)
 
         dice_data = dice_ml.Data(dataframe=dice_transformed_data,
-                                 continuous_features=user_specified_concepts,
+                                 continuous_features=available_concepts,
                                  outcome_name="label")
 
         # 2. Initialize the explainer
@@ -54,7 +62,7 @@ class CounterFactualExplanationService:
 
         to_be_explained_instance = pd.DataFrame(to_be_explained_instance, index=[0])
 
-        permitted_range = {concept: [0.0, 1.0] for concept in explanation_requirement.user_specified_concepts}
+        permitted_range = {concept: [0.0, 1.0] for concept in available_concepts}
 
         error_output = {}
         for minimum_acceptance_probability in minimum_counterfactual_probability:
@@ -71,9 +79,9 @@ class CounterFactualExplanationService:
                 counterfactual_view = []
                 for cf_array in counterfactual["cfs_list"][0]:
                     array_diff = [test_instance_as_array[i] - el for i, el in enumerate(cf_array)]
-                    dict_diff = {concept: array_diff[i] for i, concept in enumerate(user_specified_concepts)}
+                    dict_diff = {concept: array_diff[i] for i, concept in enumerate(available_concepts)}
 
-                    values = {concept: cf_array[i] for i, concept in enumerate(user_specified_concepts)}
+                    values = {concept: cf_array[i] for i, concept in enumerate(available_concepts)}
                     instance = {"values": values, "dif": dict_diff}
                     counterfactual_view.append(instance)
 

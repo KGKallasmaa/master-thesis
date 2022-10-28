@@ -17,8 +17,9 @@ closest_label_db = ClosestLabelsDb()
 # TODO: improve it. It's not very good, because we don't distunish between images. we should find the essence of the img
 def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
     user_specified_concepts = requirement_db.get_explanation_requirement(explanation_id).user_specified_concepts
-    user_specified_concepts.sort()
-    if len(user_specified_concepts) == 0:
+    decision_tree_concepts = user_specified_concepts.get("decision_tree", [])
+
+    if len(decision_tree_concepts) == 0:
         raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
     closest = closest_label_db.get_by_image_id(to_be_explained_image_index)
     valid_labels = [closest.label] + closest.closest
@@ -26,7 +27,7 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
     # ["office","beach","mountain"] office = 1, beach = 2
     label_encoder = encode_categorical_values(get_labels())
     # [0,0,0,0]  [1,1,0,0]  [0,0,0,0]
-    feature_encoder = encode_categorical_values(user_specified_concepts)
+    feature_encoder = encode_categorical_values(decision_tree_concepts)
 
     training_data, training_labels, testing_data, testing_labels = [], [], [], []
 
@@ -34,7 +35,7 @@ def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int
     for index, (label, pic, mask) in enumerate(zip(get_labels(), get_images(), get_masks())):
         if label not in valid_labels:
             continue
-        row = get_training_row(user_specified_concepts, pic, mask)
+        row = get_training_row(decision_tree_concepts, pic, mask)
         label_as_nr = label_encoder.transform([label])
 
         if index == to_be_explained_image_index:

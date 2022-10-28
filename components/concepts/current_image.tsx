@@ -11,9 +11,7 @@ export function CurrentImage(props: { index: number }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const payload = {
-      index: index,
-    };
+    const payload = { index };
     http("/image-by-index", payload)
       .then((el) => el.json())
       .then((data) => {
@@ -31,15 +29,13 @@ export function CurrentImage(props: { index: number }) {
   }
 
   return (
-    <>
-      <ConceptCard
-        title={"Closest image"}
-        label={label}
-        imageBase64={image}
-        imageWidth={200}
-        onSelected={null}
-      />
-    </>
+    <ConceptCard
+      title={"Closest image"}
+      label={label}
+      imageBase64={image}
+      imageWidth={200}
+      onSelected={null}
+    />
   );
 }
 
@@ -67,13 +63,11 @@ export function OriginalImage() {
   }
 
   return (
-    <>
-      <ConceptCard
-        title={"Original image"}
-        imageBase64={image}
-        imageWidth={200}
-        onSelected={null}
-      />
-    </>
+    <ConceptCard
+      title={"Original image"}
+      imageBase64={image}
+      imageWidth={200}
+      onSelected={null}
+    />
   );
 }

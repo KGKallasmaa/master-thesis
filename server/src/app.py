@@ -7,7 +7,7 @@ import base64
 
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
-from main.service.explain.explain import explain_using_concepts
+from main.service.explain.decision_tree_explanation import explain_using_concepts
 from main.service.pre_explanation.center_most_concepts import CENTER_MOST_CONCEPTS
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
@@ -81,10 +81,14 @@ def image_segment_view():
 @api.route("/center-most-concepts", methods=["POST"])
 def label_concepts_view():
     payload = request.get_json()
+
+    label = payload.get("label", "")
     index = payload["index"]
-    if index is None:
-        return jsonify({"results": []})
-    label = get_labels()[index]
+    if label == "":
+        if index is None or index == -1:
+            return jsonify({"results": []})
+        label = get_labels()[index]
+
     center_concepts = CENTER_MOST_CONCEPTS.get(label, [])
     if len(center_concepts) == 0:
         return '', 400
@@ -105,24 +109,28 @@ def concept_representative_view():
 # TODO: this is used
 @api.route("/concept-constraint", methods=["POST"])
 def edit_concept_constraint_view():
-    # TODO: we should do some validation before sumitting data
+    # TODO: we should do some validation before submitting data
     payload = request.get_json()
+    explanation_type = payload["explanation_type"]
     viable_concepts = payload["concepts"]
     explanation_id = payload["id"]
-    if viable_concepts is not None and explanation_id is not None:
-        viable_concepts.sort()
-        constraint = explanation_requirement_db.get_explanation_requirement(explanation_id)
-        constraint.user_specified_concepts = viable_concepts
-        image_id = payload["img"]
-        constraint.original_image_id = image_id
-        explanation_requirement_db.update_explanation_requirement(constraint)
-        return '', 204
-    return '', 400
+    if explanation_type is None or explanation_id is None or viable_concepts is None:
+        return '', 400
+    viable_concepts.sort()
+
+    constraint = explanation_requirement_db.get_explanation_requirement(explanation_id)
+    constraint.user_specified_concepts[explanation_type] = viable_concepts
+    image_id = payload["img"]
+    constraint.original_image_id = image_id
+
+    explanation_requirement_db.update_explanation_requirement(constraint)
+
+    return '', 204
 
 
 # TODO: this is used
-@api.route("/explain-using-concepts", methods=["POST"])
-def explain_using_concepts_view():
+@api.route("/decision-tree-explanation", methods=["POST"])
+def decision_tree_explanation_view():
     payload = request.get_json()
     img_id = payload["img"]
     explanation_id = payload["id"]

@@ -10,6 +10,7 @@ from main.service.utils.dictionary import sort_dictionary
 closest_label_repository = ClosestLabelsDb()
 
 
+
 def find_closest_image_index(image: np.array, k_closest=5) -> int:
     """Finding the closest index to the uploaded user_uploaded_image"""
     # k = how many images we're using for closeness
