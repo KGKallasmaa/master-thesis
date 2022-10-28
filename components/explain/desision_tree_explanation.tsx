@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { getId } from "../common/storage";
+import CenterConcepts from "../concepts/center_concepts";
 
-export default function MachineLearningExplanation(props: { index: number }) {
+export default function DesisionTreeExplanation(props: { index: number }) {
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
-
+  const [conceptsHaveBeenSelected, setConceptsHaveBeenSelected] =
+    useState(false);
   const [explanations, setExplanations] = useState<string[]>([]);
   const [plainTreeExplanation, setPlainTreeExplanation] = useState<string[]>(
     []
@@ -15,6 +17,9 @@ export default function MachineLearningExplanation(props: { index: number }) {
 
   useEffect(() => {
     const { index } = props;
+    if (!conceptsHaveBeenSelected) {
+      return;
+    }
     if (!index) {
       setErrorMessage("Image index not found");
       return;
@@ -23,7 +28,7 @@ export default function MachineLearningExplanation(props: { index: number }) {
       img: index,
       id: getId(),
     };
-    http("/explain-using-concepts", payload)
+    http("/decision-tree-explanation", payload)
       .then((el) => el.json())
       .then((data) => {
         setTrueLabel(data.trueLabel);
@@ -37,7 +42,17 @@ export default function MachineLearningExplanation(props: { index: number }) {
       .finally(() => {
         setLoading(false);
       });
-  }, [props.index]);
+  }, [props.index, conceptsHaveBeenSelected]);
+
+  if (conceptsHaveBeenSelected === false) {
+    return (
+      <CenterConcepts
+        index={props.index}
+        explanation_type={"decision_tree"}
+        onComplete={() => setConceptsHaveBeenSelected(true)}
+      />
+    );
+  }
 
   if (isLoading) {
     return <p>generating an explanation ...</p>;

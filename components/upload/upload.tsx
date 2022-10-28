@@ -1,6 +1,5 @@
 import { Col, Row } from "antd";
 import { UploadTask } from "./upload_task";
-import { CurrentStep, ExplainableSteps } from "../common/steps";
 import { ExplainableHeader } from "../common/header";
 
 export default function Upload() {
@@ -8,15 +7,13 @@ export default function Upload() {
   const description = "Upload the image you would like us to explain";
 
   function handleSuccessfulUpload(img_index: number) {
-    window.location.replace("/concepts/" + img_index);
+    window.location.replace(`/explain/${img_index}/desision_tree`);
   }
 
   return (
     <>
       <br />
       <ExplainableHeader title={title} description={description} />
-      <br />
-      <ExplainableSteps step={CurrentStep.Upload} />
       <br />
       <Row>
         <Col span={8} />

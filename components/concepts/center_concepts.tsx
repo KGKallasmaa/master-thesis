@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
-import { Col, Row, Skeleton } from "antd";
+import { Button, Col, Row, Skeleton } from "antd";
 import { ConceptCard } from "../common/card";
 import { getId } from "../common/storage";
 
-export default function CenterConcepts(props: { index: number }) {
-  const { index } = props;
+export default function CenterConcepts(props: {
+  index: number;
+  label?: string;
+  explanation_type: string;
+  onComplete: () => void;
+}) {
+  const { index, label } = props;
   const [images, setImage] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
+  const [settingIsCompleted, setSettingIsCompleted] = useState(false);
 
   useEffect(() => {
-    const payload = { index };
+    const payload = label ? { label, index } : { index };
+
     http("/center-most-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
@@ -24,16 +31,23 @@ export default function CenterConcepts(props: { index: number }) {
   }, [index]);
 
   useEffect(() => {
+    if (selectedConcepts.length == 0 || !settingIsCompleted) {
+      return;
+    }
     const payload = {
       id: getId(),
       img: index,
+      explanation_type: props.explanation_type,
       concepts: selectedConcepts,
     };
     http("/concept-constraint", payload)
       .then((el) => el.json())
       .then(() => {})
-      .catch(() => {});
-  }, [selectedConcepts]);
+      .catch(() => {})
+      .finally(() => {
+        props.onComplete();
+      });
+  }, [selectedConcepts, settingIsCompleted]);
 
   if (isLoading) {
     return <Skeleton active />;
@@ -52,12 +66,25 @@ export default function CenterConcepts(props: { index: number }) {
 
   return (
     <>
+      {selectedConcepts.length > 0 && (
+        <>
+          <Button
+            type="primary"
+            onClick={() => setSettingIsCompleted(!settingIsCompleted)}
+          >
+            {settingIsCompleted ? "Select more" : "Finish selecting"}
+          </Button>
+          <br />
+          <br />
+        </>
+      )}
       <Row>
         <p>Selected concepts:</p>
         <br />
+        <br />
         {selectedConcepts.map((el) => (
           <div>
-            <p>{el}</p>
+            <p>{el},</p>
             <br />
           </div>
         ))}
@@ -71,6 +98,7 @@ export default function CenterConcepts(props: { index: number }) {
               imageBase64={el.src}
               imageWidth={200}
               onSelected={handleConceptWillBeUsed}
+              title={""}
             />
           </Col>
         ))}

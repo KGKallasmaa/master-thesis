@@ -3,6 +3,7 @@ import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { CounterfactualExplanation } from "./models/counterfactual_model";
+import CenterConcepts from "../concepts/center_concepts";
 const { Option } = Select;
 
 export default function CounterFactualExplanation({
@@ -10,6 +11,8 @@ export default function CounterFactualExplanation({
 }: {
   index: number;
 }) {
+  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =
+    useState<string>("select");
   const [counterFactualClass, setCounterFactualClass] = useState<string>("");
   const [counterFactualLabels, setCouterFactualLabels] = useState<string[]>([]);
 
@@ -29,19 +32,34 @@ export default function CounterFactualExplanation({
     return <>Loading ...</>;
   }
 
+  const handleConceptSelected = (lable: string) => {
+    setCounterFactualClass(lable);
+    setCounterFactualExplanationStep("constraints");
+  };
+
   return (
     <>
       <Select
         defaultValue={counterFactualLabels[0]}
         style={{ width: 120 }}
-        onChange={(value) => setCounterFactualClass(value)}
+        onChange={(value) => handleConceptSelected(value)}
       >
         {counterFactualLabels.map((label) => {
           return <Option value={label}>{label}</Option>;
         })}
       </Select>
+      <br />
+      <br />
+      {counterFactualExplanationStep === "constraints" && (
+        <CenterConcepts
+          index={index}
+          label={counterFactualClass}
+          explanation_type={"counter_factual"}
+          onComplete={() => setCounterFactualExplanationStep("explain")}
+        />
+      )}
 
-      {counterFactualClass && (
+      {counterFactualExplanationStep === "explain" && (
         <>
           <br />
           <br />
@@ -54,6 +72,7 @@ export default function CounterFactualExplanation({
     </>
   );
 }
+
 function Counterfactual({
   imageIndex,
   desiredCounterFactualClass,

@@ -1,28 +1,30 @@
 import { ExplainableHeader } from "../common/header";
-import { CurrentStep, ExplainableSteps } from "../common/steps";
 import { Col, Row } from "antd";
-import { useState } from "react";
 import { CurrentImage } from "../concepts/current_image";
 import CounterFactualExplanation from "./counterfactual_explanation";
-import MachineLearningExplanation from "./machine_learning_explanation";
+import DesisionTreeExplanation from "./desision_tree_explanation";
 import { Button } from "antd";
 
-export default function ExplainTask(index: number) {
+const explainTypeMessageMap = {
+  desision_tree: "Explaining this image using a decision tree",
+  counter_factual: "Explain this image using counter factuals",
+};
+const explainTypeButtonTextMap = {
+  desision_tree: "Counterfactual Explanation",
+  counter_factual: "Decision Tree Explanation",
+};
+
+export default function ExplainTask(index: number, explanation_type: string) {
   const title = "Explain";
-  const description = "Explaining this image using a decision tree";
-  const [currentStep, setCurrentStep] = useState<CurrentStep>(
-    CurrentStep.ExplainModels
-  );
-  const [buttonText, setButtonText] = useState<string>(
-    "View Counterfactual Explanation"
-  );
+  const description = explainTypeMessageMap[explanation_type];
+  const changeExplanationButtonText =
+    explainTypeButtonTextMap[explanation_type];
+
   const handleStepChange = () => {
-    if (currentStep === CurrentStep.ExplainModels) {
-      setCurrentStep(CurrentStep.CounterFactualExplanation);
-      setButtonText("View Decision Tree Explanation");
+    if (explanation_type === "desision_tree") {
+      window.location.replace(`/explain/${index}/counter_factual`);
     } else {
-      setCurrentStep(CurrentStep.ExplainModels);
-      setButtonText("View Counterfactual Explanation");
+      window.location.replace(`/explain/${index}/desision_tree`);
     }
   };
   return (
@@ -30,23 +32,21 @@ export default function ExplainTask(index: number) {
       <br />
       <ExplainableHeader title={title} description={description} />
       <br />
-      <ExplainableSteps step={currentStep} />
-      <br />
       <Row>
         <Col span={8} />
         <Col span={8}>
           <CurrentImage index={index} />
           <br />
-          {currentStep === CurrentStep.ExplainModels && (
-            <MachineLearningExplanation index={index} />
+          {explanation_type === "desision_tree" && (
+            <DesisionTreeExplanation index={index} />
           )}
-          {currentStep === CurrentStep.CounterFactualExplanation && (
+          {explanation_type === "counter_factual" && (
             <CounterFactualExplanation index={index} />
           )}
           <br />
           <br />
           <Button onClick={handleStepChange} type="primary">
-            {buttonText}
+            {changeExplanationButtonText}
           </Button>
         </Col>
         <Col span={8} />
