@@ -1,10 +1,9 @@
-from typing import Dict, List
+from typing import Dict
 
 import numpy as np
 from sklearn.cluster import KMeans
 
-from main.service.pre_explanation.common import serve_pil_image, resize_img, array_to_image
-from main.service.pre_explanation.data_access import get_masks, get_images, get_segments
+from main.service.pre_explanation.common import serve_pil_image, resize_img
 
 
 def cluster_images(image_map, k=10) -> Dict[int, str]:
@@ -41,51 +40,6 @@ def cluster_images(image_map, k=10) -> Dict[int, str]:
         bestimg_cluster[cluster_index] = serve_pil_image(resize_lookup[str(best_img)])
 
     return bestimg_cluster
-
-
-def concept_representatives(my_concept: str, k=5) -> List[any]:
-    """
-    Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
-    Our task is to find k=5 best representatives from the given concept. E.g. we find the k top beds from our dataset
-    """
-
-    training_data = []
-    segment_lookup = {}
-    my_labels = []
-
-    for pic, mask in zip(get_images(), get_masks()):
-        segss, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
-        segss = [s for index, s in enumerate(segss) if seg_class[index] == my_concept]
-
-        for s in segss:
-            to_img = array_to_image(s)
-            s = np.array(resize_img(to_img)).flatten()
-            segment_lookup[str(s)] = np.array(resize_img(to_img))
-            training_data.append(np.array(s))
-            my_labels.append(my_concept)
-
-    kmeans = KMeans(n_clusters=min(len(training_data), k), random_state=0).fit(training_data)
-
-    label_index_segment_distance_map = {}
-    for label_index, segment in zip(kmeans.labels_, training_data):
-        distance = euclidean_distance(segment, kmeans.cluster_centers_[label_index])
-        key = f"{label_index}___{segment}"
-        label_index_segment_distance_map[key] = distance
-
-    label_index_segment_distance_map = dict(sorted(label_index_segment_distance_map.items(), key=lambda item: item[1]))
-
-    i = 0
-    results = []
-    for key, distance in label_index_segment_distance_map.items():
-        if i > k:
-            continue
-        i += 1
-        label_index, segment = key.split("___")
-        lookup = segment_lookup[str(segment)]
-        segment_as_arr = array_to_image(lookup)
-        results.append({"conceptName": my_concept, "src": serve_pil_image(segment_as_arr)})
-
-    return results
 
 
 def euclidean_distance(a: np.array, b: np.array, allow_not_equal=False) -> float:
