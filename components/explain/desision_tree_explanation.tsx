@@ -55,7 +55,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   }
 
   if (isLoading) {
-    return <p>generating an explanation ...</p>;
+    return <>Generating an explanation ...</>;
   }
   if (errorMessage && !explanations) {
     return (
@@ -75,7 +75,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       <h3>Path explanations</h3>
       <br />
       {explanations.map((el) => (
-        <div>
+        <div key={el}>
           <p>{el}</p>
           <br />
         </div>
@@ -83,7 +83,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       <h3>Tree representation</h3>
       <br />
       {plainTreeExplanation.map((el) => (
-        <div>
+        <div key={el}>
           <p>
             {extraSpace(el)}
             {el}

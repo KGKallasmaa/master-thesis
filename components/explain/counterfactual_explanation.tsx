@@ -29,7 +29,7 @@ export default function CounterFactualExplanation({
   }, []);
 
   if (counterFactualLabels.length === 0) {
-    return <>Loading ...</>;
+    return <>Generating an explanation ...</>;
   }
 
   const handleConceptSelected = (lable: string) => {
@@ -39,13 +39,20 @@ export default function CounterFactualExplanation({
 
   return (
     <>
+      {counterFactualExplanationStep === "select" && (
+        <p>Select counterfactual target class</p>
+      )}
       <Select
         defaultValue={counterFactualLabels[0]}
-        style={{ width: 120 }}
+        style={{ width: 200 }}
         onChange={(value) => handleConceptSelected(value)}
       >
         {counterFactualLabels.map((label) => {
-          return <Option value={label}>{label}</Option>;
+          return (
+            <Option key={label} value={label}>
+              {label}
+            </Option>
+          );
         })}
       </Select>
       <br />
