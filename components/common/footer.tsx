@@ -14,7 +14,7 @@ export default function Footer() {
       <h3>Explanation Id {getId()}</h3>
       {index ? <h3>ImageId {index}</h3> : ""}
       <br />
-      <Button onClick={handleReset} type="danger">
+      <Button onClick={handleReset} type="primary">
         Reset
       </Button>
     </>

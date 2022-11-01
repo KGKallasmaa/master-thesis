@@ -1,6 +1,6 @@
 import { ExplainableHeader } from "../common/header";
 import { Col, Row } from "antd";
-import { CurrentImage } from "../concepts/current_image";
+import { CurrentImage, OriginalImage } from "../concepts/current_image";
 import CounterFactualExplanation from "./counterfactual_explanation";
 import DesisionTreeExplanation from "./desision_tree_explanation";
 import { Button } from "antd";
@@ -36,6 +36,8 @@ export default function ExplainTask(index: number, explanation_type: string) {
         <Col span={8} />
         <Col span={8}>
           <CurrentImage index={index} />
+          <br />
+          <OriginalImage />
           <br />
           {explanation_type === "desision_tree" && (
             <DesisionTreeExplanation index={index} />

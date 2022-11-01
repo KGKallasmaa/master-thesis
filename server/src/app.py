@@ -47,7 +47,7 @@ def upload_images_view():
 @api.route("/image-by-index", methods=["POST"])
 def image_by_index_view():
     payload = request.get_json()
-    index = payload.get("index",None)
+    index = payload.get("index", None)
     if index is None:
         return jsonify({"url": "", "label": ""})
     img = get_images()[index]

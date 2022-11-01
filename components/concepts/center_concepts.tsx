@@ -83,7 +83,7 @@ export default function CenterConcepts(props: {
         <br />
         <br />
         {selectedConcepts.map((el) => (
-          <div>
+          <div key={el}>
             <p>{el},</p>
             <br />
           </div>
