@@ -11,9 +11,8 @@ from main.service.explain.decision_tree_explanation import explain_using_concept
 from main.service.pre_explanation.center_most_concepts import CENTER_MOST_CONCEPTS
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
-from main.service.pre_explanation.image_index import attach_image_to_explanation, find_closest_image_index
-from main.service.pre_explanation.index_segments import image_segments
-from main.service.pre_explanation.kmeans import concept_representatives
+from main.service.pre_explanation.closest_image import find_closest_image_index
+from main.service.pre_explanation.image_segments import image_segments
 
 api = Flask(__name__)
 CORS(api)
@@ -24,18 +23,12 @@ counterfactual_explanation_service = CounterFactualExplanationService()
 
 
 # TODO: this is used
-@api.route("/health", methods=["GET"])
-def health_view():
-    return jsonify({"hello": "world"})
-
-
-# TODO: this is used
 @api.route("/upload-image", methods=["POST"])
 def upload_images_view():
     image = request.files['file'].read()
     explanation_id = request.args.get('id')
     base_64_image = base64.b64encode(image).decode("utf-8")
-    attach_image_to_explanation(base_64_image, explanation_id)
+    explanation_requirement_db.add_original_image_to_explanation(base_64_image,explanation_id)
 
     image_as_ar = np.array(base64_to_pil(base_64_image))
     index = find_closest_image_index(image_as_ar)
@@ -93,17 +86,6 @@ def label_concepts_view():
     if len(center_concepts) == 0:
         return '', 400
     return jsonify({"results": center_concepts})
-
-
-# TODO: this is used
-@api.route("/concept-representatives", methods=["POST"])
-def concept_representative_view():
-    payload = request.get_json()
-    concept_name = payload["name"]
-    if concept_name is None or concept_name == "":
-        return jsonify({"results": []})
-    results = concept_representatives(concept_name)
-    return jsonify({"results": results})
 
 
 # TODO: this is used

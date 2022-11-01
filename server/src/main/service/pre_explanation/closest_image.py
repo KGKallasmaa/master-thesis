@@ -1,14 +1,12 @@
 import numpy as np
 
 from main.database.closest_labels import ClosestLabelsDb
-from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.closest_label import ClosestLabel
 from main.service.pre_explanation.data_access import get_hog, get_images, get_labels
 from main.service.pre_explanation.kmeans import euclidean_distance
 from main.service.utils.dictionary import sort_dictionary
 
 closest_label_repository = ClosestLabelsDb()
-
 
 
 def find_closest_image_index(image: np.array, k_closest=5) -> int:
@@ -47,9 +45,3 @@ def find_closest_image_index(image: np.array, k_closest=5) -> int:
         closest_label_repository.update_closest_labels(closest_label)
 
         return image_index
-
-
-
-def attach_image_to_explanation(image: str, explanation_id: str):
-    database = ExplanationRequirementDb()
-    database.add_original_image_to_explanation(image, explanation_id)

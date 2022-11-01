@@ -54,7 +54,7 @@ def kmean_segments(images, masks, k=10):
             all_segments.append(np.array(segment))
             segment_labels.append(segment_class)
 
-    kmeans = KMeans(n_clusters=len(set(segment_labels)), random_state=0).fit(all_segments)
+    kmeans = KMeans(n_clusters=min(k, len(set(segment_labels))), random_state=0).fit(all_segments)
 
     segment_best_example_map = {}
 
