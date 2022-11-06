@@ -107,5 +107,6 @@ function DesisionTreeGraph(props: { data: FeatureImportance[] }) {
       showMarkers: false,
     },
   };
+  // @ts-ignore
   return <BidirectionalBar {...config} />;
 }

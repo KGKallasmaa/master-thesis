@@ -8,7 +8,7 @@ from skimage.feature import hog
 
 base_path = ""
 # TODO: use this bath when testing code locally
-#base_path = "/Users/karl-gustav.kallasmaa/Documents/Projects/master-thesis/server/src/"
+# base_path = "/Users/karl-gustav.kallasmaa/Documents/Projects/master-thesis/server/src/"
 masks_path = f"{base_path}main/data/masks.pkl"
 img_path = f"{base_path}main/data/resized_imgs.pkl"
 labels_path = f"{base_path}main/data/classes.pkl"
@@ -61,6 +61,6 @@ def get_segments(img, mask, threshold=0.05):
 
 
 def get_hog(image: np.array):
-    fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
-                        cells_per_block=(1, 1), visualize=True, channel_axis=-1)
+    _, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
+                       cells_per_block=(1, 1), visualize=True, channel_axis=-1)
     return hog_image

@@ -67,10 +67,10 @@ def get_training_row(user_selected_concepts: List[str], pic, mask) -> np.array:
     return row
 
 
-def train_decision_tree(X, y) -> DecisionTreeClassifier:
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
+def train_decision_tree(x, y) -> DecisionTreeClassifier:
+    x_train,_, y_train, _ = train_test_split(x, y, test_size=0.1, random_state=0)
     clf = DecisionTreeClassifier()
-    clf.fit(X_train, y_train)
+    clf.fit(x_train, y_train)
     return clf
 
 

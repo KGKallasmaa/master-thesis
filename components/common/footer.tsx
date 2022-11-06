@@ -6,6 +6,7 @@ export default function Footer() {
   const router = useRouter();
   const handleReset = () => {
     localStorage.clear();
+    sessionStorage.clear();
     window.location.href = "http://localhost:3000/";
   };
   const { index } = router.query;

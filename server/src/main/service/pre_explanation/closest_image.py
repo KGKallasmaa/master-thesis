@@ -35,10 +35,11 @@ def find_closest_image_index(image: np.array, k_closest=5) -> int:
     for image_index, _ in image_index_distance_dict.items():
         if image_index_label_dict[image_index] != most_popular_label:
             continue
+
         closest_label = ClosestLabel({
             "image_index": image_index,
             "label": most_popular_label,
-            "closest": [label for label, count in sorted_label_presence_count_dict[1:]]
+            "closest": [label for label, _ in sorted_label_presence_count_dict[1:]]
         })
         closest_label_repository.update_closest_labels(closest_label)
 
