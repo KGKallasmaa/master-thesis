@@ -17,12 +17,10 @@ def find_closest_image_index(image: np.array, k_closest=5) -> int:
     image_index_distance_dict = {}
     image_index_label_dict = {}
 
-    i = 0
-    for img, label in zip(get_images(), get_labels()):
+    for i, (img, label) in enumerate(zip(get_images(), get_labels())):
         img_hog = get_hog(img)
         image_index_distance_dict[i] = euclidean_distance(target_image_hog, img_hog, allow_not_equal=True)
         image_index_label_dict[i] = label
-        i += 1
 
     sorted_image_index_distance_dict = sort_dictionary(image_index_distance_dict, reverse=False, by_value=True)
     label_presence_count_dict = {}

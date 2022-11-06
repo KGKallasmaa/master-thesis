@@ -17,7 +17,7 @@ explanation_requirement_db = ExplanationRequirementDb()
 COUNTERFACTUAL_LABEL = 1
 ORIGINAL = 0
 
-minimum_counterfactual_probability = [i / 100.0 for i in range(25, 101, 1)]
+minimum_counterfactual_probability = [i / 100.0 for i in range(25, 101)]
 minimum_counterfactual_probability.reverse()
 
 
@@ -64,7 +64,6 @@ class CounterFactualExplanationService:
 
         permitted_range = {concept: [0.0, 1.0] for concept in available_concepts}
 
-        error_output = {}
         for minimum_acceptance_probability in minimum_counterfactual_probability:
             try:
                 counterfactual = exp.generate_counterfactuals(query_instances=to_be_explained_instance,
@@ -96,8 +95,8 @@ class CounterFactualExplanationService:
                     "counterfactuals": counterfactual_view,
                 }
             except Exception as e:
-                error_output = {
-                    "error": "%s" % e,
+                return {
+                    "error": f"{e}",
                     "original": {
                         "class": get_labels()[to_be_explained_image_index],
                         "values": to_be_explained_instance_as_dict
@@ -106,7 +105,6 @@ class CounterFactualExplanationService:
                     "counterFactualClass": counter_factual_class,
                     "counterfactuals": [],
                 }
-        return error_output
 
     @staticmethod
     def __transform_data_for_dice(X, y, concepts: List[str]):

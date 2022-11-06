@@ -2,16 +2,20 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { getId } from "../common/storage";
 import CenterConcepts from "../concepts/center_concepts";
+import { BidirectionalBar } from '@ant-design/plots';
+
+type FeatureImportance ={
+  featureName:string,
+  local:number,
+  global:number
+}
 
 export default function DesisionTreeExplanation(props: { index: number }) {
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [conceptsHaveBeenSelected, setConceptsHaveBeenSelected] =
     useState(false);
-  const [explanations, setExplanations] = useState<string[]>([]);
-  const [plainTreeExplanation, setPlainTreeExplanation] = useState<string[]>(
-    []
-  );
+  const [featureImportance,setFeatureImportance] = useState<FeatureImportance[]>([]);
   const [trueLabel, setTrueLabel] = useState<string>("");
   const [predictedLabel, setPredictedLabel] = useState<string>("");
 
@@ -33,8 +37,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       .then((data) => {
         setTrueLabel(data.trueLabel);
         setPredictedLabel(data.predictedLabel);
-        setExplanations(data.explanations);
-        setPlainTreeExplanation(data.plainTextTree);
+        setFeatureImportance(data.featureImportance);
       })
       .catch((err) => {
         setErrorMessage(err.message);
@@ -57,7 +60,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   if (isLoading) {
     return <>Generating an explanation ...</>;
   }
-  if (errorMessage && !explanations) {
+  if (errorMessage && !featureImportance) {
     return (
       <div>
         <h3>Explanation has failed</h3>
@@ -71,37 +74,38 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       <h3>{trueLabel}</h3>
       <br />
       <h3>{predictedLabel}</h3>
+
       <br />
-      <h3>Path explanations</h3>
+      <h3>Feature importance</h3>
       <br />
-      {explanations.map((el) => (
-        <div key={el}>
-          <p>{el}</p>
-          <br />
-        </div>
-      ))}
-      <h3>Tree representation</h3>
+      <p>Global - how imortant a feature is the desision tree (%)</p>
+      <p>Local - how imortant a feature is explaining this instance (%)</p>
       <br />
-      {plainTreeExplanation.map((el) => (
-        <div key={el}>
-          <p>
-            {extraSpace(el)}
-            {el}
-          </p>
-          <br />
-        </div>
-      ))}
+      <DesisionTreeGraph data={ featureImportance}/>
     </div>
   );
 }
-function extraSpace(row) {
-  const extraSpace = Array(3).fill("\xa0").join("");
-  const indexLevelSymbol = "|";
-  const nrOfAccourances = row.split(indexLevelSymbol).length - 1; //4
 
-  let space = "";
-  for (let i = 0; i < nrOfAccourances - 1; i++) {
-    space += extraSpace;
-  }
-  return space;
+
+function DesisionTreeGraph(props: { data: FeatureImportance[]; }){
+    let{data} = props
+    data = data.map()
+    const config = {
+      data,
+      xField: 'featureName',
+      xAxis: {
+        position: 'bottom',
+      },
+      interactions: [
+        {
+          type: 'active-region',
+        },
+      ],
+      yField: ['local', 'global'],
+      tooltip: {
+        shared: true,
+        showMarkers: false,
+      },
+    };
+    return <BidirectionalBar {...config} />;
 }
