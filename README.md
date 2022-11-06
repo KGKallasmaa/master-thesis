@@ -61,10 +61,14 @@ We're using all of the concepts specified by you to train a decision tree that e
 
 ![Tree concepts](./docs/select_tree_concepts.png)
 
-The decision tree-based explanation for this image is:
-This image is a beach because the % of the sea in the image is less than 41% and the % of trees is bigger than 0%
+For example, if we choose those concepts (tree, sea, sky, rock; stone, sand) then we get the following explanation
 
 ![Tree explain](./docs/tree_explain.png)
+
+This image contains a few, but some are more important than others. For this specific instance the presence of <b>sea</b> (52.28%) and <b>sand</b> (39.02%) are mostly responsible for <b>beach</b> classification. Concept <b>rock; stone</b> (8.7%) also contributed to it, but <b>sand</b> and <b>tree</b> didn't contribute at all to this classification.
+<br/>
+Overall, sand and tree contributed to the classification, but the feature importance order stayed the same.
+
 
 #### Counterfactual explanation
 
@@ -72,7 +76,7 @@ For counterfactual explanations, you need to select the counterfactual class fro
 
 ![Select counterfactual](./docs/select_mountain.png)
 
-And also the concepts from the counterfactual class (mountain)
+And also the concepts from the counterfactual class <b>mountain</b>
 
 ![Mountain concepts](./docs/mountain_concepts.png)
 
@@ -80,9 +84,9 @@ The program generates 2 synthetic counterfactual explanations.
 
 ![Counterfactual explanations](./docs/counterfactual_explain.png)
 
-First, this image would be classified as <b>mountain</b> if 50% of the image would be a mountain, 40% sky, and 20% tree.<br>
-Secondly, this image could be classified as a <b>mountain</b> if 30% of the image would be a mountain, 100% a sky, and 30% a tree.
+First, this image would be classified as <b>mountain</b> if 60% of the image would be a sky, 40% mountain, and 20% rock<br>
+Secondly, this image could be classified as a <b>mountain</b> if 70% of the image would be a mountain, 60% tree, and 50% sand.
 
 The concepts are not mutually exclusive, therefore the sum can be greater than 100%. For example, 60% of the image can be a sea, and 50% of the image can be a sky because there's an overlap between them. The concept representation sum can also be smaller than 100% because there typically are concepts that the user did not select as part of their explanation.
 
-These counterfactuals explanations indicate that the presence of <b>sea</b> plaid an important role in classifying the previous image as a <b>beach</b>
+These counterfactual explanations indicate that the presence of the sky paid an important role in classifying the previous image as a <b>beach</b>. The counterfactual explanations also indicate that the presence of a mountain would improve the chances of this image being classified as a <b>mountain</b>.
