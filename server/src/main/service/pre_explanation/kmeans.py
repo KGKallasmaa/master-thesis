@@ -1,65 +1,59 @@
-from typing import Dict
+from typing import List
 
 import numpy as np
 from sklearn.cluster import KMeans
 
+from main.service.pre_explanation.common import array_to_image, euclidean_distance
+
 from main.service.pre_explanation.common import serve_pil_image, resize_img
+from main.service.pre_explanation.data_access import get_segments
+from main.service.utils.dictionary import sort_dictionary
 
 
-def cluster_images(image_map, k=10) -> Dict[int, str]:
-    image_val = list(image_map.values())
+def kmean_segments(images, masks, k=10):
+    all_segments = []
+    segment_lookup = {}
+    segment_labels = []
+    most_pop = most_popular_concepts(images, masks, k)
+    for pic, mask in zip(images, masks):
+        # TODO: we're feeding garbage into this
+        segss, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
+        for segment, segment_class in zip(segss, seg_class):
+            if segment_class not in most_pop:
+                continue
+            to_img = array_to_image(segment)
+            segment = np.array(resize_img(to_img)).flatten()
+            segment_lookup[str(segment)] = np.array(resize_img(to_img))
+            all_segments.append(np.array(segment))
+            segment_labels.append(segment_class)
 
-    resized_images = [resize_img(pic) for pic in image_val]
-    resize_lookup = {str(resize): original for resize, original in zip(resized_images, image_map.values())}
+    kmeans = KMeans(n_clusters=min(k, len(set(segment_labels))), random_state=0).fit(all_segments)
 
-    to_be_clustered_images = np.array([np.array(pic).flatten().tolist() for pic in resized_images])
+    segment_best_example_map = {}
 
-    kmeans = KMeans(n_clusters=k, random_state=0).fit(to_be_clustered_images)
+    for label_index, segment in zip(kmeans.labels_, all_segments):
+        segment_name = segment_labels[label_index]
+        _, smallest_distance_to_center = segment_best_example_map.get(segment_name, (None, float('inf')))
+        distance = euclidean_distance(kmeans.cluster_centers_[label_index], segment)
+        if distance < smallest_distance_to_center:
+            segment_as_arr = array_to_image(segment_lookup[str(segment)])
+            segment_best_example_map[segment_name] = (serve_pil_image(segment_as_arr), distance)
 
-    clusterindex_images_map = {}
+    results = [
+        {"conceptName": segment_name, "src": segment_value, "distance": smallest_distance_to_center}
+        for segment_name, (segment_value, smallest_distance_to_center) in segment_best_example_map.items()
+    ]
 
-    for cluster_index, img in zip(kmeans.labels_, resized_images):
-        current_values = clusterindex_images_map.get(cluster_index, [])
-        current_values.append(img)
-        clusterindex_images_map[cluster_index] = current_values
+    results.sort(key=lambda x: x["distance"])
 
-    bestimg_cluster = {}
-
-    for cluster_index, images in clusterindex_images_map.items():
-        cluster_center = kmeans.cluster_centers_[cluster_index]
-
-        best_img = None
-        best_distance = float('inf')
-
-        for img in images:
-            distance_from_center = euclidean_distance(cluster_center, np.array(img).flatten())
-            if distance_from_center < best_distance:
-                best_distance = distance_from_center
-                best_img = img
-
-        bestimg_cluster[cluster_index] = serve_pil_image(resize_lookup[str(best_img)])
-
-    return bestimg_cluster
-
-
-def euclidean_distance(a: np.array, b: np.array, allow_not_equal=False) -> float:
-    if a.shape == b.shape:
-        return np.linalg.norm(a - b)
-    if allow_not_equal is False:
-        raise ValueError("Images must have the same shape")
-
-    a_number_of_rows, a_number_of_col = a.shape
-    b_number_of_rows, b_number_of_col = b.shape
-
-    rows, columns = min(a_number_of_rows, b_number_of_rows), min(a_number_of_col, b_number_of_col)
-    a_copy = np.empty((rows, columns))
-    b_copy = np.empty((rows, columns))
-
-    for i in range(rows):
-        a_copy[i] = a[i][:columns]
-        b_copy[i] = b[i][:columns]
-    return euclidean_distance(a_copy, b_copy)
+    return results
 
 
-def cosine_similarity(a: np.array, b: np.array) -> float:
-    return np.dot(a, b) / (np.norm(a) * np.norm(b))
+def most_popular_concepts(images, masks, k) -> List[str]:
+    segment_count = {}
+    for pic, mask in zip(images, masks):
+        _, seg_class = get_segments(np.array(pic), mask, threshold=0.005)
+        for s in seg_class:
+            segment_count[s] = segment_count.get(s, 0) + 1
+    segment_count = sort_dictionary(segment_count)
+    return [s for s, _ in segment_count[:k]]
