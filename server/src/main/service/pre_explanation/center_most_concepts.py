@@ -30,7 +30,7 @@ def center_most_concepts(k=10) -> Dict[str, List[any]]:
 
         label_images[label] = current_images
         label_masks[label] = current_maks
-
+    # TODO: we should also extract concepst from coast and sea not only beach class
     return {
         label: kmean_segments(label_images[label], label_masks[label], k)
         for label in list(label_images.keys())
@@ -83,8 +83,7 @@ def most_popular_concepts(images, masks, k) -> List[str]:
         for s in seg_class:
             segment_count[s] = segment_count.get(s, 0) + 1
     segment_count = sort_dictionary(segment_count)
-    segments = [s for s, _ in segment_count[:k]]
-    return segments
+    return [s for s, _ in segment_count[:k]]
 
 
 CENTER_MOST_CONCEPTS = center_most_concepts()

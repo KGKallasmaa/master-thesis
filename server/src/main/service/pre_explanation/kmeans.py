@@ -45,7 +45,7 @@ def cluster_images(image_map, k=10) -> Dict[int, str]:
 def euclidean_distance(a: np.array, b: np.array, allow_not_equal=False) -> float:
     if a.shape == b.shape:
         return np.linalg.norm(a - b)
-    if allow_not_equal is False and a.shape != b.shape:
+    if allow_not_equal is False:
         raise ValueError("Images must have the same shape")
 
     a_number_of_rows, a_number_of_col = a.shape
