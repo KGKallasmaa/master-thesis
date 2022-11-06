@@ -2,20 +2,22 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { getId } from "../common/storage";
 import CenterConcepts from "../concepts/center_concepts";
-import { BidirectionalBar } from '@ant-design/plots';
+import { BidirectionalBar } from "@ant-design/plots";
 
-type FeatureImportance ={
-  featureName:string,
-  local:number,
-  global:number
-}
+type FeatureImportance = {
+  featureName: string;
+  local: number;
+  global: number;
+};
 
 export default function DesisionTreeExplanation(props: { index: number }) {
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [conceptsHaveBeenSelected, setConceptsHaveBeenSelected] =
     useState(false);
-  const [featureImportance,setFeatureImportance] = useState<FeatureImportance[]>([]);
+  const [featureImportance, setFeatureImportance] = useState<
+    FeatureImportance[]
+  >([]);
   const [trueLabel, setTrueLabel] = useState<string>("");
   const [predictedLabel, setPredictedLabel] = useState<string>("");
 
@@ -81,31 +83,29 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       <p>Global - how imortant a feature is the desision tree (%)</p>
       <p>Local - how imortant a feature is explaining this instance (%)</p>
       <br />
-      <DesisionTreeGraph data={ featureImportance}/>
+      <DesisionTreeGraph data={featureImportance} />
     </div>
   );
 }
 
-
-function DesisionTreeGraph(props: { data: FeatureImportance[]; }){
-    let{data} = props
-    data = data.map()
-    const config = {
-      data,
-      xField: 'featureName',
-      xAxis: {
-        position: 'bottom',
+function DesisionTreeGraph(props: { data: FeatureImportance[] }) {
+  const { data } = props;
+  const config = {
+    data,
+    xField: "featureName",
+    xAxis: {
+      position: "bottom",
+    },
+    interactions: [
+      {
+        type: "active-region",
       },
-      interactions: [
-        {
-          type: 'active-region',
-        },
-      ],
-      yField: ['local', 'global'],
-      tooltip: {
-        shared: true,
-        showMarkers: false,
-      },
-    };
-    return <BidirectionalBar {...config} />;
+    ],
+    yField: ["local", "global"],
+    tooltip: {
+      shared: true,
+      showMarkers: false,
+    },
+  };
+  return <BidirectionalBar {...config} />;
 }
