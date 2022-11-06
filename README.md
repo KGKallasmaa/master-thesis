@@ -69,7 +69,6 @@ This image contains a few, but some are more important than others. For this spe
 <br/>
 Overall, sand and tree contributed to the classification, but the feature importance order stayed the same.
 
-
 #### Counterfactual explanation
 
 For counterfactual explanations, you need to select the counterfactual class from the dropdown
