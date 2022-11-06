@@ -62,9 +62,6 @@ class HumanReadableExplanationService:
 
         return sorted(list(results.values()), key=lambda x: x["local"], reverse=True)
 
-    def a(self):
-        print("hello world")
-
 
 class HumanReadableExplanation:
     def __init__(self,
