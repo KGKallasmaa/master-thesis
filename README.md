@@ -26,6 +26,16 @@ npm run dev
 Before starting the server, please download [data](https://drive.google.com/file/d/1BLU0CALcHmnXzcoHmNB5ETasJwN_XIpZ/view?usp=sharing)
 and copy its content to the <b>data</b> folder in the server directory. This folder will hold the images and segments used for this demo.
 
+You also need to set the DB_URL env variable located in the .env file.
+This URL should be a valid Mongodb url. You can use MongoDb [Atlas](https://www.mongodb.com/atlas/database) for that
+
+This is a shared free image that can be used to run the code locally. Change it if you want to see the results in your own DB
+
+```bash
+DB_URL=mongodb+srv://master:0A1cwFHMiG0js25B0A1cwFHMiG0js25B@masterthesis.y4xd8th.mongodb.net/?retryWrites=true&w=majority
+```
+
+
 After that run the following command (requires [Docker](https://docs.docker.com/get-docker/))
 
 ```bash
