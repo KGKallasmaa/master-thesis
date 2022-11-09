@@ -35,7 +35,6 @@ This is a shared free image that can be used to run the code locally. Change it 
 DB_URL=mongodb+srv://master:0A1cwFHMiG0js25B0A1cwFHMiG0js25B@masterthesis.y4xd8th.mongodb.net/?retryWrites=true&w=majority
 ```
 
-
 After that run the following command (requires [Docker](https://docs.docker.com/get-docker/))
 
 ```bash
