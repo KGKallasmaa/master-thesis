@@ -8,6 +8,4 @@ WORKDIR /src
 COPY src/ .
 COPY .env/ .
 
-EXPOSE 5000
-
 CMD ["python", "./app.py"]
