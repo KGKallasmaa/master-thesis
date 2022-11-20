@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import numpy as np
 from main.service.pre_explanation.data_access import get_masks, get_images, get_segments, get_labels
-from main.service.pre_explanation.kmeans import kmean_segments
+from main.service.pre_explanation.kmeans import kmean_segments, most_popular_concepts
 from main.service.utils.dictionary import sort_dictionary
 
 
@@ -34,4 +34,28 @@ def center_most_concepts(k=10) -> Dict[str, List[any]]:
     }
 
 
+def static_most_popular_concepts() -> Dict[str, List[any]]:
+    label_images_map = {}
+    label_masks_map = {}
+    for label, image, mask in zip(get_labels(), get_images(), get_masks()):
+        current_images = label_images_map.get(label, [])
+        current_maks = label_masks_map.get(label, [])
+
+        current_images.append(image)
+        current_maks.append(mask)
+
+        label_images_map[label] = current_images
+        label_masks_map[label] = current_maks
+
+    image_most_popular_concepts = {}
+    for label in set(get_labels()):
+        images = label_images_map[label]
+        masks = label_masks_map[label]
+        nr_of_images = len(images)  # TODO:maybe use set
+        image_most_popular_concepts[label] = most_popular_concepts(images, masks, nr_of_images)
+
+    return image_most_popular_concepts
+
+
 CENTER_MOST_CONCEPTS = center_most_concepts()
+MOST_POPULAR_CONCEPTS = static_most_popular_concepts()

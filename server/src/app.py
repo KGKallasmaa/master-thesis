@@ -8,7 +8,7 @@ import base64
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation import explain_using_concepts
-from main.service.pre_explanation.center_most_concepts import CENTER_MOST_CONCEPTS
+from main.service.pre_explanation.static_concepts_map import CENTER_MOST_CONCEPTS, MOST_POPULAR_CONCEPTS
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
 from main.service.pre_explanation.closest_image import find_closest_image_index
@@ -59,7 +59,16 @@ def original_image():
     image = database.get_explanation_requirement(explanation_id).original_image
     return jsonify({"url": image})
 
+# TODO: this is used
+@api.route("/initial-concepts", methods=["POST"])
+def initial_concepts():
+    payload = request.get_json()
+    label = payload["label"]
+    if label is None:
+        return jsonify({"concepts": []})
+    return jsonify({"concepts": MOST_POPULAR_CONCEPTS[label]})
 
+"""
 @api.route("/user_uploaded_image-segments", methods=["POST"])
 def image_segment_view():
     payload = request.get_json()
@@ -143,6 +152,7 @@ def all_labels_view():
     labels.sort()
     return jsonify({"labels": labels})
 
+"""
 
 if __name__ == '__main__':
     api.run(host='0.0.0.0', port=8000)

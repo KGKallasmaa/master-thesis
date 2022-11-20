@@ -4,6 +4,7 @@ import { CurrentImage, OriginalImage } from "../concepts/current_image";
 import CounterFactualExplanation from "./counterfactual_explanation";
 import DesisionTreeExplanation from "./desision_tree_explanation";
 import { Button } from "antd";
+import { useState } from "react";
 
 const explainTypeMessageMap = {
   desision_tree: "Explaining this image using a decision tree",
@@ -13,13 +14,21 @@ const explainTypeButtonTextMap = {
   desision_tree: "Counterfactual Explanation",
   counter_factual: "Decision Tree Explanation",
 };
+const explanationStep_TitelAndDescription = {
+  'inital_concepts':{
+    title: "Step 1: Select some concepts",
+    description: "Select concepts that you think are important for the image."
+  }
+}
 
-export default function ExplainTask(index: number, explanation_type: string) {
-  const title = "Explain";
-  const description = explainTypeMessageMap[explanation_type];
-  const changeExplanationButtonText =
-    explainTypeButtonTextMap[explanation_type];
+export default function ExplainTask(index: number) {
+  const [explanationStep, setExplanationStep] = useState('inital_concepts');
+  const {title,description} = explanationStep_TitelAndDescription[explanationStep];
+//  const description = explainTypeMessageMap[explanation_type];
+//  const changeExplanationButtonText =
+  //  explainTypeButtonTextMap[explanation_type];
 
+  /*
   const handleStepChange = () => {
     if (explanation_type === "desision_tree") {
       window.location.replace(`/explain/${index}/counter_factual`);
@@ -27,6 +36,7 @@ export default function ExplainTask(index: number, explanation_type: string) {
       window.location.replace(`/explain/${index}/desision_tree`);
     }
   };
+  */
   return (
     <>
       <br />
@@ -39,20 +49,17 @@ export default function ExplainTask(index: number, explanation_type: string) {
           <br />
           <OriginalImage />
           <br />
-          {explanation_type === "desision_tree" && (
+          {explanationStep === 'inital_concepts' && (
             <DesisionTreeExplanation index={index} />
           )}
-          {explanation_type === "counter_factual" && (
-            <CounterFactualExplanation index={index} />
-          )}
-          <br />
-          <br />
-          <Button onClick={handleStepChange} type="primary">
-            {changeExplanationButtonText}
-          </Button>
         </Col>
         <Col span={8} />
       </Row>
     </>
   );
 }
+/*
+ <Button onClick={handleStepChange} type="primary">
+            {changeExplanationButtonText}
+          </Button>
+          */
