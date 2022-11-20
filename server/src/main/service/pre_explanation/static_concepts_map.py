@@ -2,6 +2,7 @@ from typing import Dict, List
 
 import numpy as np
 from main.service.pre_explanation.data_access import get_masks, get_images, get_segments, get_labels
+from main.service.pre_explanation.image_segments import image_segments
 from main.service.pre_explanation.kmeans import kmean_segments, most_popular_concepts
 from main.service.utils.dictionary import sort_dictionary
 
@@ -56,6 +57,5 @@ def static_most_popular_concepts() -> Dict[str, List[any]]:
 
     return image_most_popular_concepts
 
-
-CENTER_MOST_CONCEPTS = center_most_concepts()
+LABEL_CENTER_MOST_CONCEPT = center_most_concepts()
 MOST_POPULAR_CONCEPTS = static_most_popular_concepts()

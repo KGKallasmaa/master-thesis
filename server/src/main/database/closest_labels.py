@@ -11,9 +11,7 @@ class ClosestLabelsDb:
 
     def get_by_image_id(self, image_id: int) -> Optional[ClosestLabel]:
         value = self.collection.find_one({'image_index': image_id})
-        if value is None:
-            return None
-        return ClosestLabel(value)
+        return None if value is None else ClosestLabel(value)
 
     def update_closest_labels(self, obj: ClosestLabel):
         self.collection.update_one({'_id': obj.id}, {'$set': obj.to_db_value()}, upsert=True)

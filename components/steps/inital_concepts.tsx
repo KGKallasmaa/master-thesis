@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
-import { Button, Col, Row, Skeleton } from "antd";
-import { ConceptCard } from "../common/card";
+import { Button, Row, Skeleton } from "antd";
 import { getId } from "../common/storage";
+import Tags from "../common/tags";
 
+// TODO: use this https://ant.design/components/select
 export default function InitialConceptsStep({
   index,
   onComplete,
@@ -11,18 +12,25 @@ export default function InitialConceptsStep({
   index: number;
   onComplete: () => void;
 }) {
-  const [images, setImage] = useState([]);
+  const [initalConcepts, setInitalConcepts] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
   const [settingIsCompleted, setSettingIsCompleted] = useState(false);
 
   useEffect(() => {
+    if (typeof index !== "number") {
+      return;
+    }
+    if (!index) {
+      return;
+    }
     const payload = { img: index };
+    console.log(payload);
 
-    http("/initial-concepts", payload)
+    http("/most-popular-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
-        setImage(data.results);
+        setInitalConcepts(data.concepts);
         setIsLoading(false);
       })
       .catch(() => {
@@ -37,6 +45,7 @@ export default function InitialConceptsStep({
     const payload = {
       id: getId(),
       img: index,
+      constraint_type: "initially_proposed_concepts",
       concepts: selectedConcepts,
     };
     http("/concept-constraint", payload)
@@ -52,9 +61,9 @@ export default function InitialConceptsStep({
     return <Skeleton active />;
   }
 
-  function handleConceptWillBeUsed(name: string, decision: boolean) {
+  function handleConcepClick(name: string, isSelected: boolean) {
     let currentValues = selectedConcepts;
-    if (decision) {
+    if (isSelected) {
       currentValues.push(name);
     } else {
       currentValues = removeElFromArray(currentValues, name);
@@ -78,29 +87,36 @@ export default function InitialConceptsStep({
         </>
       )}
       <Row>
-        <p>Selected concepts:</p>
-        <br />
-        <br />
-        {selectedConcepts.map((el) => (
-          <div key={el}>
-            <p>{el},</p>
-            <br />
-          </div>
-        ))}
+        <p>
+          {selectedConcepts.length > 0
+            ? "Selected concepts (click to unselect):"
+            : ""}
+        </p>
+
+        <div style={{ marginTop: 15 }}>
+          <Tags
+            color={"blue"}
+            values={selectedConcepts}
+            onClick={(value) => handleConcepClick(value, false)}
+          />
+        </div>
       </Row>
       <Row>
-        {images.map((el, i) => (
-          <Col span={8} key={i} style={{ marginRight: 50, marginBottom: 20 }}>
-            <ConceptCard
-              key={i}
-              label={el.conceptName}
-              imageBase64={el.src}
-              imageWidth={200}
-              onSelected={handleConceptWillBeUsed}
-              title={""}
-            />
-          </Col>
-        ))}
+        <p>
+          {initalConcepts.length - selectedConcepts.length > 0
+            ? "Available concepts (click to select):"
+            : ""}
+        </p>
+
+        <div style={{ marginTop: 15 }}>
+          <Tags
+            color={"red"}
+            values={initalConcepts.filter(
+              (el) => !selectedConcepts.includes(el)
+            )}
+            onClick={(value) => handleConcepClick(value, true)}
+          />
+        </div>
       </Row>
     </>
   );

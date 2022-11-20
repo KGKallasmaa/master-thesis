@@ -1,11 +1,9 @@
 import { useRouter } from "next/router";
-import ExplainTask from "../../components/explain/explain_task";
+import ExplainTask from "../../components/steps/explain_task";
 
-const ExplainMap = () => {
+export default function ExplainPage() {
   const router = useRouter();
   const { index } = router.query;
   // @ts-ignore
-  return ExplainTask(parseInt(<string>index));
-};
-
-export default ExplainMap;
+  return ExplainTask(parseInt(index));
+}

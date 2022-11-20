@@ -8,7 +8,7 @@ import base64
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation import explain_using_concepts
-from main.service.pre_explanation.static_concepts_map import CENTER_MOST_CONCEPTS, MOST_POPULAR_CONCEPTS
+from main.service.pre_explanation.static_concepts_map import LABEL_CENTER_MOST_CONCEPT, MOST_POPULAR_CONCEPTS
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
 from main.service.pre_explanation.closest_image import find_closest_image_index
@@ -28,7 +28,7 @@ def upload_images_view():
     image = request.files['file'].read()
     explanation_id = request.args.get('id')
     base_64_image = base64.b64encode(image).decode("utf-8")
-    explanation_requirement_db.add_original_image_to_explanation(base_64_image,explanation_id)
+    explanation_requirement_db.add_original_image_to_explanation(base_64_image, explanation_id)
 
     image_as_ar = np.array(base64_to_pil(base_64_image))
     index = find_closest_image_index(image_as_ar)
@@ -59,16 +59,67 @@ def original_image():
     image = database.get_explanation_requirement(explanation_id).original_image
     return jsonify({"url": image})
 
+
 # TODO: this is used
-@api.route("/initial-concepts", methods=["POST"])
-def initial_concepts():
+@api.route("/most-popular-concepts", methods=["POST"])
+def most_popular_concepts():
     payload = request.get_json()
-    label = payload["label"]
-    if label is None:
+    img = payload["img"]
+    if img is None:
         return jsonify({"concepts": []})
+    label = get_labels()[img]
     return jsonify({"concepts": MOST_POPULAR_CONCEPTS[label]})
 
+
+# TODO: this is used
+
+
+
+@api.route("/concept-constraint", methods=["POST"])
+def edit_concept_constraint_view():
+    # TODO: we should do some validation before submitting data
+    payload = request.get_json()
+
+    constraint_type = payload["constraint_type"]
+    viable_concepts = payload["concepts"]
+    explanation_id = payload["id"]
+    image_id = payload["img"]
+
+    if constraint_type is None or explanation_id is None or viable_concepts is None:
+        return '', 400
+
+    viable_concepts.sort()
+
+    explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
+    explanation_requirement.constraints.change_concept_constraint(constraint_type, viable_concepts)
+    explanation_requirement.original_image_id = image_id
+    explanation_requirement_db.update_explanation_requirement(explanation_requirement)
+    return '', 204
+
+@api.route("/explanation-concepts", methods=["POST"])
+def explanation_concepts():
+    payload = request.get_json()
+    img = payload["img"]
+    explanation_id = payload["id"]
+    explanation_type = payload["explanation_type"]
+    if img is None:
+        return jsonify({"concepts": []})
+    explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
+    used_concepts_labels = explanation_requirement.constraints.currently_used_concepts[explanation_type]
+    available_to_be_chosen_concepts = explanation_requirement.constraints.available_concepts(explanation_type)
+
+    return jsonify(
+        {
+            "usedConcepts": used_concepts_labels,
+            "availableToBeChosenConcepts": available_to_be_chosen_concepts,
+        }
+    )
+
 """
+
+
+
+
 @api.route("/user_uploaded_image-segments", methods=["POST"])
 def image_segment_view():
     payload = request.get_json()
@@ -98,25 +149,7 @@ def label_concepts_view():
 
 
 # TODO: this is used
-@api.route("/concept-constraint", methods=["POST"])
-def edit_concept_constraint_view():
-    # TODO: we should do some validation before submitting data
-    payload = request.get_json()
-    explanation_type = payload["explanation_type"]
-    viable_concepts = payload["concepts"]
-    explanation_id = payload["id"]
-    if explanation_type is None or explanation_id is None or viable_concepts is None:
-        return '', 400
-    viable_concepts.sort()
 
-    constraint = explanation_requirement_db.get_explanation_requirement(explanation_id)
-    constraint.user_specified_concepts[explanation_type] = viable_concepts
-    image_id = payload["img"]
-    constraint.original_image_id = image_id
-
-    explanation_requirement_db.update_explanation_requirement(constraint)
-
-    return '', 204
 
 
 # TODO: this is used
