@@ -15,17 +15,18 @@ const explainTypeButtonTextMap = {
   counter_factual: "Decision Tree Explanation",
 };
 const explanationStep_TitelAndDescription = {
-  'inital_concepts':{
+  inital_concepts: {
     title: "Step 1: Select some concepts",
-    description: "Select concepts that you think are important for the image."
-  }
-}
+    description: "Select concepts that you think are important for the image.",
+  },
+};
 
 export default function ExplainTask(index: number) {
-  const [explanationStep, setExplanationStep] = useState('inital_concepts');
-  const {title,description} = explanationStep_TitelAndDescription[explanationStep];
-//  const description = explainTypeMessageMap[explanation_type];
-//  const changeExplanationButtonText =
+  const [explanationStep, setExplanationStep] = useState("inital_concepts");
+  const { title, description } =
+    explanationStep_TitelAndDescription[explanationStep];
+  //  const description = explainTypeMessageMap[explanation_type];
+  //  const changeExplanationButtonText =
   //  explainTypeButtonTextMap[explanation_type];
 
   /*
@@ -49,7 +50,7 @@ export default function ExplainTask(index: number) {
           <br />
           <OriginalImage />
           <br />
-          {explanationStep === 'inital_concepts' && (
+          {explanationStep === "inital_concepts" && (
             <DesisionTreeExplanation index={index} />
           )}
         </Col>

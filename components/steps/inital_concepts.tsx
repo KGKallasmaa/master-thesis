@@ -1,6 +1,3 @@
-
-
-
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { Button, Col, Row, Skeleton } from "antd";
@@ -8,16 +5,19 @@ import { ConceptCard } from "../common/card";
 import { getId } from "../common/storage";
 
 export default function InitialConceptsStep({
-    index,
-    onComplete,
-}:{index:number,onComplete:()=>void}) {
+  index,
+  onComplete,
+}: {
+  index: number;
+  onComplete: () => void;
+}) {
   const [images, setImage] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
   const [settingIsCompleted, setSettingIsCompleted] = useState(false);
 
   useEffect(() => {
-    const payload = { img:index };
+    const payload = { img: index };
 
     http("/initial-concepts", payload)
       .then((el) => el.json())
