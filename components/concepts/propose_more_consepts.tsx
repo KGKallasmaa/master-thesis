@@ -1,4 +1,4 @@
-import { Col, Row, Skeleton, Tag } from "antd";
+import { Row, Skeleton } from "antd";
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { getId } from "../common/storage";
@@ -9,6 +9,7 @@ type ConceptsManagerProps = {
   explanation_type: string;
   onChangeCompleted: () => void;
 };
+const USER_SELECTED_CONCEPTS = "user_selected_concepts";
 
 export default function ConceptsManager(props: ConceptsManagerProps) {
   const { index, explanation_type, onChangeCompleted } = props;
@@ -18,40 +19,50 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
   );
   const [availableToBeChosenConcepts, setAvailableToBeChosenConcepts] =
     useState<string[]>([]);
+
+  const [userSelectedConcepts, setUserSelectedConcepts] = useState<string[]>(
+    []
+  );
+
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const payload = {
       id: getId(),
       img: index,
-      explanationType: explanation_type,
+      explanation_type,
     };
     http("/explanation-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
         setCurrentlyUsedConcepts(data.usedConcepts);
         setAvailableToBeChosenConcepts(data.availableToBeChosenConcepts);
-      })
+        setUserSelectedConcepts(data.userSelectedConcepts);
+        setLoading(false);
+    })
       .catch((err) => {
         console.error(err);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [props.index, props.explanation_type]);
+  }, [index, explanation_type]);
 
-  const handeleConceptChange = (conceptName: string, isAdding: boolean) => {
+  useEffect(() => {
     const payload = {
       id: getId(),
       img: index,
-      conceptName,
-      isAdding,
+      constraint_type: USER_SELECTED_CONCEPTS,
+      concepts: userSelectedConcepts,
     };
-    http("/explanation-concepts-change", payload).finally(() => {
-      setLoading(false);
-      onChangeCompleted();
-    });
-  };
+    http("/concept-constraint", payload)
+      .then((el) => el.json())
+      .then(() => {
+        onChangeCompleted();
+      })
+      .catch(() => {});
+
+  }, [userSelectedConcepts]);
 
   if (isLoading) {
     return <Skeleton active />;
@@ -69,7 +80,9 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
           <Tags
             color={"blue"}
             values={currentlyUsedConcepts}
-            onClick={(value) => handeleConceptChange(value, false)}
+            onClick={(conceptName) =>
+              setUserSelectedConcepts([...userSelectedConcepts, conceptName])
+            }
           />
         </div>
       </Row>
@@ -84,7 +97,11 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
           <Tags
             color={"red"}
             values={availableToBeChosenConcepts}
-            onClick={(value) => handeleConceptChange(value, true)}
+            onClick={(conceptName) =>
+              setUserSelectedConcepts(
+                userSelectedConcepts.filter((el) => el !== conceptName)
+              )
+            }
           />
         </div>
       </Row>

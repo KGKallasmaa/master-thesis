@@ -31,9 +31,7 @@ export default function ExplainTask(index: number) {
   if (typeof index !== "number") {
     return <div>Invalid index</div>;
   }
-  const [explanationStep, setExplanationStep] = useState(
-    "choose_explanation_type"
-  ); // useState("inital_concepts");
+  const [explanationStep, setExplanationStep] = useState("inital_concepts");
   const { title, description } =
     explanationStep_TitelAndDescription[explanationStep];
   //  const description = explainTypeMessageMap[explanation_type];

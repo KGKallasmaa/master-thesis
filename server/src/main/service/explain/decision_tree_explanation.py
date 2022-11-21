@@ -15,12 +15,8 @@ closest_label_db = ClosestLabelsDb()
 
 
 # TODO: improve it. It's not very good, because we don't distunish between images. we should find the essence of the img
-def explain_using_concepts(explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
-    user_specified_concepts = requirement_db.get_explanation_requirement(explanation_id).user_specified_concepts
-    decision_tree_concepts = user_specified_concepts.get("decision_tree", [])
-
-    if len(decision_tree_concepts) == 0:
-        raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
+def explain_using_decision_tree(explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
+    decision_tree_concepts = to_be_used_concepts(explanation_id)
     closest = closest_label_db.get_by_image_id(to_be_explained_image_index)
     valid_labels = [closest.label] + closest.closest
 
@@ -84,3 +80,13 @@ def get_segment_relative_size(segment: np.array, picture: np.array) -> float:
     segment_area = float(segment.shape[0] * segment.shape[1])
     picture_area = float(picture.shape[0] * picture.shape[1])
     return round(segment_area / picture_area, 2)
+
+
+# TODO: fix this
+def to_be_used_concepts(explanation_id: str) -> List[str]:
+    explanation_requirement = requirement_db.get_explanation_requirement(explanation_id)
+    used_concepts = explanation_requirement.constraints.initially_proposed_concepts
+    if len(used_concepts) == 0:
+        raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
+    used_concepts.sort()
+    return used_concepts

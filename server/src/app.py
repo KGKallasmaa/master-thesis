@@ -7,7 +7,7 @@ import base64
 
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
-from main.service.explain.decision_tree_explanation import explain_using_concepts
+from main.service.explain.decision_tree_explanation import explain_using_decision_tree
 from main.service.pre_explanation.static_concepts_map import LABEL_CENTER_MOST_CONCEPT, MOST_POPULAR_CONCEPTS
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
@@ -106,20 +106,31 @@ def explanation_concepts():
         return jsonify({"concepts": []})
     explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
     used_concepts_labels = explanation_requirement.constraints.currently_used_concepts[explanation_type]
-    available_to_be_chosen_concepts = explanation_requirement.constraints.available_concepts(explanation_type)
+    available_to_be_chosen_concepts = explanation_requirement.constraints.available_to_be_chosen_concepts(explanation_type)
 
     return jsonify(
         {
             "usedConcepts": used_concepts_labels,
             "availableToBeChosenConcepts": available_to_be_chosen_concepts,
+            "userSelectedConcepts": explanation_requirement.constraints.user_selected_concepts
         }
     )
 
+# TODO: this is used
+@api.route("/decision-tree-explanation", methods=["POST"])
+def decision_tree_explanation_view():
+    payload = request.get_json()
+    img_id = payload["img"]
+    explanation_id = payload["id"]
+    if img_id is None:
+        return 'Image number is missing', 400
+    if explanation_id is None:
+        return 'Explanation id is missing', 400
+    explanation = explain_using_decision_tree(explanation_id, img_id)
+    return jsonify(explanation)
+
+
 """
-
-
-
-
 @api.route("/user_uploaded_image-segments", methods=["POST"])
 def image_segment_view():
     payload = request.get_json()
@@ -152,18 +163,6 @@ def label_concepts_view():
 
 
 
-# TODO: this is used
-@api.route("/decision-tree-explanation", methods=["POST"])
-def decision_tree_explanation_view():
-    payload = request.get_json()
-    img_id = payload["img"]
-    explanation_id = payload["id"]
-    if img_id is None:
-        return 'Image number is missing', 400
-    if explanation_id is None:
-        return 'Explanation id is missing', 400
-    explanation = explain_using_concepts(explanation_id, img_id)
-    return jsonify(explanation)
 
 
 # TODO: this is used

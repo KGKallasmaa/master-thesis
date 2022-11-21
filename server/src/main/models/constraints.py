@@ -10,7 +10,8 @@ class Constraints:
             "decision_tree": [],
             "counterfactual": [],
         })
-        self.user_specified_concepts = json.get("user_specified_concepts", [])
+        self.user_selected_concepts = json.get("user_selected_concepts", [])
+
 
     def change_concept_constraint(self,
                                   constraint_type: str,
@@ -24,8 +25,8 @@ class Constraints:
             self.most_intuitive_concepts = new_values
         elif constraint_type == "most_predictive_concepts":
             self.most_predictive_concepts = new_values
-        elif constraint_type == "user_specified_concepts":
-            self.user_specified_concepts = new_values
+        elif constraint_type == "user_selected_concepts":
+            self.user_selected_concepts = new_values
         else:
             raise ValueError(f"Unknown constraint type: {constraint_type}")
 
@@ -33,7 +34,7 @@ class Constraints:
         if explanation_type not in {"decision_tree", "counterfactual"}:
             raise ValueError(f"Unknown explanation type: {explanation_type}")
 
-        new_concepts = self.user_specified_concepts
+        new_concepts = self.user_selected_concepts
         for predictive_concept, intuitive_concept in zip(self.most_predictive_concepts, self.most_intuitive_concepts):
             if predictive_concept not in new_concepts:
                 new_concepts.append(predictive_concept)
@@ -46,10 +47,9 @@ class Constraints:
                                        explanation_type: str,
                                        new_values: list[str]
                                        ):
-        if explanation_type in {"decision_tree", "counterfactual"}:
-            self.currently_used_concepts[explanation_type] = new_values
-        else:
+        if explanation_type not in {"decision_tree", "counterfactual"}:
             raise ValueError(f"Unknown explanation type: {explanation_type}")
+        self.currently_used_concepts[explanation_type] = new_values
 
     def to_db_value(self) -> Dict[str, any]:
         return {
@@ -57,4 +57,5 @@ class Constraints:
             'most_predictive_concepts': self.most_predictive_concepts,
             'most_intuitive_concepts': self.most_intuitive_concepts,
             'currently_used_concepts': self.currently_used_concepts,
+            'user_selected_concepts': self.user_selected_concepts,
         }
