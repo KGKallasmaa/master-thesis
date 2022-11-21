@@ -39,7 +39,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
         setAvailableToBeChosenConcepts(data.availableToBeChosenConcepts);
         setUserSelectedConcepts(data.userSelectedConcepts);
         setLoading(false);
-    })
+      })
       .catch((err) => {
         console.error(err);
       })
@@ -61,7 +61,6 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
         onChangeCompleted();
       })
       .catch(() => {});
-
   }, [userSelectedConcepts]);
 
   if (isLoading) {
