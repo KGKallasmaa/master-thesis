@@ -7,12 +7,11 @@ import base64
 
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
-from main.service.explain.decision_tree_explanation import explain_using_decision_tree
-from main.service.pre_explanation.static_concepts_map import LABEL_CENTER_MOST_CONCEPT, MOST_POPULAR_CONCEPTS
+from main.service.explain.decision_tree_explanation import DecisionTreeExplanationService
+from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
 from main.service.pre_explanation.closest_image import find_closest_image_index
-from main.service.pre_explanation.image_segments import image_segments
 
 api = Flask(__name__)
 CORS(api)
@@ -20,6 +19,7 @@ CORS(api)
 explanation_requirement_db = ExplanationRequirementDb()
 
 counterfactual_explanation_service = CounterFactualExplanationService()
+decision_tree_explanation_service = DecisionTreeExplanationService()
 
 
 # TODO: this is used
@@ -74,7 +74,6 @@ def most_popular_concepts():
 # TODO: this is used
 
 
-
 @api.route("/concept-constraint", methods=["POST"])
 def edit_concept_constraint_view():
     # TODO: we should do some validation before submitting data
@@ -88,13 +87,22 @@ def edit_concept_constraint_view():
     if constraint_type is None or explanation_id is None or viable_concepts is None:
         return '', 400
 
-    viable_concepts.sort()
+    print("adding concept constraint", flush=True)
+    print(viable_concepts, flush=True)
+    print(payload, flush=True)
 
     explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
-    explanation_requirement.constraints.change_concept_constraint(constraint_type, viable_concepts)
+    explanation_requirement.constraints.change_concept_constraint(constraint_type=constraint_type,
+                                                                  new_values=viable_concepts)
     explanation_requirement.original_image_id = image_id
     explanation_requirement_db.update_explanation_requirement(explanation_requirement)
+
+    debug = explanation_requirement_db.get_explanation_requirement(explanation_id)
+    print(debug.constraints.initially_proposed_concepts, flush=True)
+    assert len(debug.constraints.initially_proposed_concepts) > 0
+
     return '', 204
+
 
 @api.route("/explanation-concepts", methods=["POST"])
 def explanation_concepts():
@@ -106,7 +114,8 @@ def explanation_concepts():
         return jsonify({"concepts": []})
     explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
     used_concepts_labels = explanation_requirement.constraints.currently_used_concepts[explanation_type]
-    available_to_be_chosen_concepts = explanation_requirement.constraints.available_to_be_chosen_concepts(explanation_type)
+    available_to_be_chosen_concepts = explanation_requirement.constraints.available_to_be_chosen_concepts(
+        explanation_type)
 
     return jsonify(
         {
@@ -115,6 +124,7 @@ def explanation_concepts():
             "userSelectedConcepts": explanation_requirement.constraints.user_selected_concepts
         }
     )
+
 
 # TODO: this is used
 @api.route("/decision-tree-explanation", methods=["POST"])
@@ -126,7 +136,7 @@ def decision_tree_explanation_view():
         return 'Image number is missing', 400
     if explanation_id is None:
         return 'Explanation id is missing', 400
-    explanation = explain_using_decision_tree(explanation_id, img_id)
+    explanation = decision_tree_explanation_service.explain(explanation_id, img_id)
     return jsonify(explanation)
 
 
@@ -187,4 +197,4 @@ def all_labels_view():
 """
 
 if __name__ == '__main__':
-    api.run(host='0.0.0.0', port=8000)
+    api.run(host='0.0.0.0', port=8000, debug=True)

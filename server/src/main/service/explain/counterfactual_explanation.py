@@ -6,8 +6,7 @@ import pandas as pd
 
 from main.database.closest_labels import ClosestLabelsDb
 from main.database.explanation_requirement import ExplanationRequirementDb
-from main.service.explain.decision_tree_explanation import get_training_row, train_decision_tree, \
-    encode_categorical_values
+from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 import json
 
@@ -150,5 +149,7 @@ class CounterFactualExplanationService:
             else:
                 y[i] = ORIGINAL
 
-        clf = train_decision_tree(valid_X, valid_y)
+        clf, accuracy = train_decision_tree(valid_X, valid_y)
         return X, y, clf
+
+

@@ -4,6 +4,8 @@ import { Button, Row, Skeleton } from "antd";
 import { getId } from "../common/storage";
 import Tags from "../common/tags";
 
+const initalConceptConstraint = "initially_proposed_concepts";
+
 // TODO: use this https://ant.design/components/select
 export default function InitialConceptsStep({
   index,
@@ -25,7 +27,6 @@ export default function InitialConceptsStep({
       return;
     }
     const payload = { img: index };
-    console.log(payload);
 
     http("/most-popular-concepts", payload)
       .then((el) => el.json())
@@ -45,15 +46,18 @@ export default function InitialConceptsStep({
     const payload = {
       id: getId(),
       img: index,
-      constraint_type: "initially_proposed_concepts",
+      constraint_type: initalConceptConstraint,
       concepts: selectedConcepts,
     };
+    console.log(payload);
+    alert("music");
+
     http("/concept-constraint", payload)
-      .then((el) => el.json())
-      .then(() => {})
-      .catch(() => {})
-      .finally(() => {
+      .then(() => {
         onComplete();
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }, [selectedConcepts, settingIsCompleted]);
 
@@ -76,48 +80,39 @@ export default function InitialConceptsStep({
     <>
       {selectedConcepts.length > 0 && (
         <>
-          <Button
-            type="primary"
-            onClick={() => setSettingIsCompleted(!settingIsCompleted)}
-          >
+          <Button type="primary" onClick={() => setSettingIsCompleted(true)}>
             {settingIsCompleted ? "Select more" : "Finish selecting"}
           </Button>
           <br />
           <br />
         </>
       )}
-      <Row>
-        <p>
-          {selectedConcepts.length > 0
-            ? "Selected concepts (click to unselect):"
-            : ""}
-        </p>
-
-        <div style={{ marginTop: 15 }}>
-          <Tags
-            color={"blue"}
-            values={selectedConcepts}
-            onClick={(value) => handleConcepClick(value, false)}
-          />
-        </div>
-      </Row>
-      <Row>
-        <p>
-          {initalConcepts.length - selectedConcepts.length > 0
-            ? "Available concepts (click to select):"
-            : ""}
-        </p>
-
-        <div style={{ marginTop: 15 }}>
-          <Tags
-            color={"red"}
-            values={initalConcepts.filter(
-              (el) => !selectedConcepts.includes(el)
-            )}
-            onClick={(value) => handleConcepClick(value, true)}
-          />
-        </div>
-      </Row>
+      {selectedConcepts.length > 0 && (
+        <Row>
+          <p>Selected concepts (click to unselect):</p>
+          <div style={{ marginTop: 15 }}>
+            <Tags
+              color={"blue"}
+              values={selectedConcepts}
+              onClick={(value) => handleConcepClick(value, false)}
+            />
+          </div>
+        </Row>
+      )}
+      {initalConcepts.length - selectedConcepts.length > 0 && (
+        <Row>
+          <p>Available concepts (click to select):</p>
+          <div style={{ marginTop: 15 }}>
+            <Tags
+              color={"red"}
+              values={initalConcepts.filter(
+                (el) => !selectedConcepts.includes(el)
+              )}
+              onClick={(value) => handleConcepClick(value, true)}
+            />
+          </div>
+        </Row>
+      )}
     </>
   );
 }

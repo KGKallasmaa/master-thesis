@@ -8,9 +8,10 @@ class ExplanationRequirementDb:
         self.collection = self.database["explanation_requirement"]
 
     def get_explanation_requirement(self, id: str) -> ExplanationRequirement:
-        value = self.collection.find_one({'_id': id})
+        value = self.collection.find_one({"_id": id})
         if value is None:
             return ExplanationRequirement({"_id": id})
+        print(value, flush=True)
         return ExplanationRequirement(value)
 
     def update_explanation_requirement(self, obj: ExplanationRequirement):
