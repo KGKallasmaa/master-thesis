@@ -1,8 +1,23 @@
 version: '3.8'
 services:
-  master_thesis_server:
-    image: master_thesis_server
-    build: .
-    container_name: "master_thesis_server"
+  master-thesis-server:
+    environment:
+      - DB_URL=mongodb://mongodb-container:27017
+    image: master-thesis-server
+    container_name: "master-thesis-server"
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - '8000:8000'
+    depends_on:
+      - mongodb-container
+
+  mongodb-container:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+volumes:
+  mongodb_data_container:
