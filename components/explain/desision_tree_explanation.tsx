@@ -22,6 +22,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   const [predictedLabel, setPredictedLabel] = useState<string>("");
 
   const fetchDesisionTreeExplanation = () => {
+    setLoading(true);
     const payload = {
       img: index,
       id: getId(),

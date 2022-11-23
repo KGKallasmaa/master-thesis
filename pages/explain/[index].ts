@@ -5,7 +5,7 @@ export default function ExplainPage() {
   const router = useRouter();
   const { index } = router.query;
   // @ts-ignore
-  if (!parseInt(index)){
+  if (!parseInt(index)) {
     return null;
   }
   return ExplainTask(parseInt(index));

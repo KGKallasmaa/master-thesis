@@ -57,7 +57,7 @@ export default function InitialConceptsStep({
       })
       .catch((err) => {
         console.log(err);
-        toast.error(err)
+        toast.error(err);
         setSettingIsCompleted(false);
       });
   }, [selectedConcepts, settingIsCompleted]);
