@@ -1,12 +1,9 @@
 from typing import Dict, List
 
-import numpy as np
-from main.service.pre_explanation.data_access import get_masks, get_images, get_segments, get_labels
-from main.service.pre_explanation.image_segments import image_segments
+from main.service.pre_explanation.data_access import get_masks, get_images, get_labels
 from main.service.pre_explanation.kmeans import kmean_segments, most_popular_concepts
-from main.service.utils.dictionary import sort_dictionary
 
-
+# TODO: apply multi processing https://www.machinelearningplus.com/python/parallel-processing-python/
 def center_most_concepts(k=10) -> Dict[str, List[any]]:
     """
     Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).

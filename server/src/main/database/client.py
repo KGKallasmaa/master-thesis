@@ -1,8 +1,5 @@
 import os
-import certifi
 from pymongo import MongoClient
-
-ca = certifi.where()
 
 
 def get_client() -> MongoClient:

@@ -3,6 +3,7 @@ import { http } from "../common/http";
 import { Button, Row, Skeleton } from "antd";
 import { getId } from "../common/storage";
 import Tags from "../common/tags";
+import toast from "react-hot-toast";
 
 const initalConceptConstraint = "initially_proposed_concepts";
 
@@ -49,8 +50,6 @@ export default function InitialConceptsStep({
       constraint_type: initalConceptConstraint,
       concepts: selectedConcepts,
     };
-    console.log(payload);
-    alert("music");
 
     http("/concept-constraint", payload)
       .then(() => {
@@ -58,6 +57,8 @@ export default function InitialConceptsStep({
       })
       .catch((err) => {
         console.log(err);
+        toast.error(err)
+        setSettingIsCompleted(false);
       });
   }, [selectedConcepts, settingIsCompleted]);
 

@@ -11,12 +11,26 @@ class ExplanationRequirementDb:
         value = self.collection.find_one({"_id": id})
         if value is None:
             return ExplanationRequirement({"_id": id})
-        print(value, flush=True)
         return ExplanationRequirement(value)
 
-    def update_explanation_requirement(self, obj: ExplanationRequirement):
-        self.collection.update_one({'_id': obj.id}, {'$set': obj.to_db_value()}, upsert=True)
+    def update_explanation_requirement(self, obj: ExplanationRequirement) -> bool:
+        try:
+            result = self.collection.update_one({'_id': obj.id}, {'$set': obj.to_db_value()}, upsert=True)
+            return result.matched_count > 0
+        except Exception:
+            return False
+
+    def update_explanation_requirement_constraints(self, obj: ExplanationRequirement) -> bool:
+        try:
+            result = self.collection.update_one({'_id': obj.id}, {'$set': obj.constraints.to_db_value()}, upsert=True)
+            return result.matched_count > 0
+        except Exception:
+            return False
 
     def add_original_image_to_explanation(self, user_uploaded_image: any, explanation_id: str):
         update = {"original_image": user_uploaded_image}
-        self.collection.update_one({'_id': explanation_id}, {'$set': update}, upsert=True)
+        try:
+            result = self.collection.update_one({'_id': explanation_id}, {'$set': update}, upsert=True)
+            return result.matched_count > 0
+        except Exception:
+            return False

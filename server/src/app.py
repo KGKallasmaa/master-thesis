@@ -55,8 +55,7 @@ def original_image():
     explanation_id = payload["id"]
     if explanation_id is None:
         return jsonify({"url": ""})
-    database = ExplanationRequirementDb()
-    image = database.get_explanation_requirement(explanation_id).original_image
+    image = explanation_requirement_db.get_explanation_requirement(explanation_id).original_image
     return jsonify({"url": image})
 
 
@@ -72,8 +71,6 @@ def most_popular_concepts():
 
 
 # TODO: this is used
-
-
 @api.route("/concept-constraint", methods=["POST"])
 def edit_concept_constraint_view():
     # TODO: we should do some validation before submitting data
@@ -87,19 +84,12 @@ def edit_concept_constraint_view():
     if constraint_type is None or explanation_id is None or viable_concepts is None:
         return '', 400
 
-    print("adding concept constraint", flush=True)
-    print(viable_concepts, flush=True)
-    print(payload, flush=True)
-
     explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
-    explanation_requirement.constraints.change_concept_constraint(constraint_type=constraint_type,
-                                                                  new_values=viable_concepts)
+    explanation_requirement.constraints.change_concept_constraint(constraint_type, viable_concepts)
+    explanation_requirement_db.update_explanation_requirement_constraints(explanation_requirement)
+
     explanation_requirement.original_image_id = image_id
     explanation_requirement_db.update_explanation_requirement(explanation_requirement)
-
-    debug = explanation_requirement_db.get_explanation_requirement(explanation_id)
-    print(debug.constraints.initially_proposed_concepts, flush=True)
-    assert len(debug.constraints.initially_proposed_concepts) > 0
 
     return '', 204
 
@@ -114,8 +104,7 @@ def explanation_concepts():
         return jsonify({"concepts": []})
     explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
     used_concepts_labels = explanation_requirement.constraints.currently_used_concepts[explanation_type]
-    available_to_be_chosen_concepts = explanation_requirement.constraints.available_to_be_chosen_concepts(
-        explanation_type)
+    available_to_be_chosen_concepts = explanation_requirement.constraints.available_to_be_chosen_concepts(explanation_type)
 
     return jsonify(
         {

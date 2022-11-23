@@ -13,15 +13,10 @@ class Constraints:
         self.user_selected_concepts = json.get("user_selected_concepts", [])
 
     def change_concept_constraint(self, constraint_type: str, new_values: list[str]):
-        print("changing concept constraint", flush=True)
-        print(constraint_type, flush=True)
-        print(new_values, flush=True)
         if constraint_type == "currently_used_concepts":
             self.currently_used_concepts = new_values
         elif constraint_type == "initially_proposed_concepts":
-            print("changing initially proposed concepts", flush=True)
             self.initially_proposed_concepts = new_values
-            print(self.initially_proposed_concepts, flush=True)
         elif constraint_type == "most_intuitive_concepts":
             self.most_intuitive_concepts = new_values
         elif constraint_type == "most_predictive_concepts":
