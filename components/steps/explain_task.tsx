@@ -29,10 +29,10 @@ const explanationStep_TitelAndDescription = {
 
 export default function ExplainTask(index: number) {
   const [explanationStep, setExplanationStep] = useState("inital_concepts");
-  
+
   const { title, description } =
     explanationStep_TitelAndDescription[explanationStep];
- 
+
   const explanationChoiceStepIsVisible = !["", "inital_concepts"].includes(
     explanationStep
   );
