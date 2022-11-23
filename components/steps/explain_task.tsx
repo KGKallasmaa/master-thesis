@@ -28,25 +28,11 @@ const explanationStep_TitelAndDescription = {
 };
 
 export default function ExplainTask(index: number) {
-  if (typeof index !== "number") {
-    return <div>Invalid index</div>;
-  }
   const [explanationStep, setExplanationStep] = useState("inital_concepts");
+  
   const { title, description } =
     explanationStep_TitelAndDescription[explanationStep];
-  //  const description = explainTypeMessageMap[explanation_type];
-  //  const changeExplanationButtonText =
-  //  explainTypeButtonTextMap[explanation_type];
-
-  /*
-  const handleStepChange = () => {
-    if (explanation_type === "desision_tree") {
-      window.location.replace(`/explain/${index}/counter_factual`);
-    } else {
-      window.location.replace(`/explain/${index}/desision_tree`);
-    }
-  };
-  */
+ 
   const explanationChoiceStepIsVisible = !["", "inital_concepts"].includes(
     explanationStep
   );
@@ -90,8 +76,3 @@ export default function ExplainTask(index: number) {
     </>
   );
 }
-/*
- <Button onClick={handleStepChange} type="primary">
-            {changeExplanationButtonText}
-          </Button>
-          */

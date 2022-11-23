@@ -1,5 +1,5 @@
 import copy
-from typing import List
+from typing import List, Dict
 
 import dice_ml
 import pandas as pd
@@ -19,25 +19,24 @@ ORIGINAL = 0
 minimum_counterfactual_probability = [i / 100.0 for i in range(25, 101)]
 minimum_counterfactual_probability.reverse()
 
+DECISION_TREE = "decision_tree"
+COUNTERFACTUAL = "counterfactual"
+
 
 class CounterFactualExplanationService:
+    def __init__(self):
+        self.requirement_db = ExplanationRequirementDb()
+        self.closest_label_db = ClosestLabelsDb()
 
-    def counterfactual_explanation(self,
-                                   explanation_id: str,
-                                   to_be_explained_image_index: int,
-                                   counter_factual_class: str):
+    def explain(self, explanation_id: str, counter_factual_class: str, to_be_explained_image_index: int) -> Dict[
+        str, any]:
+        concepts = self.to_be_used_concepts(explanation_id)
+        return self.counterfactual_explanation(to_be_explained_image_index=to_be_explained_image_index,
+                                               counter_factual_class=counter_factual_class,
+                                               available_concepts=concepts)
 
-        user_specified_concepts = explanation_requirement_db.get_explanation_requirement(
-            explanation_id).user_specified_concepts
-        decision_tree_concepts = user_specified_concepts.get("decision_tree", [])
-        counter_factual_concepts = user_specified_concepts.get("counter_factual", [])
-
-        if len(counter_factual_concepts) == 0:
-            raise RuntimeError("Explanation can not be provided, because we can not use any concepts")
-
-        available_concepts = decision_tree_concepts + counter_factual_concepts
-        available_concepts = list(set(available_concepts))
-        available_concepts.sort()
+    def counterfactual_explanation(self, to_be_explained_image_index: int, counter_factual_class: str,
+                                   available_concepts: List[str]):
 
         X, y, black_box_model = self.__find_blackbox_model(available_concepts,
                                                            counter_factual_class,
@@ -93,15 +92,16 @@ class CounterFactualExplanationService:
                     "minimumAcceptanceProbability": minimum_acceptance_probability,
                     "counterfactuals": counterfactual_view,
                 }
+
             except Exception as e:
                 return {
-                    "error": f"{e}",
+                    "error": str(e),
                     "original": {
                         "class": get_labels()[to_be_explained_image_index],
                         "values": to_be_explained_instance_as_dict
                     },
-                    "minimumAcceptanceProbability": minimum_acceptance_probability,
                     "counterFactualClass": counter_factual_class,
+                    "minimumAcceptanceProbability": minimum_acceptance_probability,
                     "counterfactuals": [],
                 }
 
@@ -152,4 +152,17 @@ class CounterFactualExplanationService:
         clf, accuracy = train_decision_tree(valid_X, valid_y)
         return X, y, clf
 
+    # TODO: fix this
+    def to_be_used_concepts(self, explanation_id: str) -> List[str]:
+        constraints = self.requirement_db.get_explanation_requirement(explanation_id).constraints
+        human_readable_concepts = constraints.user_selected_concepts
+        if len(human_readable_concepts) == 0:
+            human_readable_concepts = constraints.initially_proposed_concepts
+        if len(human_readable_concepts) == 0:
+            raise ValueError("Counter tree explanation requires at least one concept for explanation")
+        return human_readable_concepts
 
+    def update_used_constraints(self, explanation_id: str, used: List[str]):
+        requirement = self.requirement_db.get_explanation_requirement(explanation_id)
+        requirement.constraints.change_currently_used_concepts(COUNTERFACTUAL, used)
+        self.requirement_db.update_explanation_requirement_constraints(requirement)

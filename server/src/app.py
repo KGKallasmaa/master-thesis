@@ -128,6 +128,23 @@ def decision_tree_explanation_view():
     explanation = decision_tree_explanation_service.explain(explanation_id, img_id)
     return jsonify(explanation)
 
+# TODO: this is used
+@api.route("/counter-factual-explanation", methods=["POST"])
+def counterfactual_explanation_view():
+    payload = request.get_json()
+    explanation_id = payload["id"]
+    img_id = payload["img"]
+    counter_factual_class = payload["counterFactualClass"]
+    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id, img_id,
+                                                                                    counter_factual_class)
+    return jsonify(counter_factual)
+
+
+# TODO: this is used
+@api.route("/all-labels", methods=["GET"])
+def all_labels_view():
+    labels = sorted(set(list(get_labels())))
+    return jsonify({"labels": labels})
 
 """
 @api.route("/user_uploaded_image-segments", methods=["POST"])
@@ -156,33 +173,6 @@ def label_concepts_view():
     if len(center_concepts) == 0:
         return '', 400
     return jsonify({"results": center_concepts})
-
-
-# TODO: this is used
-
-
-
-
-
-# TODO: this is used
-@api.route("/counter-factual-explanation", methods=["POST"])
-def counterfactual_explanation_view():
-    payload = request.get_json()
-    explanation_id = payload["id"]
-    img_id = payload["img"]
-    counter_factual_class = payload["counterFactualClass"]
-    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id, img_id,
-                                                                                    counter_factual_class)
-    return jsonify(counter_factual)
-
-
-# TODO: this is used
-@api.route("/all-labels", methods=["GET"])
-def all_labels_view():
-    labels = list(set(list(get_labels())))
-    labels.sort()
-    return jsonify({"labels": labels})
-
 """
 
 if __name__ == '__main__':

@@ -8,5 +8,6 @@ export default function ExplainPage() {
   if (!parseInt(index)) {
     return null;
   }
+  // @ts-ignore
   return ExplainTask(parseInt(index));
 }
