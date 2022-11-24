@@ -3,7 +3,7 @@ import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { CounterfactualExplanation } from "./models/counterfactual_model";
-import CenterConcepts from "../concepts/center_concepts";
+import ConceptsManager from "../concepts/propose_more_consepts";
 const { Option } = Select;
 
 export default function CounterFactualExplanation({
@@ -11,8 +11,7 @@ export default function CounterFactualExplanation({
 }: {
   index: number;
 }) {
-  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =
-    useState<string>("select");
+  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =useState<string>("select");
   const [counterFactualClass, setCounterFactualClass] = useState<string>("");
   const [counterFactualLabels, setCouterFactualLabels] = useState<string[]>([]);
 
@@ -34,7 +33,7 @@ export default function CounterFactualExplanation({
 
   const handleConceptSelected = (lable: string) => {
     setCounterFactualClass(lable);
-    setCounterFactualExplanationStep("constraints");
+    setCounterFactualExplanationStep("explain");
   };
 
   return (
@@ -55,17 +54,6 @@ export default function CounterFactualExplanation({
           );
         })}
       </Select>
-      <br />
-      <br />
-      {counterFactualExplanationStep === "constraints" && (
-        <CenterConcepts
-          index={index}
-          label={counterFactualClass}
-          explanation_type={"counter_factual"}
-          onComplete={() => setCounterFactualExplanationStep("explain")}
-        />
-      )}
-
       {counterFactualExplanationStep === "explain" && (
         <>
           <br />
@@ -92,7 +80,7 @@ function Counterfactual({
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const fetchCounterFactualExplanation = () => {
     setLoading(true);
     const payload = {
       img: imageIndex,
@@ -112,6 +100,11 @@ function Counterfactual({
         setError(err.message);
         setLoading(false);
       });
+  };
+
+
+  useEffect(() => {
+    fetchCounterFactualExplanation();
   }, []);
 
   if (isLoading) {
@@ -154,6 +147,14 @@ function Counterfactual({
 
   return (
     <>
+ <ConceptsManager
+        index={imageIndex}
+        explanation_type={"counterfactual"}
+        onChangeCompleted={() => fetchCounterFactualExplanation()}
+      />
+<br/>
+<br/>
+
       <p>OriginalClass {counterFactualExplanation.original.class}</p>
       <Table
         columns={renderedOriginalInstanceColumns}

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { Button, Row, Skeleton } from "antd";
 import { getId } from "../common/storage";
-import Tags from "../common/tags";
 import toast from "react-hot-toast";
+import Tags from "../common/tags";
 
 const initalConceptConstraint = "initially_proposed_concepts";
 
@@ -67,6 +67,7 @@ export default function InitialConceptsStep({
   }
 
   function handleConcepClick(name: string, isSelected: boolean) {
+    alert("hi");
     let currentValues = selectedConcepts;
     if (isSelected) {
       currentValues.push(name);

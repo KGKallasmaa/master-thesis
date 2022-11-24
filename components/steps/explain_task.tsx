@@ -60,9 +60,13 @@ export default function ExplainTask(index: number) {
             />
           )}
           {explanationChoiceStepIsVisible && (
+           <>
             <ExplanationTypeChoiceStep
               onComplete={(choice) => handleSelect(choice)}
             />
+            <br/>
+            <br/>
+           </>
           )}
           {explanationStep === "desision_tree" && (
             <DesisionTreeExplanation index={index} />

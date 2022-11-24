@@ -1,5 +1,6 @@
 import { Row, Skeleton } from "antd";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { http } from "../common/http";
 import { getId } from "../common/storage";
 import Tags from "../common/tags";
@@ -11,20 +12,21 @@ type ConceptsManagerProps = {
 };
 const USER_SELECTED_CONCEPTS = "user_selected_concepts";
 
+function arraysHaveSameElements(a: string[], b: string[]) {
+  return a.length === b.length && a.every((v) => b.includes(v));
+}
+
 export default function ConceptsManager(props: ConceptsManagerProps) {
   const { index, explanation_type, onChangeCompleted } = props;
 
-  const [currentlyUsedConcepts, setCurrentlyUsedConcepts] = useState<string[]>(
-    []
-  );
-  const [availableToBeChosenConcepts, setAvailableToBeChosenConcepts] =
-    useState<string[]>([]);
-
-  const [userSelectedConcepts, setUserSelectedConcepts] = useState<string[]>(
-    []
-  );
-
   const [isLoading, setLoading] = useState(true);
+
+  const [currentlyUsedConcepts, setCurrentlyUsedConcepts] = useState<string[]>([]);
+  const [availableToBeChosenConcepts, setAvailableToBeChosenConcepts] =useState<string[]>([]);
+
+  const [newConceptConstraint, setNewConceptConstraint] = useState<string[]>([]);
+
+  
 
   useEffect(() => {
     const payload = {
@@ -37,11 +39,12 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
       .then((data) => {
         setCurrentlyUsedConcepts(data.usedConcepts);
         setAvailableToBeChosenConcepts(data.availableToBeChosenConcepts);
-        setUserSelectedConcepts(data.userSelectedConcepts);
+        setNewConceptConstraint(data.usedConcepts);
         setLoading(false);
       })
       .catch((err) => {
         console.error(err);
+        toast.error(err)
       })
       .finally(() => {
         setLoading(false);
@@ -49,19 +52,24 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
   }, [index, explanation_type]);
 
   useEffect(() => {
+    if (arraysHaveSameElements(currentlyUsedConcepts, newConceptConstraint)) {
+      return;
+    }
+    alert("hi");
     const payload = {
       id: getId(),
       img: index,
       constraint_type: USER_SELECTED_CONCEPTS,
-      concepts: userSelectedConcepts,
+      concepts: newConceptConstraint.filter((v, i, a) => a.indexOf(v) === i),
     };
     http("/concept-constraint", payload)
-      .then((el) => el.json())
-      .then(() => {
-        onChangeCompleted();
+      .then((resp) => {
+        if (resp.status === 200) {
+          onChangeCompleted();
+        }
       })
       .catch(() => {});
-  }, [userSelectedConcepts]);
+  }, [newConceptConstraint]);
 
   if (isLoading) {
     return <Skeleton active />;
@@ -80,7 +88,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
             color={"blue"}
             values={currentlyUsedConcepts}
             onClick={(conceptName) =>
-              setUserSelectedConcepts([...userSelectedConcepts, conceptName])
+              setNewConceptConstraint([...newConceptConstraint, conceptName])
             }
           />
         </div>
@@ -97,8 +105,8 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
             color={"red"}
             values={availableToBeChosenConcepts}
             onClick={(conceptName) =>
-              setUserSelectedConcepts(
-                userSelectedConcepts.filter((el) => el !== conceptName)
+              setNewConceptConstraint(
+                newConceptConstraint.filter((el) => el !== conceptName)
               )
             }
           />
