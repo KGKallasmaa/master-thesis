@@ -11,7 +11,8 @@ export default function CounterFactualExplanation({
 }: {
   index: number;
 }) {
-  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =useState<string>("select");
+  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =
+    useState<string>("select");
   const [counterFactualClass, setCounterFactualClass] = useState<string>("");
   const [counterFactualLabels, setCouterFactualLabels] = useState<string[]>([]);
 
@@ -102,7 +103,6 @@ function Counterfactual({
       });
   };
 
-
   useEffect(() => {
     fetchCounterFactualExplanation();
   }, []);
@@ -147,13 +147,13 @@ function Counterfactual({
 
   return (
     <>
- <ConceptsManager
+      <ConceptsManager
         index={imageIndex}
         explanation_type={"counterfactual"}
         onChangeCompleted={() => fetchCounterFactualExplanation()}
       />
-<br/>
-<br/>
+      <br />
+      <br />
 
       <p>OriginalClass {counterFactualExplanation.original.class}</p>
       <Table

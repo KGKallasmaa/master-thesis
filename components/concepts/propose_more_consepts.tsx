@@ -21,12 +21,15 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
 
   const [isLoading, setLoading] = useState(true);
 
-  const [currentlyUsedConcepts, setCurrentlyUsedConcepts] = useState<string[]>([]);
-  const [availableToBeChosenConcepts, setAvailableToBeChosenConcepts] =useState<string[]>([]);
+  const [currentlyUsedConcepts, setCurrentlyUsedConcepts] = useState<string[]>(
+    []
+  );
+  const [availableToBeChosenConcepts, setAvailableToBeChosenConcepts] =
+    useState<string[]>([]);
 
-  const [newConceptConstraint, setNewConceptConstraint] = useState<string[]>([]);
-
-  
+  const [newConceptConstraint, setNewConceptConstraint] = useState<string[]>(
+    []
+  );
 
   useEffect(() => {
     const payload = {
@@ -44,7 +47,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
       })
       .catch((err) => {
         console.error(err);
-        toast.error(err)
+        toast.error(err);
       })
       .finally(() => {
         setLoading(false);
