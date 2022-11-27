@@ -2,7 +2,6 @@ from typing import List, Optional
 
 from main.database.client import get_client
 from main.models.consept_intuitevness import ConceptIntuitiveness
-from main.models.constraints import Constraints
 
 
 class IntuitivenessDb:

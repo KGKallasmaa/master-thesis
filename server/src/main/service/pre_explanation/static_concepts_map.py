@@ -3,6 +3,7 @@ from typing import Dict, List
 from main.service.pre_explanation.data_access import get_masks, get_images, get_labels
 from main.service.pre_explanation.kmeans import kmean_segments, most_popular_concepts
 
+
 # TODO: apply multi processing https://www.machinelearningplus.com/python/parallel-processing-python/
 def center_most_concepts(k=10) -> Dict[str, List[any]]:
     """

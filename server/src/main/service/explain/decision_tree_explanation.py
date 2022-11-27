@@ -73,7 +73,7 @@ class DecisionTreeExplanationService:
         return human_readable_concepts
 
     def update_used_constraints(self, explanation_id: str, feature_encoder, estimator):
-        feature_importance = {feature: {"featureName": feature, "global": importance} for feature, importance in
+        feature_importance = {feature: {"featureName": feature, "local": importance} for feature, importance in
                               zip(feature_encoder.classes_, estimator.feature_importances_)}
 
         feature_importance = sorted(list(feature_importance.values()), key=lambda x: x["local"], reverse=True)

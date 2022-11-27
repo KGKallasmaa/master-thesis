@@ -1,3 +1,4 @@
+import itertools
 from typing import List, Set
 
 from main.database.closest_labels import ClosestLabelsDb
@@ -28,7 +29,6 @@ class ConceptSuggestionService:
         print(constraints,flush=True)
         used_concepts = constraints.user_selected_concepts[explanation_type]
 
-        proposed_concepts = []
         if explanation_type == ExplanationType.DECISION_TREE:
             proposed_concepts = self.__propose_concepts_for_decision_tree(image_label=image_label,
                                                                           constraints=constraints)
@@ -37,6 +37,10 @@ class ConceptSuggestionService:
                 image_id=explanation_requirement.original_image_id,
                 image_label=image_label,
                 constraints=constraints)
+        else:
+            raise ValueError("Unknown explanation type")
+
+        print("proposed concepts",flush=True)
 
         return ConceptSuggestions({
             "usedConcepts": used_concepts,
@@ -45,8 +49,11 @@ class ConceptSuggestionService:
 
     def __propose_concepts_for_decision_tree(self, image_label: str, constraints: Constraints) -> List[str]:
         used_concepts = set(constraints.user_selected_concepts[ExplanationType.DECISION_TREE])
-
+        print("user selected concepts",flush=True)
+        print(constraints.user_selected_concepts,flush=True)
         most_predictive_concepts = constraints.most_predictive_concepts[ExplanationType.DECISION_TREE]
+        print("most predictive concepts",flush=True)
+        print(most_predictive_concepts, flush=True)
         most_predictive_concepts = [c for c in most_predictive_concepts if c not in used_concepts]
 
         most_intuitive_concepts = self.__most_intuitive_concepts(labels=[image_label], used_concepts=used_concepts)
@@ -77,9 +84,8 @@ class ConceptSuggestionService:
         for label in labels:
             intuitive_concepts = self.intuitiveness_db.top_intuitive_concepts(label, TOP_K_INTUITIVE_CONCEPTS)
             intuitive_concepts = [c.label for c in intuitive_concepts if c not in used_concepts]
-            for concept in intuitive_concepts:
-                if concept not in final_results:
-                    final_results.append(concept)
+            intuitive_concepts = [c for c in intuitive_concepts if c not in final_results]
+            final_results.extend(intuitive_concepts)
 
         return final_results
 
@@ -88,12 +94,13 @@ class ConceptSuggestionService:
                                                     most_intuitive_concepts: List[str]) -> List[str]:
         proposed_concepts = []
 
-        for predictive_concept, intuitive_concept in zip(most_predictive_concepts, most_intuitive_concepts):
+        for combination in itertools.zip_longest(most_predictive_concepts, most_intuitive_concepts):
             if len(proposed_concepts) >= CONCEPT_SUGGESTION_LIMIT:
                 break
-            if predictive_concept not in proposed_concepts:
+            predictive_concept, intuitive_concept = combination
+            if predictive_concept is not None and predictive_concept not in proposed_concepts:
                 proposed_concepts.append(predictive_concept)
-            if intuitive_concept not in proposed_concepts:
+            if intuitive_concept is not None and intuitive_concept not in proposed_concepts:
                 proposed_concepts.append(intuitive_concept)
 
         return proposed_concepts

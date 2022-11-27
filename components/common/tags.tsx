@@ -14,11 +14,10 @@ export default function Tags(props: TagProps) {
   return (
     <>
       {values.map((el) => (
-        <div onClick={()=>onClick(el)}>
-        <Tag key={el}
-            color={color}>
-          {el}
-        </Tag>
+        <div onClick={() => onClick(el)}>
+          <Tag key={el} color={color}>
+            {el}
+          </Tag>
         </div>
       ))}
     </>

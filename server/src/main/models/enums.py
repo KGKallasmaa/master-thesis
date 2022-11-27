@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ExplanationType(Enum):
+class ExplanationType(str, Enum):
     DECISION_TREE = "decision_tree"
     COUNTERFACTUAL = "counterfactual"
 

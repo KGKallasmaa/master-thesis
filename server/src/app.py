@@ -1,21 +1,22 @@
+import base64
+
 import numpy as np
 from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_cors import CORS
-import base64
 
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.enums import ExplanationType
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation import DecisionTreeExplanationService
-from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS
+from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
-from main.service.pre_explanation.closest_image import find_closest_image_index
-from main.service.suggestions.concept_suggestion_service import ConceptSuggestionService
+from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS
 from main.service.suggestions.concept_handler import UserSelectedConceptsHandler
+from main.service.suggestions.concept_suggestion_service import ConceptSuggestionService
 
 api = Flask(__name__)
 CORS(api)
@@ -87,6 +88,8 @@ def edit_concept_constraint_view():
     viable_concepts = payload["concepts"]
     explanation_id = payload["id"]
     image_id = payload["img"]
+    explanation_type = ExplanationType.from_str(
+        payload["explanation_type"]) if constraint_type != "initially_proposed_concepts" else None
 
     if constraint_type is None or explanation_id is None or viable_concepts is None:
         return '', 400
@@ -95,12 +98,11 @@ def edit_concept_constraint_view():
     explanation_requirement.original_image_id = image_id
     explanation_requirement_db.update_explanation_requirement(explanation_requirement)
 
-    if constraint_type != "initially_proposed_concepts":
-        explanation_type = ExplanationType.from_str(payload["explanation_type"])
-        user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type,
-                                                           viable_concepts)
+    user_selected_concepts_handler.new_constraints_selected(explanation_id, constraint_type, explanation_type,viable_concepts)
 
-    user_selected_concepts_handler.new_constraints_selected(explanation_id,constraint_type,viable_concepts)
+    if constraint_type != "initially_proposed_concepts":
+        user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
+
 
     return '', 204
 

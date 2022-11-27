@@ -63,7 +63,8 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
       id: getId(),
       img: index,
       constraint_type: USER_SELECTED_CONCEPTS,
-      concepts: newConceptConstraint.filter((v, i, a) => a.indexOf(v) === i),
+      explanation_type,
+      concepts: newConceptConstraint,
     };
     http("/concept-constraint", payload)
       .then((resp) => {
@@ -81,36 +82,34 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
   return (
     <>
       <Row>
-        <p>
+        <b>
           {currentlyUsedConcepts.length > 0
             ? "Selected concepts (click to unselect):"
             : ""}
-        </p>
+        </b>
         <div style={{ marginTop: 15 }}>
           <Tags
             color={"blue"}
             values={currentlyUsedConcepts}
             onClick={(conceptName) =>
-              setNewConceptConstraint([...newConceptConstraint, conceptName])
+              setNewConceptConstraint(newConceptConstraint.filter((el) => el !== conceptName))
             }
           />
         </div>
       </Row>
       <Row>
-        <p>
+        <b>
           {availableToBeChosenConcepts.length > 0
             ? "Available concepts (click to select):"
             : ""}
-        </p>
+        </b>
 
         <div style={{ marginTop: 15 }}>
           <Tags
             color={"red"}
             values={availableToBeChosenConcepts}
             onClick={(conceptName) =>
-              setNewConceptConstraint(
-                newConceptConstraint.filter((el) => el !== conceptName)
-              )
+              setNewConceptConstraint([...newConceptConstraint, conceptName])
             }
           />
         </div>

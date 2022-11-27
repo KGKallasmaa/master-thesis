@@ -1,5 +1,6 @@
 import copy
-from typing import List, Dict, Tuple
+import json
+from typing import List, Tuple
 
 import dice_ml
 import pandas as pd
@@ -10,7 +11,6 @@ from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.enums import ExplanationType
 from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
-import json
 
 COUNTERFACTUAL_LABEL = 1
 ORIGINAL = 0
@@ -172,7 +172,7 @@ class CounterFactualExplanationService:
         return human_readable_concepts
 
     def update_used_constraints(self, explanation_id: str, feature_encoder, estimator):
-        feature_importance = {feature: {"featureName": feature, "global": importance} for feature, importance in
+        feature_importance = {feature: {"featureName": feature, "local": importance} for feature, importance in
                               zip(feature_encoder.classes_, estimator.feature_importances_)}
 
         feature_importance = sorted(list(feature_importance.values()), key=lambda x: x["local"], reverse=True)

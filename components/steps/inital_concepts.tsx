@@ -52,8 +52,12 @@ export default function InitialConceptsStep({
     };
 
     http("/concept-constraint", payload)
-      .then(() => {
-        onComplete();
+      .then((resp) => {
+        console.log(resp);
+        if (resp.status === 204) {
+          alert("hello");
+          onComplete();
+        }
       })
       .catch((err) => {
         console.log(err);

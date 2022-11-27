@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from main.database.constraint_db import ConstraintDb
 from main.database.intuitivness_db import IntuitivenessDb
@@ -26,9 +26,12 @@ class UserSelectedConceptsHandler:
             new_value = self.intuitiveness_db.get_constraint_by_concept(concept).decrement_count()
             self.intuitiveness_db.update_intuitiveness(new_value)
 
-    def new_constraints_selected(self,explanation_id: str,
-                                 constraint:str,
+    def new_constraints_selected(self, explanation_id: str,
+                                 constraint_type: str,
+                                 explanation_type: Optional[ExplanationType],
                                  new_concepts: List[str]):
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
-        constraints.user_selected_concepts[constraint] = new_concepts
-        self.constraint_db.update_constraint(constraints)
+        constraints.change_concept_constraint(constraint_type, explanation_type, new_concepts)
+        print(constraints.initially_proposed_concepts, flush=True)
+        print(constraints.to_db_value(), flush=True)
+        assert self.constraint_db.update_constraint(constraints) == True
