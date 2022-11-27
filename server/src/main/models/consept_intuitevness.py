@@ -10,7 +10,7 @@ class ConceptIntuitiveness:
         self.label = json.get("label", "")
         # e.g. bed
         self.concept = json.get("concept", "")
-        self.count = json.get("count",0)
+        self.count = json.get("count", 0)
 
     def to_db_value(self) -> Dict[str, any]:
         return {

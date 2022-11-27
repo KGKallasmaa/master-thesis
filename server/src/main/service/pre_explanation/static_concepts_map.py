@@ -54,5 +54,5 @@ def static_most_popular_concepts() -> Dict[str, List[any]]:
 
     return image_most_popular_concepts
 
-LABEL_CENTER_MOST_CONCEPT = center_most_concepts()
+#LABEL_CENTER_MOST_CONCEPT = center_most_concepts()
 MOST_POPULAR_CONCEPTS = static_most_popular_concepts()

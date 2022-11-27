@@ -7,21 +7,16 @@ import pandas as pd
 from main.database.closest_labels import ClosestLabelsDb
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
+from main.models.enums import ExplanationType
 from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 import json
-
-# closest_label_db = ClosestLabelsDb()
-# explanation_requirement_db = ExplanationRequirementDb()
 
 COUNTERFACTUAL_LABEL = 1
 ORIGINAL = 0
 
 minimum_counterfactual_probability = [i / 100.0 for i in range(25, 101)]
 minimum_counterfactual_probability.reverse()
-
-DECISION_TREE = "decision_tree"
-COUNTERFACTUAL = "counterfactual"
 
 
 class CounterFactualExplanationService:
@@ -169,7 +164,7 @@ class CounterFactualExplanationService:
 
     def to_be_used_concepts(self, explanation_id: str) -> List[str]:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
-        human_readable_concepts = constraints.most_predictive_concepts(COUNTERFACTUAL)
+        human_readable_concepts = constraints.most_predictive_concepts[ExplanationType.COUNTERFACTUAL]
         if len(human_readable_concepts) == 0:
             human_readable_concepts = constraints.initially_proposed_concepts
         if len(human_readable_concepts) == 0:
@@ -185,6 +180,6 @@ class CounterFactualExplanationService:
 
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
 
-        constraints.change_concept_constraint("most_predictive_concepts", COUNTERFACTUAL, most_predictive_features)
+        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL, most_predictive_features)
 
         self.constraint_db.update_constraint(constraints)

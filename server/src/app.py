@@ -7,6 +7,7 @@ import base64
 
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
+from main.models.enums import ExplanationType
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation import DecisionTreeExplanationService
 from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS
@@ -14,7 +15,7 @@ from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.suggestions.concept_suggestion_service import ConceptSuggestionService
-from main.service.suggestions.intutevness_handler import UserSelectedConceptsHandler
+from main.service.suggestions.concept_handler import UserSelectedConceptsHandler
 
 api = Flask(__name__)
 CORS(api)
@@ -86,7 +87,6 @@ def edit_concept_constraint_view():
     viable_concepts = payload["concepts"]
     explanation_id = payload["id"]
     image_id = payload["img"]
-    explanation_type = payload["explanation_type"]
 
     if constraint_type is None or explanation_id is None or viable_concepts is None:
         return '', 400
@@ -96,7 +96,11 @@ def edit_concept_constraint_view():
     explanation_requirement_db.update_explanation_requirement(explanation_requirement)
 
     if constraint_type != "initially_proposed_concepts":
-        user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
+        explanation_type = ExplanationType.from_str(payload["explanation_type"])
+        user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type,
+                                                           viable_concepts)
+
+    user_selected_concepts_handler.new_constraints_selected(explanation_id,constraint_type,viable_concepts)
 
     return '', 204
 
@@ -105,7 +109,7 @@ def edit_concept_constraint_view():
 def explanation_concepts():
     payload = request.get_json()
     explanation_id = payload["id"]
-    explanation_type = payload["explanation_type"]
+    explanation_type = ExplanationType.from_str(payload["explanation_type"])
     return concept_suggestion_service.consept_suggestions(explanation_id, explanation_type).to_db_value()
 
 

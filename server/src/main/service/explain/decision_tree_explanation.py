@@ -5,12 +5,10 @@ import numpy as np
 from main.database.closest_labels import ClosestLabelsDb
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
+from main.models.enums import ExplanationType
 from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
 from main.service.explain.human_readable_explanation import HumanReadableExplanationService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
-
-DECISION_TREE = "decision_tree"
-COUNTERFACTUAL = "counterfactual"
 
 
 class DecisionTreeExplanationService:
@@ -65,14 +63,16 @@ class DecisionTreeExplanationService:
 
     def to_be_used_concepts(self, explanation_id: str) -> List[str]:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
-        human_readable_concepts = constraints.most_predictive_concepts(DECISION_TREE)
+        print(constraints.to_db_value(), flush=True)
+        print(constraints.most_predictive_concepts, flush=True)
+        human_readable_concepts = constraints.most_predictive_concepts[ExplanationType.DECISION_TREE]
         if len(human_readable_concepts) == 0:
             human_readable_concepts = constraints.initially_proposed_concepts
         if len(human_readable_concepts) == 0:
             raise ValueError("Decision tree explanation requires at least one concept for explanation")
         return human_readable_concepts
 
-    def update_used_constraints(self,explanation_id: str,feature_encoder,estimator):
+    def update_used_constraints(self, explanation_id: str, feature_encoder, estimator):
         feature_importance = {feature: {"featureName": feature, "global": importance} for feature, importance in
                               zip(feature_encoder.classes_, estimator.feature_importances_)}
 
@@ -81,6 +81,7 @@ class DecisionTreeExplanationService:
 
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
 
-        constraints.change_concept_constraint("most_predictive_concepts", DECISION_TREE, most_predictive_features)
+        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.DECISION_TREE,
+                                              most_predictive_features)
 
         self.constraint_db.update_constraint(constraints)
