@@ -64,7 +64,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
       img: index,
       constraint_type: USER_SELECTED_CONCEPTS,
       explanation_type,
-      concepts: newConceptConstraint,
+      concepts: newConceptConstraint.filter((v, i, a) => a.indexOf(v) === i),
     };
     http("/concept-constraint", payload)
       .then((resp) => {

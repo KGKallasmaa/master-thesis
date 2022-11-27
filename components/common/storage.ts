@@ -1,4 +1,8 @@
-import { GetLocalStorageValue, RemoveLocalStorageValue, UpdateLocalStorageValue } from "./local";
+import {
+  GetLocalStorageValue,
+  RemoveLocalStorageValue,
+  UpdateLocalStorageValue,
+} from "./local";
 
 export function getId(): string {
   const key = "id";
