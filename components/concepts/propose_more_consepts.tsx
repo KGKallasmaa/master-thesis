@@ -92,7 +92,9 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
             color={"blue"}
             values={currentlyUsedConcepts}
             onClick={(conceptName) =>
-              setNewConceptConstraint(newConceptConstraint.filter((el) => el !== conceptName))
+              setNewConceptConstraint(
+                newConceptConstraint.filter((el) => el !== conceptName)
+              )
             }
           />
         </div>
