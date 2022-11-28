@@ -7,7 +7,7 @@ export default function Upload() {
   const description = "Upload the image you would like us to explain";
 
   function handleSuccessfulUpload(img_index: number) {
-    window.location.replace(`/explain/${img_index}/desision_tree`);
+    window.location.replace(`/explain/${img_index}`);
   }
 
   return (

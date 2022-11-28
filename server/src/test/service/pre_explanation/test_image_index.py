@@ -1,6 +1,7 @@
+import numpy as np
+
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.data_access import get_images
-import numpy as np
 
 
 def test_works_with_same_image():

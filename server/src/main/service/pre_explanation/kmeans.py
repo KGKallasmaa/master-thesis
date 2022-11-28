@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 from main.service.pre_explanation.common import array_to_image, euclidean_distance
-
 from main.service.pre_explanation.common import serve_pil_image, resize_img
 from main.service.pre_explanation.data_access import get_segments
 from main.service.utils.dictionary import sort_dictionary

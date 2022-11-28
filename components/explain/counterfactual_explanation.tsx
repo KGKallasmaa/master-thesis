@@ -1,9 +1,11 @@
-import { Select, Table } from "antd";
+import { Select, Skeleton, Table } from "antd";
 import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { CounterfactualExplanation } from "./models/counterfactual_model";
-import CenterConcepts from "../concepts/center_concepts";
+import ConceptsManager from "../concepts/propose_more_consepts";
+import toast from "react-hot-toast";
+
 const { Option } = Select;
 
 export default function CounterFactualExplanation({
@@ -24,17 +26,17 @@ export default function CounterFactualExplanation({
       })
       .catch((err) => {
         console.error(err);
-      })
-      .finally(() => {});
+        toast.error(err);
+      });
   }, []);
 
   if (counterFactualLabels.length === 0) {
-    return <>Generating an explanation ...</>;
+    return <Skeleton active />;
   }
 
   const handleConceptSelected = (lable: string) => {
     setCounterFactualClass(lable);
-    setCounterFactualExplanationStep("constraints");
+    setCounterFactualExplanationStep("explain");
   };
 
   return (
@@ -55,17 +57,6 @@ export default function CounterFactualExplanation({
           );
         })}
       </Select>
-      <br />
-      <br />
-      {counterFactualExplanationStep === "constraints" && (
-        <CenterConcepts
-          index={index}
-          label={counterFactualClass}
-          explanation_type={"counter_factual"}
-          onComplete={() => setCounterFactualExplanationStep("explain")}
-        />
-      )}
-
       {counterFactualExplanationStep === "explain" && (
         <>
           <br />
@@ -92,7 +83,7 @@ function Counterfactual({
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const fetchCounterFactualExplanation = () => {
     setLoading(true);
     const payload = {
       img: imageIndex,
@@ -112,10 +103,14 @@ function Counterfactual({
         setError(err.message);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchCounterFactualExplanation();
   }, []);
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Skeleton active />;
   }
   if (error) {
     return (
@@ -154,6 +149,14 @@ function Counterfactual({
 
   return (
     <>
+      <ConceptsManager
+        index={imageIndex}
+        explanation_type={"counterfactual"}
+        onChangeCompleted={() => fetchCounterFactualExplanation()}
+      />
+      <br />
+      <br />
+
       <p>OriginalClass {counterFactualExplanation.original.class}</p>
       <Table
         columns={renderedOriginalInstanceColumns}
@@ -161,7 +164,7 @@ function Counterfactual({
         pagination={false}
       />
       <br />
-      <p>Counter_factual: {desiredCounterFactualClass}</p>
+      <p>Counterfactual: {desiredCounterFactualClass}</p>
       <br />
       <p>Raw counterfactual values</p>
       <Table
