@@ -65,7 +65,7 @@ class DecisionTreeExplanationService:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
         print(constraints.to_db_value(), flush=True)
         print(constraints.most_predictive_concepts, flush=True)
-        human_readable_concepts = constraints.most_predictive_concepts[ExplanationType.DECISION_TREE]
+        human_readable_concepts = constraints.user_selected_concepts[ExplanationType.DECISION_TREE.value]
         if len(human_readable_concepts) == 0:
             human_readable_concepts = constraints.initially_proposed_concepts
         if len(human_readable_concepts) == 0:

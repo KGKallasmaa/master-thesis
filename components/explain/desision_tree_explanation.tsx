@@ -3,6 +3,7 @@ import { http } from "../common/http";
 import { getId } from "../common/storage";
 import { BidirectionalBar } from "@ant-design/plots";
 import ConceptsManager from "../concepts/propose_more_consepts";
+import { Skeleton } from "antd";
 
 type FeatureImportance = {
   featureName: string;
@@ -22,6 +23,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   const [predictedLabel, setPredictedLabel] = useState<string>("");
 
   const fetchDesisionTreeExplanation = () => {
+    alert("fetchDesisionTreeExplanation");
     setLoading(true);
     const payload = {
       img: index,
@@ -47,7 +49,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   }, [index]);
 
   if (isLoading) {
-    return <>Generating an explanation ...</>;
+    return <Skeleton active />;
   }
   if (errorMessage && !featureImportance) {
     return (

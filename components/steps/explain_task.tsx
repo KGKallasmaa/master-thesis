@@ -21,7 +21,7 @@ const explanationStep_TitelAndDescription = {
     title: "Decision Tree Explanation",
     description: "This is a decision tree explanation",
   },
-  counter_factual: {
+  counterfactual: {
     title: "Counterfactual Explanation",
     description: "This is a counterfactual explanation",
   },

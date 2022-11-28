@@ -1,9 +1,10 @@
-import { Select, Table } from "antd";
+import { Select, Skeleton, Table } from "antd";
 import { getId } from "../common/storage";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { CounterfactualExplanation } from "./models/counterfactual_model";
 import ConceptsManager from "../concepts/propose_more_consepts";
+
 const { Option } = Select;
 
 export default function CounterFactualExplanation({
@@ -29,7 +30,7 @@ export default function CounterFactualExplanation({
   }, []);
 
   if (counterFactualLabels.length === 0) {
-    return <>Generating an explanation ...</>;
+    return <Skeleton active />;
   }
 
   const handleConceptSelected = (lable: string) => {
@@ -108,7 +109,7 @@ function Counterfactual({
   }, []);
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Skeleton active />;
   }
   if (error) {
     return (

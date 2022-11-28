@@ -1,3 +1,4 @@
+import copy
 import itertools
 from typing import List, Set
 
@@ -10,7 +11,8 @@ from main.models.constraints import Constraints
 from main.models.enums import ExplanationType
 from main.service.pre_explanation.data_access import get_labels
 
-TOP_K_INTUITIVE_CONCEPTS = 3
+TOP_K_PREDICTIVE_CONCEPTS = 5
+TOP_K_INTUITIVE_CONCEPTS = 5
 CONCEPT_SUGGESTION_LIMIT = 10
 
 
@@ -26,7 +28,7 @@ class ConceptSuggestionService:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
         explanation_requirement = self.explanation_requirement_db.get_explanation_requirement(explanation_id)
         image_label = get_labels()[explanation_requirement.original_image_id]
-        print(constraints,flush=True)
+        print(constraints, flush=True)
         used_concepts = constraints.user_selected_concepts[explanation_type]
 
         if explanation_type == ExplanationType.DECISION_TREE:
@@ -40,7 +42,10 @@ class ConceptSuggestionService:
         else:
             raise ValueError("Unknown explanation type")
 
-        print("proposed concepts",flush=True)
+        print("used_concepts", flush=True)
+        print(used_concepts, flush=True)
+        print("availableToBeChosenConcepts", flush=True)
+        print(proposed_concepts, flush=True)
 
         return ConceptSuggestions({
             "usedConcepts": used_concepts,
@@ -49,16 +54,17 @@ class ConceptSuggestionService:
 
     def __propose_concepts_for_decision_tree(self, image_label: str, constraints: Constraints) -> List[str]:
         used_concepts = set(constraints.user_selected_concepts[ExplanationType.DECISION_TREE])
-        print("user selected concepts",flush=True)
-        print(constraints.user_selected_concepts,flush=True)
         most_predictive_concepts = constraints.most_predictive_concepts[ExplanationType.DECISION_TREE]
-        print("most predictive concepts",flush=True)
-        print(most_predictive_concepts, flush=True)
         most_predictive_concepts = [c for c in most_predictive_concepts if c not in used_concepts]
 
         most_intuitive_concepts = self.__most_intuitive_concepts(labels=[image_label], used_concepts=used_concepts)
 
-        return self.__combine_predictive_and_intuitive_concepts(most_predictive_concepts, most_intuitive_concepts)
+        initially_proposed_concepts = set(constraints.initially_proposed_concepts)
+        initially_proposed_concepts = initially_proposed_concepts.difference(set(used_concepts))
+
+        return self.__combine_concepts(most_predictive_concepts=most_predictive_concepts,
+                                       most_intuitive_concepts=most_intuitive_concepts,
+                                       initially_proposed_concepts=list(initially_proposed_concepts))
 
     def __propose_concepts_for_counterfactual(self,
                                               image_id: int,
@@ -76,7 +82,12 @@ class ConceptSuggestionService:
             most_intuitive_concepts = self.__most_intuitive_concepts(labels=closest_labels.closest,
                                                                      used_concepts=used_concepts)
 
-        return self.__combine_predictive_and_intuitive_concepts(most_predictive_concepts, most_intuitive_concepts)
+        initially_proposed_concepts = set(constraints.initially_proposed_concepts)
+        initially_proposed_concepts = initially_proposed_concepts.difference(set(used_concepts))
+
+        return self.__combine_concepts(most_predictive_concepts=most_predictive_concepts,
+                                       most_intuitive_concepts=most_intuitive_concepts,
+                                       initially_proposed_concepts=list(initially_proposed_concepts))
 
     def __most_intuitive_concepts(self, labels: List[str], used_concepts: Set[str]) -> List[str]:
         final_results = []
@@ -90,17 +101,38 @@ class ConceptSuggestionService:
         return final_results
 
     @staticmethod
-    def __combine_predictive_and_intuitive_concepts(most_predictive_concepts: List[str],
-                                                    most_intuitive_concepts: List[str]) -> List[str]:
+    def __combine_concepts(
+            most_predictive_concepts: List[str],
+            most_intuitive_concepts: List[str],
+            initially_proposed_concepts: List[str]) -> List[str]:
+
         proposed_concepts = []
+
+        added_predictive_concepts, added_intuitive_concepts = set(), set()
 
         for combination in itertools.zip_longest(most_predictive_concepts, most_intuitive_concepts):
             if len(proposed_concepts) >= CONCEPT_SUGGESTION_LIMIT:
-                break
-            predictive_concept, intuitive_concept = combination
-            if predictive_concept is not None and predictive_concept not in proposed_concepts:
-                proposed_concepts.append(predictive_concept)
-            if intuitive_concept is not None and intuitive_concept not in proposed_concepts:
-                proposed_concepts.append(intuitive_concept)
+                return proposed_concepts[:CONCEPT_SUGGESTION_LIMIT]
 
-        return proposed_concepts
+            predictive_concept, intuitive_concept = combination
+
+            should_append_predictive_concept = predictive_concept is not None and predictive_concept not in proposed_concepts and len(
+                added_predictive_concepts) < TOP_K_PREDICTIVE_CONCEPTS
+            if should_append_predictive_concept:
+                proposed_concepts.append(predictive_concept)
+                added_predictive_concepts.add(predictive_concept)
+
+            should_append_intuitive_concept = intuitive_concept is not None and intuitive_concept not in proposed_concepts and len(
+                added_intuitive_concepts) < TOP_K_INTUITIVE_CONCEPTS
+
+            if should_append_intuitive_concept:
+                proposed_concepts.append(intuitive_concept)
+                added_intuitive_concepts.add(intuitive_concept)
+
+        initially_proposed_concepts_copy = set(copy.copy(initially_proposed_concepts))
+        initially_proposed_concepts_copy = initially_proposed_concepts_copy.difference(added_predictive_concepts)
+        initially_proposed_concepts_copy = initially_proposed_concepts_copy.difference(added_intuitive_concepts)
+
+        proposed_concepts.extend(list(initially_proposed_concepts_copy))
+
+        return proposed_concepts[:CONCEPT_SUGGESTION_LIMIT] if len(proposed_concepts) > CONCEPT_SUGGESTION_LIMIT else proposed_concepts

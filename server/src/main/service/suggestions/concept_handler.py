@@ -32,6 +32,4 @@ class UserSelectedConceptsHandler:
                                  new_concepts: List[str]):
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
         constraints.change_concept_constraint(constraint_type, explanation_type, new_concepts)
-        print(constraints.initially_proposed_concepts, flush=True)
-        print(constraints.to_db_value(), flush=True)
-        assert self.constraint_db.update_constraint(constraints) == True
+        self.constraint_db.update_constraint(constraints)

@@ -164,7 +164,7 @@ class CounterFactualExplanationService:
 
     def to_be_used_concepts(self, explanation_id: str) -> List[str]:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
-        human_readable_concepts = constraints.most_predictive_concepts[ExplanationType.COUNTERFACTUAL]
+        human_readable_concepts = constraints.user_selected_concepts[ExplanationType.COUNTERFACTUAL.value]
         if len(human_readable_concepts) == 0:
             human_readable_concepts = constraints.initially_proposed_concepts
         if len(human_readable_concepts) == 0:

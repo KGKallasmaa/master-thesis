@@ -58,7 +58,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
     if (arraysHaveSameElements(currentlyUsedConcepts, newConceptConstraint)) {
       return;
     }
-    alert("hi");
+    alert("newConceptConstraint");
     const payload = {
       id: getId(),
       img: index,
@@ -68,7 +68,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
     };
     http("/concept-constraint", payload)
       .then((resp) => {
-        if (resp.status === 200) {
+        if (resp.status === 200 || resp.status === 204) {
           onChangeCompleted();
         }
       })
@@ -83,9 +83,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
     <>
       <Row>
         <b>
-          {currentlyUsedConcepts.length > 0
-            ? "Selected concepts (click to unselect):"
-            : ""}
+          {currentlyUsedConcepts.length > 0 ? "Select concepts to remove:" : ""}
         </b>
         <div style={{ marginTop: 15 }}>
           <Tags
@@ -102,7 +100,7 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
       <Row>
         <b>
           {availableToBeChosenConcepts.length > 0
-            ? "Available concepts (click to select):"
+            ? "Select concepts to add:"
             : ""}
         </b>
 

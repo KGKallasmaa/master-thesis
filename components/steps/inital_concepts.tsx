@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
-import { Button, Row, Skeleton } from "antd";
+import { Button, Col, Row, Skeleton } from "antd";
 import { getId } from "../common/storage";
 import toast from "react-hot-toast";
 import Tags from "../common/tags";
@@ -82,8 +82,22 @@ export default function InitialConceptsStep({
     setSelectedConcepts(currentValues);
   }
 
+  function handleSelectAll() {
+    const allConcepts = initalConcepts.filter(
+      (el) => !selectedConcepts.includes(el)
+    );
+    setSelectedConcepts(allConcepts);
+  }
+
   return (
     <>
+      {selectedConcepts.length == 0 && (
+        <>
+          <p>Choose the concepts that will be used to explain this image.</p>
+          <p>Concepts not chosen will not be used</p>
+        </>
+      )}
+
       {selectedConcepts.length > 0 && (
         <>
           <Button type="primary" onClick={() => setSettingIsCompleted(true)}>
@@ -95,28 +109,46 @@ export default function InitialConceptsStep({
       )}
       {selectedConcepts.length > 0 && (
         <Row>
-          <p>Selected concepts (click to unselect):</p>
-          <div style={{ marginTop: 15 }}>
-            <Tags
-              color={"blue"}
-              values={selectedConcepts}
-              onClick={(value) => handleConcepClick(value, false)}
-            />
-          </div>
+          <Col span={24}>
+            <p>Selected concepts (click to unselect):</p>
+          </Col>
+          <Col span={12}>
+            <Button type="dashed" onClick={() => setSelectedConcepts([])}>
+              Unselect all
+            </Button>
+          </Col>
+          <Col span={24}>
+            <div style={{ marginTop: 15 }}>
+              <Tags
+                color={"blue"}
+                values={selectedConcepts}
+                onClick={(value) => handleConcepClick(value, false)}
+              />
+            </div>
+          </Col>
         </Row>
       )}
       {initalConcepts.length - selectedConcepts.length > 0 && (
         <Row>
-          <p>Available concepts (click to select):</p>
-          <div style={{ marginTop: 15 }}>
-            <Tags
-              color={"red"}
-              values={initalConcepts.filter(
-                (el) => !selectedConcepts.includes(el)
-              )}
-              onClick={(value) => handleConcepClick(value, true)}
-            />
-          </div>
+          <Col span={24}>
+            <p>Available concepts (click to select):</p>
+          </Col>
+          <Col span={12}>
+            <Button type="primary" onClick={() => handleSelectAll()}>
+              Select all
+            </Button>
+          </Col>
+          <Col span={24}>
+            <div style={{ marginTop: 15 }}>
+              <Tags
+                color={"red"}
+                values={initalConcepts.filter(
+                  (el) => !selectedConcepts.includes(el)
+                )}
+                onClick={(value) => handleConcepClick(value, true)}
+              />
+            </div>
+          </Col>
         </Row>
       )}
     </>
