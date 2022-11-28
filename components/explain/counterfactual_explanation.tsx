@@ -13,7 +13,8 @@ export default function CounterFactualExplanation({
 }: {
   index: number;
 }) {
-  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =useState<string>("select");
+  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =
+    useState<string>("select");
   const [counterFactualClass, setCounterFactualClass] = useState<string>("");
   const [counterFactualLabels, setCouterFactualLabels] = useState<string[]>([]);
 
@@ -26,7 +27,7 @@ export default function CounterFactualExplanation({
       .catch((err) => {
         console.error(err);
         toast.error(err);
-      })
+      });
   }, []);
 
   if (counterFactualLabels.length === 0) {

@@ -76,6 +76,7 @@ class ConceptSuggestionService:
         most_predictive_concepts = [c for c in most_predictive_concepts if c not in used_concepts]
 
         closest_labels = self.closest_labels_db.get_by_image_id(image_id)
+
         if closest_labels is None:
             most_intuitive_concepts = self.__most_intuitive_concepts(labels=[image_label], used_concepts=used_concepts)
         else:

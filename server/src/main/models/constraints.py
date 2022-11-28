@@ -27,6 +27,8 @@ class Constraints:
 
         if constraint_type == "initially_proposed_concepts":
             self.initially_proposed_concepts = new_values
+            self.user_selected_concepts[ExplanationType.DECISION_TREE.value] = new_values
+            self.user_selected_concepts[ExplanationType.COUNTERFACTUAL.value] = new_values
         elif constraint_type == "most_predictive_concepts":
             self.most_predictive_concepts[explanation_type.value] = new_values
         elif constraint_type == "user_selected_concepts":

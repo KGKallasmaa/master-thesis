@@ -34,10 +34,10 @@ class CounterFactualExplanationService:
             to_be_explained_image_index=to_be_explained_image_index,
             counter_factual_class=counter_factual_class,
             available_concepts=concepts)
-        self.update_used_constraints(explanation_id=explanation_id,
-                                     feature_encoder=feature_encoder,
-                                     estimator=estimator)
 
+        if explanation["error"] != "":
+            return explanation
+        self.update_used_constraints(explanation_id=explanation_id,feature_encoder=feature_encoder,estimator=estimator)
         return explanation
 
     def counterfactual_explanation(self, to_be_explained_image_index: int, counter_factual_class: str,
