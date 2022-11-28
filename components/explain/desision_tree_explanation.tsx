@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { http } from "../common/http";
 import { getId } from "../common/storage";
-import CenterConcepts from "../concepts/center_concepts";
 import { BidirectionalBar } from "@ant-design/plots";
+import ConceptsManager from "../concepts/propose_more_consepts";
+import { Skeleton } from "antd";
 
 type FeatureImportance = {
   featureName: string;
@@ -13,23 +14,16 @@ type FeatureImportance = {
 export default function DesisionTreeExplanation(props: { index: number }) {
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [conceptsHaveBeenSelected, setConceptsHaveBeenSelected] =
-    useState(false);
+
   const [featureImportance, setFeatureImportance] = useState<
     FeatureImportance[]
   >([]);
+  const { index } = props;
   const [trueLabel, setTrueLabel] = useState<string>("");
   const [predictedLabel, setPredictedLabel] = useState<string>("");
 
-  useEffect(() => {
-    const { index } = props;
-    if (!conceptsHaveBeenSelected) {
-      return;
-    }
-    if (!index) {
-      setErrorMessage("Image index not found");
-      return;
-    }
+  const fetchDesisionTreeExplanation = () => {
+    setLoading(true);
     const payload = {
       img: index,
       id: getId(),
@@ -47,20 +41,14 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       .finally(() => {
         setLoading(false);
       });
-  }, [props.index, conceptsHaveBeenSelected]);
+  };
 
-  if (conceptsHaveBeenSelected === false) {
-    return (
-      <CenterConcepts
-        index={props.index}
-        explanation_type={"decision_tree"}
-        onComplete={() => setConceptsHaveBeenSelected(true)}
-      />
-    );
-  }
+  useEffect(() => {
+    fetchDesisionTreeExplanation();
+  }, [index]);
 
   if (isLoading) {
-    return <>Generating an explanation ...</>;
+    return <Skeleton active />;
   }
   if (errorMessage && !featureImportance) {
     return (
@@ -76,12 +64,17 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       <h3>{trueLabel}</h3>
       <br />
       <h3>{predictedLabel}</h3>
-
       <br />
       <h3>Feature importance</h3>
       <br />
       <p>Global - how imortant a feature is the desision tree (%)</p>
       <p>Local - how imortant a feature is explaining this instance (%)</p>
+      <br />
+      <ConceptsManager
+        index={index}
+        explanation_type={"decision_tree"}
+        onChangeCompleted={() => fetchDesisionTreeExplanation()}
+      />
       <br />
       <DesisionTreeGraph data={featureImportance} />
     </div>

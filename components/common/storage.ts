@@ -1,21 +1,21 @@
 import {
-  GetSessionStorageValue,
-  RemoveSessionStorageValue,
-  UpdateSessionStorageValue,
-} from "./session";
+  GetLocalStorageValue,
+  RemoveLocalStorageValue,
+  UpdateLocalStorageValue,
+} from "./local";
 
 export function getId(): string {
   const key = "id";
-  const currentValue = GetSessionStorageValue(key);
+  const currentValue = GetLocalStorageValue(key);
   if (currentValue) {
     return currentValue;
   }
   const token: string = objectId();
-  UpdateSessionStorageValue(key, token);
+  UpdateLocalStorageValue(key, token);
   return token;
 }
 export function removeId() {
-  RemoveSessionStorageValue("id");
+  RemoveLocalStorageValue("id");
 }
 
 function objectId() {

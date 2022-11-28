@@ -1,7 +1,8 @@
 import base64
 from io import BytesIO
-import numpy as np
+
 import PIL
+import numpy as np
 from PIL import Image
 
 

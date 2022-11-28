@@ -1,4 +1,4 @@
-from main.service.pre_explanation.center_most_concepts import CENTER_MOST_CONCEPTS
+from main.service.pre_explanation.static_concepts_map import CENTER_MOST_CONCEPTS
 
 
 def test_center_most_concepts_finding_works():
