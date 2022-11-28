@@ -128,6 +128,8 @@ class CounterFactualExplanationService:
     def __find_blackbox_model(self, available_concepts: List[str], counter_factual_class: str,
                               to_be_explained_image_index: int):
         closest = self.closest_label_db.get_by_image_id(to_be_explained_image_index)
+        if closest is None:
+            raise ValueError("No closest labels found")
         valid_labels = [closest.label] + [counter_factual_class] + closest.closest
 
         label_encoder = encode_categorical_values(get_labels())

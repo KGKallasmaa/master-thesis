@@ -27,8 +27,7 @@ class Constraints:
 
         if constraint_type == "initially_proposed_concepts":
             self.initially_proposed_concepts = new_values
-            return
-        if constraint_type == "most_predictive_concepts":
+        elif constraint_type == "most_predictive_concepts":
             self.most_predictive_concepts[explanation_type.value] = new_values
         elif constraint_type == "user_selected_concepts":
             self.user_selected_concepts[explanation_type.value] = new_values

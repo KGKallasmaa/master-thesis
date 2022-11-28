@@ -53,14 +53,11 @@ export default function InitialConceptsStep({
 
     http("/concept-constraint", payload)
       .then((resp) => {
-        console.log(resp);
         if (resp.status === 204) {
-          alert("hello");
           onComplete();
         }
       })
       .catch((err) => {
-        console.log(err);
         toast.error(err);
         setSettingIsCompleted(false);
       });
@@ -71,7 +68,6 @@ export default function InitialConceptsStep({
   }
 
   function handleConcepClick(name: string, isSelected: boolean) {
-    alert("hi");
     let currentValues = selectedConcepts;
     if (isSelected) {
       currentValues.push(name);

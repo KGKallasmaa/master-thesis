@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { CounterfactualExplanation } from "./models/counterfactual_model";
 import ConceptsManager from "../concepts/propose_more_consepts";
+import toast from "react-hot-toast";
 
 const { Option } = Select;
 
@@ -12,8 +13,7 @@ export default function CounterFactualExplanation({
 }: {
   index: number;
 }) {
-  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =
-    useState<string>("select");
+  const [counterFactualExplanationStep, setCounterFactualExplanationStep] =useState<string>("select");
   const [counterFactualClass, setCounterFactualClass] = useState<string>("");
   const [counterFactualLabels, setCouterFactualLabels] = useState<string[]>([]);
 
@@ -25,8 +25,8 @@ export default function CounterFactualExplanation({
       })
       .catch((err) => {
         console.error(err);
+        toast.error(err);
       })
-      .finally(() => {});
   }, []);
 
   if (counterFactualLabels.length === 0) {
@@ -163,7 +163,7 @@ function Counterfactual({
         pagination={false}
       />
       <br />
-      <p>Counter_factual: {desiredCounterFactualClass}</p>
+      <p>Counterfactual: {desiredCounterFactualClass}</p>
       <br />
       <p>Raw counterfactual values</p>
       <Table

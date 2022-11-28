@@ -58,7 +58,6 @@ export default function ConceptsManager(props: ConceptsManagerProps) {
     if (arraysHaveSameElements(currentlyUsedConcepts, newConceptConstraint)) {
       return;
     }
-    alert("newConceptConstraint");
     const payload = {
       id: getId(),
       img: index,

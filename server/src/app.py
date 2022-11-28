@@ -98,11 +98,11 @@ def edit_concept_constraint_view():
     explanation_requirement.original_image_id = image_id
     explanation_requirement_db.update_explanation_requirement(explanation_requirement)
 
-    user_selected_concepts_handler.new_constraints_selected(explanation_id, constraint_type, explanation_type,viable_concepts)
+    user_selected_concepts_handler.new_constraints_selected(explanation_id, constraint_type, explanation_type,
+                                                            viable_concepts)
 
-    if constraint_type != "initially_proposed_concepts":
+    if constraint_type not in ["initially_proposed_concepts"]:
         user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
-
 
     return '', 204
 
@@ -125,9 +125,9 @@ def decision_tree_explanation_view():
         return 'Image number is missing', 400
     if explanation_id is None:
         return 'Explanation id is missing', 400
-    explanation = decision_tree_explanation_service.explain(explanation_id, img_id)
+    explanation = decision_tree_explanation_service.explain(explanation_id=explanation_id,
+                                                            to_be_explained_image_index=img_id)
     return jsonify(explanation)
-
 
 # TODO: this is used
 @api.route("/counter-factual-explanation", methods=["POST"])
@@ -136,10 +136,10 @@ def counterfactual_explanation_view():
     explanation_id = payload["id"]
     img_id = payload["img"]
     counter_factual_class = payload["counterFactualClass"]
-    counter_factual = counterfactual_explanation_service.counterfactual_explanation(explanation_id, img_id,
-                                                                                    counter_factual_class)
+    counter_factual = counterfactual_explanation_service.explain(explanation_id=explanation_id,
+                                                                 counter_factual_class=counter_factual_class,
+                                                                 to_be_explained_image_index=img_id)
     return jsonify(counter_factual)
-
 
 # TODO: this is used
 @api.route("/all-labels", methods=["GET"])
