@@ -8,7 +8,9 @@ from flask_cors import CORS
 
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
+from main.database.performance_db import PerformanceDb
 from main.models.enums import ExplanationType
+from main.service.explain.blackbox import BlackBoxModelService
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation import DecisionTreeExplanationService
 from main.service.pre_explanation.closest_image import find_closest_image_index
@@ -23,11 +25,13 @@ CORS(api)
 
 explanation_requirement_db = ExplanationRequirementDb()
 constraint_db = ConstraintDb()
+performance_db = PerformanceDb()
 
 counterfactual_explanation_service = CounterFactualExplanationService()
 decision_tree_explanation_service = DecisionTreeExplanationService()
 concept_suggestion_service = ConceptSuggestionService()
 user_selected_concepts_handler = UserSelectedConceptsHandler()
+black_box_service = BlackBoxModelService()
 
 
 # TODO: this is used
@@ -101,8 +105,11 @@ def edit_concept_constraint_view():
     user_selected_concepts_handler.new_constraints_selected(explanation_id, constraint_type, explanation_type,
                                                             viable_concepts)
 
-    if constraint_type not in ["initially_proposed_concepts"]:
-        user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
+    match constraint_type:
+        case "initially_proposed_concepts":
+            black_box_service.execute(explanation_id,viable_concepts)
+        case _:
+            user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
 
     return '', 204
 
@@ -129,6 +136,7 @@ def decision_tree_explanation_view():
                                                             to_be_explained_image_index=img_id)
     return jsonify(explanation)
 
+
 # TODO: this is used
 @api.route("/counter-factual-explanation", methods=["POST"])
 def counterfactual_explanation_view():
@@ -141,6 +149,7 @@ def counterfactual_explanation_view():
                                                                  to_be_explained_image_index=img_id)
     return jsonify(counter_factual)
 
+
 # TODO: this is used
 @api.route("/all-labels", methods=["GET"])
 def all_labels_view():
@@ -148,34 +157,12 @@ def all_labels_view():
     return jsonify({"labels": labels})
 
 
-"""
-@api.route("/user_uploaded_image-segments", methods=["POST"])
-def image_segment_view():
-    payload = request.get_json()
-    index = payload["index"]
-    if index == -1:
-        return jsonify({"results": []})
-    results = image_segments(index)
-    return jsonify({"results": results})
-
-
 # TODO: this is used
-@api.route("/center-most-concepts", methods=["POST"])
-def label_concepts_view():
-    payload = request.get_json()
+@api.route("/performance-metrics/<explanation_id>", methods=["GET"])
+def performance_metrics_view(explanation_id):
+    performance = performance_db.get_by_explanation_requirement_id(explanation_id)
+    return performance.to_db_value()
 
-    label = payload.get("label", "")
-    index = payload["index"]
-    if label == "":
-        if index is None or index == -1:
-            return jsonify({"results": []})
-        label = get_labels()[index]
-
-    center_concepts = CENTER_MOST_CONCEPTS.get(label, [])
-    if len(center_concepts) == 0:
-        return '', 400
-    return jsonify({"results": center_concepts})
-"""
 
 if __name__ == '__main__':
     api.run(host='0.0.0.0', port=8000, debug=True)

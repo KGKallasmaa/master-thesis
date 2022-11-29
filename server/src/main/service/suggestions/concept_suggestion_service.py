@@ -28,7 +28,6 @@ class ConceptSuggestionService:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
         explanation_requirement = self.explanation_requirement_db.get_explanation_requirement(explanation_id)
         image_label = get_labels()[explanation_requirement.original_image_id]
-        print(constraints, flush=True)
         used_concepts = constraints.user_selected_concepts[explanation_type]
 
         match explanation_type:
