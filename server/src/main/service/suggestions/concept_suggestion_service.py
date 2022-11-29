@@ -31,21 +31,17 @@ class ConceptSuggestionService:
         print(constraints, flush=True)
         used_concepts = constraints.user_selected_concepts[explanation_type]
 
-        if explanation_type == ExplanationType.DECISION_TREE:
-            proposed_concepts = self.__propose_concepts_for_decision_tree(image_label=image_label,
-                                                                          constraints=constraints)
-        elif explanation_type == ExplanationType.COUNTERFACTUAL:
-            proposed_concepts = self.__propose_concepts_for_counterfactual(
-                image_id=explanation_requirement.original_image_id,
-                image_label=image_label,
-                constraints=constraints)
-        else:
-            raise ValueError("Unknown explanation type")
-
-        print("used_concepts", flush=True)
-        print(used_concepts, flush=True)
-        print("availableToBeChosenConcepts", flush=True)
-        print(proposed_concepts, flush=True)
+        match explanation_type:
+            case ExplanationType.DECISION_TREE:
+                proposed_concepts = self.__propose_concepts_for_decision_tree(image_label=image_label,
+                                                                              constraints=constraints)
+            case ExplanationType.COUNTERFACTUAL:
+                proposed_concepts = self.__propose_concepts_for_counterfactual(
+                    image_id=explanation_requirement.original_image_id,
+                    image_label=image_label,
+                    constraints=constraints)
+            case _:
+                raise Exception("Unknown explanation type")
 
         return ConceptSuggestions({
             "usedConcepts": used_concepts,

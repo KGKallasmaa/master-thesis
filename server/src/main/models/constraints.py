@@ -23,18 +23,17 @@ class Constraints:
                                   explanation_type: ExplanationType,
                                   new_values: list[str]):
 
-        # TODO: use match statement when you upgrade to python 3.10
-
-        if constraint_type == "initially_proposed_concepts":
-            self.initially_proposed_concepts = new_values
-            self.user_selected_concepts[ExplanationType.DECISION_TREE.value] = new_values
-            self.user_selected_concepts[ExplanationType.COUNTERFACTUAL.value] = new_values
-        elif constraint_type == "most_predictive_concepts":
-            self.most_predictive_concepts[explanation_type.value] = new_values
-        elif constraint_type == "user_selected_concepts":
-            self.user_selected_concepts[explanation_type.value] = new_values
-        else:
-            raise ValueError(f"Unknown constraint type: {constraint_type}")
+        match constraint_type:
+            case "initially_proposed_concepts":
+                self.initially_proposed_concepts = new_values
+                self.user_selected_concepts[ExplanationType.DECISION_TREE.value] = new_values
+                self.user_selected_concepts[ExplanationType.COUNTERFACTUAL.value] = new_values
+            case "most_predictive_concepts":
+                self.most_predictive_concepts[explanation_type.value] = new_values
+            case "user_selected_concepts":
+                self.user_selected_concepts[explanation_type.value] = new_values
+            case _:
+                raise ValueError(f"Unknown constraint type: {constraint_type}")
 
     def to_db_value(self) -> Dict[str, any]:
         return {
