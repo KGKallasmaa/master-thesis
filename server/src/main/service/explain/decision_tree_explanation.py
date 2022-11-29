@@ -8,6 +8,7 @@ from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.enums import ExplanationType
 from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
 from main.service.explain.human_readable_explanation import HumanReadableExplanationService
+from main.service.perfromance.performance_service import PerformanceService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 
 
@@ -16,18 +17,23 @@ class DecisionTreeExplanationService:
         self.requirement_db = ExplanationRequirementDb()
         self.closest_label_db = ClosestLabelsDb()
         self.constraint_db = ConstraintDb()
+        self.performance_service = PerformanceService()
 
     def explain(self, explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
         concepts = self.to_be_used_concepts(explanation_id)
-        feature_encoder, estimator, explanation = self.explain_using_decision_tree(to_be_explained_image_index,
-                                                                                   concepts)
+        feature_encoder, estimator, accuracy, explanation = self.explain_using_decision_tree(
+            to_be_explained_image_index,
+            concepts)
         self.update_used_constraints(explanation_id=explanation_id,
                                      feature_encoder=feature_encoder,
                                      estimator=estimator)
+
+        self.performance_service.update_accuracy(accuracy, ExplanationType.DECISION_TREE, explanation_id)
+
         return explanation
 
     def explain_using_decision_tree(self, to_be_explained_image_index: int,
-                                    decision_tree_concepts: List[str]) -> Tuple[any, any, Dict[str, any]]:
+                                    decision_tree_concepts: List[str]) -> Tuple[any, any, float, Dict[str, any]]:
         closest = self.closest_label_db.get_by_image_id(to_be_explained_image_index)
         valid_labels = [closest.label] + closest.closest
 
@@ -59,12 +65,10 @@ class DecisionTreeExplanationService:
 
         explanation = hre.human_readable_explanation(x_test=testing_data, y_test=predictions, y_true=testing_labels)
 
-        return feature_encoder, clf, explanation
+        return feature_encoder, clf, accuracy, explanation
 
     def to_be_used_concepts(self, explanation_id: str) -> List[str]:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
-        print(constraints.to_db_value(), flush=True)
-        print(constraints.most_predictive_concepts, flush=True)
         human_readable_concepts = constraints.user_selected_concepts[ExplanationType.DECISION_TREE.value]
         if len(human_readable_concepts) == 0:
             human_readable_concepts = constraints.initially_proposed_concepts

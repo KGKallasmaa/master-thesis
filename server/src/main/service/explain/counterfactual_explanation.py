@@ -10,6 +10,7 @@ from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.enums import ExplanationType
 from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
+from main.service.perfromance.performance_service import PerformanceService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 
 COUNTERFACTUAL_LABEL = 1
@@ -24,24 +25,27 @@ class CounterFactualExplanationService:
         self.requirement_db = ExplanationRequirementDb()
         self.closest_label_db = ClosestLabelsDb()
         self.constraint_db = ConstraintDb()
+        self.performance_service = PerformanceService()
 
     def explain(self, explanation_id: str, counter_factual_class: str, to_be_explained_image_index: int):
         concepts = self.to_be_used_concepts(explanation_id)
 
         feature_encoder = encode_categorical_values(concepts)
 
-        estimator, explanation = self.counterfactual_explanation(
+        estimator, probability, explanation = self.counterfactual_explanation(
             to_be_explained_image_index=to_be_explained_image_index,
             counter_factual_class=counter_factual_class,
             available_concepts=concepts)
 
         if explanation["error"] != "":
             return explanation
-        self.update_used_constraints(explanation_id=explanation_id,feature_encoder=feature_encoder,estimator=estimator)
+        self.update_used_constraints(explanation_id=explanation_id, feature_encoder=feature_encoder,
+                                     estimator=estimator)
+        self.performance_service.update_counterfactual_probability(probability, explanation_id)
         return explanation
 
     def counterfactual_explanation(self, to_be_explained_image_index: int, counter_factual_class: str,
-                                   available_concepts: List[str]) -> Tuple[any, any]:
+                                   available_concepts: List[str]) -> Tuple[any, float, any]:
 
         X, y, black_box_model = self.__find_blackbox_model(available_concepts,
                                                            counter_factual_class,
@@ -100,7 +104,7 @@ class CounterFactualExplanationService:
                     "counterfactuals": counterfactual_view,
                 }
 
-                return black_box_model, explanation
+                return black_box_model, minimum_acceptance_probability, explanation
 
             except Exception as e:
                 explanation = {
@@ -114,7 +118,7 @@ class CounterFactualExplanationService:
                     "counterfactuals": [],
                 }
 
-        return black_box_model, explanation
+        return black_box_model, 0.0, explanation
 
     @staticmethod
     def __transform_data_for_dice(X, y, concepts: List[str]):
@@ -182,6 +186,7 @@ class CounterFactualExplanationService:
 
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
 
-        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL, most_predictive_features)
+        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL,
+                                              most_predictive_features)
 
         self.constraint_db.update_constraint(constraints)

@@ -6,6 +6,7 @@ import ExplanationTypeChoiceStep from "./explaination_type_choice";
 import InitalConceptsStep from "./inital_concepts";
 import DesisionTreeExplanation from "../explain/desision_tree_explanation";
 import CounterFactualExplanation from "../explain/counterfactual_explanation";
+import PerformanceMetrics from "../performace/performace";
 
 const explanationStep_TitelAndDescription = {
   inital_concepts: {
@@ -40,6 +41,9 @@ export default function ExplainTask(index: number) {
   const handleSelect = (choice: string) => {
     setExplanationStep(choice);
   };
+  const showPerformanceMetrics = ["desision_tree", "counterfactual"].includes(
+    explanationStep
+  );
 
   return (
     <>
@@ -75,7 +79,11 @@ export default function ExplainTask(index: number) {
             <CounterFactualExplanation index={index} />
           )}
         </Col>
-        <Col span={8} />
+        <Col span={8}>
+          {showPerformanceMetrics && (
+            <PerformanceMetrics explanation_type={explanationStep} />
+          )}
+        </Col>
       </Row>
     </>
   );
