@@ -21,9 +21,9 @@ export default function PerformanceMetrics({
     httpGet(`/performance-metrics/${getId()}`)
       .then((el) => el.json())
       .then((data) => {
-        const { decisionTree, blackBox, counterfactual } = data;
+        const { decisionTree, blackbox, counterfactual } = data;
         setDesicionTreeAccuracy(decisionTree.accuracy);
-        setBlackBoxAccuracy(blackBox.accuracy);
+        setBlackBoxAccuracy(blackbox.accuracy);
         setCounterFactualProbability(counterfactual.probability);
       })
       .catch((err) => {
