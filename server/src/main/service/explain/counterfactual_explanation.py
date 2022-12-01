@@ -183,10 +183,7 @@ class CounterFactualExplanationService:
 
         feature_importance = sorted(list(feature_importance.values()), key=lambda x: x["local"], reverse=True)
         most_predictive_features = [feature["featureName"] for feature in feature_importance]
-
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
 
-        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL,
-                                              most_predictive_features)
-
+        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL,most_predictive_features)
         self.constraint_db.update_constraint(constraints)
