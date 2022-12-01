@@ -15,6 +15,7 @@ def find_closest_image_index(image: np.array, k_closest=5) -> int:
     # k = how many images we're using for closeness
     target_image_hog = get_hog(image)
 
+    # TODO: parralise this. Also we need to only find distances to distint images
     image_index_distance_dict = {i: euclidean_distance(target_image_hog, get_hog(img), allow_not_equal=True)
                                  for i, img in enumerate(get_images())
                                  }
