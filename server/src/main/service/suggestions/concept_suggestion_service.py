@@ -56,7 +56,7 @@ class ConceptSuggestionService:
         most_predictive_concepts = constraints.most_predictive_concepts[ExplanationType.DECISION_TREE]
         most_predictive_concepts = [c for c in most_predictive_concepts if c not in used_concepts]
 
-        most_intuitive_concepts = self.__most_intuitive_concepts(labels=[image_label], used_concepts=used_concepts)
+        most_intuitive_concepts = self.__most_intuitive_concepts(labels=[image_label])
 
         initially_proposed_concepts = set(constraints.initially_proposed_concepts)
         initially_proposed_concepts = initially_proposed_concepts.difference(set(used_concepts))
@@ -83,7 +83,6 @@ class ConceptSuggestionService:
         most_predictive_concepts = [c for c in most_predictive_concepts if c not in used_concepts]
         most_intuitive_concepts = [c for c in most_intuitive_concepts if c not in used_concepts]
 
-
         return self.__combine_concepts(most_predictive_concepts=most_predictive_concepts,
                                        most_intuitive_concepts=most_intuitive_concepts,
                                        initially_proposed_concepts=constraints.initially_proposed_concepts)
@@ -98,8 +97,8 @@ class ConceptSuggestionService:
 
         return list(dict.fromkeys(combined_most_intuitive_concepts))
 
-    @staticmethod
     def __combine_concepts(
+            self,
             most_predictive_concepts: List[str],
             most_intuitive_concepts: List[str],
             initially_proposed_concepts: List[str]) -> List[str]:
@@ -114,24 +113,30 @@ class ConceptSuggestionService:
 
             predictive_concept, intuitive_concept = combination
 
-            should_append_predictive_concept = predictive_concept is not None and predictive_concept not in proposed_concepts and len(
-                added_predictive_concepts) < TOP_K_PREDICTIVE_CONCEPTS
-            if should_append_predictive_concept:
+            if self.__should_append_predictive_concept(predictive_concept, proposed_concepts, added_intuitive_concepts):
                 proposed_concepts.append(predictive_concept)
                 added_predictive_concepts.add(predictive_concept)
 
-            should_append_intuitive_concept = intuitive_concept is not None and intuitive_concept not in proposed_concepts and len(
-                added_intuitive_concepts) < TOP_K_INTUITIVE_CONCEPTS
-
-            if should_append_intuitive_concept:
+            if self.__should_append_intuitive_concept(intuitive_concept, proposed_concepts, added_intuitive_concepts):
                 proposed_concepts.append(intuitive_concept)
                 added_intuitive_concepts.add(intuitive_concept)
 
-        initially_proposed_concepts = [c
-                                       for c in initially_proposed_concepts
-                                       if c not in proposed_concepts]
+        initially_proposed_concepts = [c for c in initially_proposed_concepts if c not in proposed_concepts]
         proposed_concepts.extend(initially_proposed_concepts)
-
 
         return proposed_concepts[:CONCEPT_SUGGESTION_LIMIT] if len(
             proposed_concepts) > CONCEPT_SUGGESTION_LIMIT else proposed_concepts
+
+    @staticmethod
+    def __should_append_intuitive_concept(intuitive_concept: str,
+                                          proposed_concepts: List[str],
+                                          added_intuitive_concepts: Set[str]):
+        return intuitive_concept is not None and intuitive_concept not in proposed_concepts and len(
+            added_intuitive_concepts) < TOP_K_INTUITIVE_CONCEPTS
+
+    @staticmethod
+    def __should_append_predictive_concept(predictive_concept: str,
+                                           proposed_concepts: List[str],
+                                           added_predictive_concepts: Set[str]):
+        return predictive_concept is not None and predictive_concept not in proposed_concepts and len(
+            added_predictive_concepts) < TOP_K_PREDICTIVE_CONCEPTS

@@ -51,15 +51,32 @@ def find_closest_image_index(image: np.array, k_closest=TOP_K_CLOSEST) -> int:
         if image_index_label_dict[image_index] != most_popular_label:
             continue
 
-        closest_label = ClosestLabel({
+        new_closest_label = ClosestLabel({
             "image_index": image_index,
             "label": most_popular_label,
             "closest": [label for label, _ in sorted_label_presence_count_dict[1:]]
         })
-        print(closest_label.to_db_value(), flush=True)
-        closest_label_repository.update_closest_labels(closest_label)
+
+        existing_closest_labels = closest_label_repository.get_by_image_id(image_index).closest
+        if len(new_closest_label.closest) < k_closest and \
+                lists_have_same_elements(existing_closest_labels, new_closest_label.closest):
+            return image_index
+        if existing_closest_labels is not None:
+            new_closest_label.closest = existing_closest_labels
+            existing_closest_labels = [c for c in existing_closest_labels if
+                                       c not in new_closest_label.closest and c != most_popular_label]
+            new_closest_label.closest.extend(existing_closest_labels)
+        if len(new_closest_label.closest) > k_closest:
+            new_closest_label.closest = new_closest_label.closest[:k_closest]
+
+        print(new_closest_label.to_db_value(), flush=True)
+        closest_label_repository.update_closest_labels(new_closest_label)
 
         return image_index
+
+
+def lists_have_same_elements(list1, list2):
+    return set(list1) == set(list2)
 
 
 def find_image_index_distance_dict(target_img) -> Dict[int, float]:
@@ -76,5 +93,5 @@ def find_image_index_distance_dict(target_img) -> Dict[int, float]:
     return image_index_distance_dict
 
 
-thread = Thread(target=find_closest_for_existing_images)
-thread.start()
+#thread = Thread(target=find_closest_for_existing_images)
+#thread.start()

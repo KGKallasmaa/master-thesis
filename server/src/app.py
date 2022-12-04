@@ -12,7 +12,8 @@ from main.database.performance_db import PerformanceDb
 from main.models.enums import ExplanationType
 from main.service.explain.blackbox import BlackBoxModelService
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
-from main.service.explain.decision_tree_explanation import DecisionTreeExplanationService
+from main.service.explain.decision_tree_explanation_service import DecisionTreeExplanationService
+from main.service.perfromance.performance_service import PerformanceService
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
@@ -32,6 +33,7 @@ decision_tree_explanation_service = DecisionTreeExplanationService()
 concept_suggestion_service = ConceptSuggestionService()
 user_selected_concepts_handler = UserSelectedConceptsHandler()
 black_box_service = BlackBoxModelService()
+performance_service = PerformanceService()
 
 
 # TODO: this is used
@@ -107,7 +109,8 @@ def edit_concept_constraint_view():
 
     match constraint_type:
         case "initially_proposed_concepts":
-            black_box_service.execute(explanation_id,viable_concepts)
+            accuracy = black_box_service.execute(explanation_id,viable_concepts)
+            performance_service.update_blackbox_accuracy(accuracy,explanation_id)
         case _:
             user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
 

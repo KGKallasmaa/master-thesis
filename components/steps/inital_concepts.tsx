@@ -63,7 +63,7 @@ export default function InitialConceptsStep({
       });
   }, [selectedConcepts, settingIsCompleted]);
 
-  if (isLoading) {
+  if (isLoading || settingIsCompleted) {
     return <Skeleton active />;
   }
 

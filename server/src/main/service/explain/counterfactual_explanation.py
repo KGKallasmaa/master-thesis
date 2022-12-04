@@ -154,16 +154,10 @@ class CounterFactualExplanationService:
 
         for i, y_i in enumerate(valid_y):
             y_as_label = label_encoder.inverse_transform([y_i])[0]
-            if y_as_label == counter_factual_class:
-                valid_y[i] = COUNTERFACTUAL_LABEL
-            else:
-                valid_y[i] = ORIGINAL
+            valid_y[i] = COUNTERFACTUAL_LABEL if y_as_label == counter_factual_class else ORIGINAL
         for i, y_i in enumerate(y):
             y_as_label = label_encoder.inverse_transform([y_i])[0]
-            if y_as_label == counter_factual_class:
-                y[i] = COUNTERFACTUAL_LABEL
-            else:
-                y[i] = ORIGINAL
+            y[i] = COUNTERFACTUAL_LABEL if y_as_label == counter_factual_class else ORIGINAL
 
         clf, accuracy = train_decision_tree(valid_X, valid_y)
         return X, y, clf
@@ -185,5 +179,5 @@ class CounterFactualExplanationService:
         most_predictive_features = [feature["featureName"] for feature in feature_importance]
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
 
-        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL,most_predictive_features)
+        constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL, most_predictive_features)
         self.constraint_db.update_constraint(constraints)

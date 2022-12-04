@@ -9,8 +9,9 @@ from main.service.pre_explanation.data_access import get_segments
 
 
 def encode_categorical_values(values: List[str]) -> preprocessing.LabelEncoder:
+    unique_values = sorted(list(set(values)))
     le = preprocessing.LabelEncoder()
-    le.fit(values)
+    le.fit(unique_values)
     return le
 
 

@@ -20,6 +20,6 @@ class IntuitivenessDb:
         except Exception:
             return False
 
-    def top_intuitive_concepts(self,label:str,limit: int) -> List[ConceptIntuitiveness]:
+    def top_intuitive_concepts(self, label: str, limit: int) -> List[ConceptIntuitiveness]:
         query = self.collection.find({"label": label}).sort("count", -1).limit(limit)
         return [ConceptIntuitiveness(el) for el in query]
