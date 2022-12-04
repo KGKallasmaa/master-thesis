@@ -47,5 +47,6 @@ def explain_using_decision_tree(valid_labels: List[str], to_be_explained_image_i
                                            model=clf,
                                            feature_encoder=feature_encoder,
                                            label_encoder=label_encoder,
+                                           allowed_labels=valid_labels,
                                            X=X,
                                            y=y)

@@ -26,7 +26,7 @@ class DecisionTreeExplanationService:
                                      feature_encoder=response.feature_encoder,
                                      estimator=response.model)
 
-        self.performance_service.update_decision_tree_accuracy(response, explanation_id)
+        self.performance_service.update_decision_tree_performance(response, explanation_id)
         return response.explanation
 
     def __explain_using_decision_tree(self, to_be_explained_image_index: int,decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
