@@ -1,24 +1,15 @@
 from typing import Tuple
 
-from sklearn.metrics import accuracy_score
-
 
 class DecisionTreeExplanationResponse:
-    def __init__(self, feature_encoder, label_encoder, model, explanation, X, y, allowed_labels):
-        self.feature_encoder = feature_encoder
-        self.label_encoder = label_encoder
-        self.model = model
+    def __init__(self,feature_encoder, label_encoder, model, explanation, X, y,accuracy):
         self.explanation = explanation
+        self.feature_encoder = feature_encoder
+        self.model = model
         X_train, X_test, y_train, y_test = non_shuffling_train_test_split(X, y, test_size=0.1)
-
-        # [ 9 23 18  3  3  3  3  3  6 30]
         predictions = model.predict(X_test)
-        all_predictions = model.predict(X)
         self.transformed_predictions = label_encoder.inverse_transform(predictions)
-        self.transformed_all_predictions = label_encoder.inverse_transform(all_predictions)
-        self.transformed_y_test = label_encoder.inverse_transform(y_test)
-        self.accuracy = accuracy_score(y_test, predictions)
-        self.allowed_labels = allowed_labels
+        self.accuracy = accuracy
 
 
 def non_shuffling_train_test_split(X, y, test_size=0.1) -> Tuple[any, any, any, any]:

@@ -29,6 +29,10 @@ class PerformanceService:
         fidelity = accuracy_score(black_box.transformed_predictions, decision_tree.transformed_predictions)
         accuracy = decision_tree.accuracy
 
+        print("black_box.transformed_predictions", black_box.transformed_predictions)
+        print("decision_tree.transformed_predictions", decision_tree.transformed_predictions)
+        print("fidelity", fidelity)
+
         performance = self.performance_repository.get_by_explanation_requirement_id(explanation_requirement_id)
         performance.update_decision_tree(accuracy, fidelity)
         self.performance_repository.update(performance)

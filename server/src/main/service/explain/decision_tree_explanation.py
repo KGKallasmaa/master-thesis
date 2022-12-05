@@ -1,55 +1,40 @@
 from typing import List
-
 from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
-from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
+from main.service.explain.common import encode_categorical_values, get_training_row, train_and_test_decision_tree
 from main.service.explain.human_readable_explanation import HumanReadableExplanationService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 import numpy as np
 
 
-def explain_using_decision_tree(valid_labels: List[str], to_be_explained_image_index: int,
-                                decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
+def explain_using_decision_tree(valid_labels:List[str],to_be_explained_image_index: int,decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
     label_encoder = encode_categorical_values(get_labels())
     feature_encoder = encode_categorical_values(decision_tree_concepts)
 
-    training_data, training_labels, testing_data, testing_labels = [], [], [], []
-
-    to_be_explained_data,to_be_explained_label = [],[]
-
-    # TDO: we should not loop over every single image
-    for index, (label, pic, mask) in enumerate(zip(get_labels(), get_images(), get_masks())):
+    X, y = [], []
+    X_train, y_train = [], []
+    for label, pic, mask in zip(get_labels(), get_images(), get_masks()):
         row = get_training_row(decision_tree_concepts, pic, mask)
         label_as_nr = label_encoder.transform([label])
-        if index == to_be_explained_image_index:
-            to_be_explained_data.append(row)
-            to_be_explained_label.append(label_as_nr)
-        elif label not in valid_labels:
-            testing_labels.append(label_as_nr)
-            testing_data.append(row)
-        else:
-            training_labels.append(label_as_nr)
-            training_data.append(row)
+        X.append(row)
+        y.append(label_as_nr)
+        if label in valid_labels:
+            X_train.append(row)
+            y_train.append(label_as_nr)
 
-    clf, _ = train_decision_tree(np.array(training_data), np.array(training_labels))
+    clf, accuracy = train_and_test_decision_tree(np.array(X_train), np.array(y_train))
 
     hre = HumanReadableExplanationService(label_encoder=label_encoder,
                                           feature_encoder=feature_encoder,
                                           estimator=clf)
 
-    explanation = hre.human_readable_explanation(x_test=to_be_explained_data,
-                                                 y_test=clf.predict(to_be_explained_data),
-                                                 y_true=to_be_explained_label)
-
-    X, y = [], []
-    X.extend(iter(training_data))
-    X.extend(iter(testing_data))
-    y.extend(iter(training_labels))
-    y.extend(iter(testing_labels))
+    explanation = hre.human_readable_explanation(x_test=[X[to_be_explained_image_index]],
+                                                 y_test=clf.predict([X[to_be_explained_image_index]]),
+                                                 y_true=[y[to_be_explained_image_index]])
 
     return DecisionTreeExplanationResponse(explanation=explanation,
                                            model=clf,
-                                           feature_encoder=feature_encoder,
                                            label_encoder=label_encoder,
-                                           allowed_labels=valid_labels,
+                                           feature_encoder=feature_encoder,
+                                           accuracy=accuracy,
                                            X=X,
                                            y=y)

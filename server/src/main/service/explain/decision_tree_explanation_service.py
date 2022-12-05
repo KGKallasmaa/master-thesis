@@ -23,7 +23,7 @@ class DecisionTreeExplanationService:
             to_be_explained_image_index,
             concepts)
         self.update_used_constraints(explanation_id=explanation_id,
-                                     feature_encoder=response.feature_encoder,
+                                        feature_encoder=response.feature_encoder,
                                      estimator=response.model)
 
         self.performance_service.update_decision_tree_performance(response, explanation_id)

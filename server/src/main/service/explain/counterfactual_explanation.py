@@ -9,7 +9,7 @@ from main.database.closest_labels import ClosestLabelsDb
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.enums import ExplanationType
-from main.service.explain.common import encode_categorical_values, get_training_row, train_decision_tree
+from main.service.explain.common import encode_categorical_values, get_training_row, train_and_test_decision_tree
 from main.service.perfromance.performance_service import PerformanceService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 
@@ -159,7 +159,7 @@ class CounterFactualExplanationService:
             y_as_label = label_encoder.inverse_transform([y_i])[0]
             y[i] = COUNTERFACTUAL_LABEL if y_as_label == counter_factual_class else ORIGINAL
 
-        clf, accuracy = train_decision_tree(valid_X, valid_y)
+        clf, accuracy = train_and_test_decision_tree(valid_X, valid_y)
         return X, y, clf
 
     def to_be_used_concepts(self, explanation_id: str) -> List[str]:
