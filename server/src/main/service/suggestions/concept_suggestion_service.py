@@ -42,7 +42,7 @@ class ConceptSuggestionService:
                     image_label=image_label,
                     constraints=constraints)
             case _:
-                raise Exception("Unknown explanation type")
+                raise ValueError(f"Unknown explanation type: {explanation_type}")
 
         proposed_concepts = [c for c in proposed_concepts if c not in used_concepts]
 

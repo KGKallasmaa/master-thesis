@@ -14,14 +14,16 @@ def explain_using_decision_tree(valid_labels: List[str], to_be_explained_image_i
 
     training_data, training_labels, testing_data, testing_labels = [], [], [], []
 
+    to_be_explained_data,to_be_explained_label = [],[]
+
     # TDO: we should not loop over every single image
     for index, (label, pic, mask) in enumerate(zip(get_labels(), get_images(), get_masks())):
-        if label not in valid_labels:
-            continue
         row = get_training_row(decision_tree_concepts, pic, mask)
         label_as_nr = label_encoder.transform([label])
-
         if index == to_be_explained_image_index:
+            to_be_explained_data.append(row)
+            to_be_explained_label.append(label_as_nr)
+        elif label not in valid_labels:
             testing_labels.append(label_as_nr)
             testing_data.append(row)
         else:
@@ -30,12 +32,13 @@ def explain_using_decision_tree(valid_labels: List[str], to_be_explained_image_i
 
     clf, _ = train_decision_tree(np.array(training_data), np.array(training_labels))
 
-    predictions = clf.predict(testing_data)
     hre = HumanReadableExplanationService(label_encoder=label_encoder,
                                           feature_encoder=feature_encoder,
                                           estimator=clf)
 
-    explanation = hre.human_readable_explanation(x_test=testing_data, y_test=predictions, y_true=testing_labels)
+    explanation = hre.human_readable_explanation(x_test=to_be_explained_data,
+                                                 y_test=clf.predict(to_be_explained_data),
+                                                 y_true=to_be_explained_label)
 
     X, y = [], []
     X.extend(iter(training_data))
