@@ -63,6 +63,7 @@ def image_by_index_view():
 
 
 # TODO: this is used
+# TODO: can we converted to get request
 @api.route("/original-image", methods=["POST"])
 def original_image():
     payload = request.get_json()
@@ -74,6 +75,7 @@ def original_image():
 
 
 # TODO: this is used
+# TODO: can we converted to get request
 @api.route("/most-popular-concepts", methods=["POST"])
 def most_popular_concepts():
     payload = request.get_json()
@@ -116,7 +118,7 @@ def edit_concept_constraint_view():
 
     return '', 204
 
-
+# TODO: can we converted to get request
 @api.route("/explanation-concepts", methods=["POST"])
 def explanation_concepts():
     payload = request.get_json()
@@ -168,4 +170,4 @@ def performance_metrics_view(explanation_id):
 
 
 if __name__ == '__main__':
-    api.run(host='0.0.0.0', port=8000, debug=True)
+    api.run(host='0.0.0.0', port=8000, debug=False)

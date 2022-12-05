@@ -1,3 +1,5 @@
+import hashlib
+
 import numpy as np
 from threading import Thread
 from main.database.closest_labels import ClosestLabelsDb
@@ -15,7 +17,7 @@ TOP_K_CLOSEST = 8
 
 def find_closest_for_existing_images():
     image_array_str_map = {
-        np.array2string(np.array(img)): np.array(img)
+        hashlib.sha1(np.array(img).view(np.uint8)).hexdigest(): np.array(img)
         for img in get_images()
     }
     print(
@@ -79,14 +81,13 @@ def find_image_index_distance_dict(target_img) -> Dict[int, float]:
 
     image_index_distance_dict, image_str_distance_dict = {}, {}
     for i, img in enumerate(get_images()):
-        image_as_array = np.array2string(np.array(img))
-        if image_as_array in image_str_distance_dict:
-            image_str_distance_dict[image_as_array] = euclidean_distance(target_image_hog, get_hog(img),
-                                                                         allow_not_equal=True)
-        image_index_distance_dict[i] = image_str_distance_dict[image_as_array]
+        image_key = hashlib.sha1(np.array(img).view(np.uint8)).hexdigest()
+        if image_key not in image_str_distance_dict:
+            image_str_distance_dict[image_key] = euclidean_distance(target_image_hog, get_hog(img),
+                                                                    allow_not_equal=True)
+        image_index_distance_dict[i] = image_str_distance_dict[image_key]
 
     return image_index_distance_dict
 
-
-#thread = Thread(target=find_closest_for_existing_images)
-#thread.start()
+# thread = Thread(target=find_closest_for_existing_images)
+# thread.start()
