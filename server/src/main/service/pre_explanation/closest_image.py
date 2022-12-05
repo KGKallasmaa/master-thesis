@@ -30,12 +30,7 @@ def find_closest_for_existing_images():
 # TODO: speed up this method. it's very slow
 def find_closest_image_index(image: np.array, k_closest=TOP_K_CLOSEST) -> int:
     """Finding the closest index to the uploaded user_uploaded_image"""
-    target_image_hog = get_hog(image)
-
-    # TODO: parralise this. Also we need to only find distances to distint images
-    image_index_distance_dict = {i: euclidean_distance(target_image_hog, get_hog(img), allow_not_equal=True)
-                                 for i, img in enumerate(get_images())
-                                 }
+    image_index_distance_dict = find_image_index_distance_dict(image)
     sorted_image_index_distance_dict = sort_dictionary(image_index_distance_dict, reverse=False, by_value=True)
 
     image_index_label_dict = dict(enumerate(get_labels()))

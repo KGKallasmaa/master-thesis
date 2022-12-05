@@ -33,16 +33,16 @@ def euclidean_distance(a: np.array, b: np.array, allow_not_equal=False) -> float
     if a.shape == b.shape:
         return np.linalg.norm(a - b)
     if allow_not_equal is False:
-        raise ValueError("Images must have the same shape")
+        raise ValueError(f"Images must have the same shape. a.shape: {a.shape}, b.shape: {b.shape}")
 
     a_number_of_rows, a_number_of_col = a.shape
     b_number_of_rows, b_number_of_col = b.shape
 
     rows, columns = min(a_number_of_rows, b_number_of_rows), min(a_number_of_col, b_number_of_col)
-    a_copy = np.empty((rows, columns))
-    b_copy = np.empty((rows, columns))
 
-    for i in range(rows):
-        a_copy[i] = a[i][:columns]
-        b_copy[i] = b[i][:columns]
-    return euclidean_distance(a_copy, b_copy)
+    if a_number_of_rows != rows or a_number_of_col != columns:
+        a = np.resize(a, (rows, columns))
+    if b_number_of_rows != rows or b_number_of_col != columns:
+        b = np.resize(b, (rows, columns))
+
+    return euclidean_distance(a, b)
