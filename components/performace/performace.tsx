@@ -13,6 +13,7 @@ export default function PerformanceMetrics({
   const [blackBoxAccuracy, setBlackBoxAccuracy] = useState<number>(0);
   // desision tree metrics
   const [desicionTreeAccuracy, setDesicionTreeAccuracy] = useState<number>(0);
+  const [desicionTreeFidelity, setDesicionTreeFidelity] = useState<number>(0);
   // counterfactual metrics
   const [counterfactualProbability, setCounterFactualProbability] =
     useState<number>(0);
@@ -22,8 +23,9 @@ export default function PerformanceMetrics({
       .then((el) => el.json())
       .then((data) => {
         const { decisionTree, blackbox, counterfactual } = data;
-        setDesicionTreeAccuracy(decisionTree.accuracy);
         setBlackBoxAccuracy(blackbox.accuracy);
+        setDesicionTreeAccuracy(decisionTree.accuracy);
+        setDesicionTreeFidelity(decisionTree.fidelity);
         setCounterFactualProbability(counterfactual.probability);
       })
       .catch((err) => {
@@ -49,7 +51,7 @@ export default function PerformanceMetrics({
         <Row>
           <Col span={24}>
             <Statistic
-              title="Black box accuraccy"
+              title="Black box accuracy"
               value={blackBoxAccuracy}
               precision={3}
             />
@@ -58,15 +60,26 @@ export default function PerformanceMetrics({
       )}
 
       {showDesisionTreeMetrics && (
-        <Row>
-          <Col span={24}>
-            <Statistic
-              title="Desision tree accuraccy"
-              value={desicionTreeAccuracy}
-              precision={3}
-            />
-          </Col>
-        </Row>
+        <>
+          <Row>
+            <Col span={24}>
+              <Statistic
+                title="Desision tree accuracy"
+                value={desicionTreeAccuracy}
+                precision={3}
+              />
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24}>
+              <Statistic
+                title="Desision tree fidelity"
+                value={desicionTreeFidelity}
+                precision={3}
+              />
+            </Col>
+          </Row>
+        </>
       )}
 
       {showCounterFactualMetrics && (

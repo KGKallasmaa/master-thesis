@@ -40,7 +40,7 @@ class HumanReadableExplanationService:
         return human_readable_explain.to_db_format()
 
     def __feature_importance(self, features_in_local_explanation: List[str]) -> List[Dict[str, float]]:
-        results = {feature: {"featureName": feature, "global": importance,} for feature, importance in zip(self.feature_encoder.classes_, self.estimator.feature_importances_)}
+        results = {feature: {"featureName": feature, "global": importance} for feature, importance in zip(self.feature_encoder.classes_, self.estimator.feature_importances_)}
 
         feature_local_score = {feature: results[feature]["global"] for feature in features_in_local_explanation}
         total_local_score = sum(feature_local_score.values())

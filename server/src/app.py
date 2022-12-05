@@ -12,7 +12,8 @@ from main.database.performance_db import PerformanceDb
 from main.models.enums import ExplanationType
 from main.service.explain.blackbox import BlackBoxModelService
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
-from main.service.explain.decision_tree_explanation import DecisionTreeExplanationService
+from main.service.explain.decision_tree_explanation_service import DecisionTreeExplanationService
+from main.service.perfromance.performance_service import PerformanceService
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
@@ -32,6 +33,7 @@ decision_tree_explanation_service = DecisionTreeExplanationService()
 concept_suggestion_service = ConceptSuggestionService()
 user_selected_concepts_handler = UserSelectedConceptsHandler()
 black_box_service = BlackBoxModelService()
+performance_service = PerformanceService()
 
 
 # TODO: this is used
@@ -61,6 +63,7 @@ def image_by_index_view():
 
 
 # TODO: this is used
+# TODO: can we converted to get request
 @api.route("/original-image", methods=["POST"])
 def original_image():
     payload = request.get_json()
@@ -72,6 +75,7 @@ def original_image():
 
 
 # TODO: this is used
+# TODO: can we converted to get request
 @api.route("/most-popular-concepts", methods=["POST"])
 def most_popular_concepts():
     payload = request.get_json()
@@ -107,13 +111,14 @@ def edit_concept_constraint_view():
 
     match constraint_type:
         case "initially_proposed_concepts":
-            black_box_service.execute(explanation_id,viable_concepts)
+            accuracy = black_box_service.execute(explanation_id,viable_concepts)
+            performance_service.update_blackbox_accuracy(accuracy,explanation_id)
         case _:
             user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
 
     return '', 204
 
-
+# TODO: can we converted to get request
 @api.route("/explanation-concepts", methods=["POST"])
 def explanation_concepts():
     payload = request.get_json()
@@ -165,4 +170,4 @@ def performance_metrics_view(explanation_id):
 
 
 if __name__ == '__main__':
-    api.run(host='0.0.0.0', port=8000, debug=True)
+    api.run(host='0.0.0.0', port=8000, debug=False)

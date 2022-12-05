@@ -1,3 +1,5 @@
+import hashlib
+
 import numpy as np
 from threading import Thread
 from main.database.closest_labels import ClosestLabelsDb
@@ -15,7 +17,7 @@ TOP_K_CLOSEST = 8
 
 def find_closest_for_existing_images():
     image_array_str_map = {
-        np.array2string(np.array(img)): np.array(img)
+        hashlib.sha1(np.array(img).view(np.uint8)).hexdigest(): np.array(img)
         for img in get_images()
     }
     print(
@@ -30,12 +32,7 @@ def find_closest_for_existing_images():
 # TODO: speed up this method. it's very slow
 def find_closest_image_index(image: np.array, k_closest=TOP_K_CLOSEST) -> int:
     """Finding the closest index to the uploaded user_uploaded_image"""
-    target_image_hog = get_hog(image)
-
-    # TODO: parralise this. Also we need to only find distances to distint images
-    image_index_distance_dict = {i: euclidean_distance(target_image_hog, get_hog(img), allow_not_equal=True)
-                                 for i, img in enumerate(get_images())
-                                 }
+    image_index_distance_dict = find_image_index_distance_dict(image)
     sorted_image_index_distance_dict = sort_dictionary(image_index_distance_dict, reverse=False, by_value=True)
 
     image_index_label_dict = dict(enumerate(get_labels()))
@@ -51,15 +48,32 @@ def find_closest_image_index(image: np.array, k_closest=TOP_K_CLOSEST) -> int:
         if image_index_label_dict[image_index] != most_popular_label:
             continue
 
-        closest_label = ClosestLabel({
+        new_closest_label = ClosestLabel({
             "image_index": image_index,
             "label": most_popular_label,
             "closest": [label for label, _ in sorted_label_presence_count_dict[1:]]
         })
-        print(closest_label.to_db_value(), flush=True)
-        closest_label_repository.update_closest_labels(closest_label)
+
+        existing_closest_labels = closest_label_repository.get_by_image_id(image_index).closest
+        if len(new_closest_label.closest) < k_closest and \
+                lists_have_same_elements(existing_closest_labels, new_closest_label.closest):
+            return image_index
+        if existing_closest_labels is not None:
+            new_closest_label.closest = existing_closest_labels
+            existing_closest_labels = [c for c in existing_closest_labels if
+                                       c not in new_closest_label.closest and c != most_popular_label]
+            new_closest_label.closest.extend(existing_closest_labels)
+        if len(new_closest_label.closest) > k_closest:
+            new_closest_label.closest = new_closest_label.closest[:k_closest]
+
+        print(new_closest_label.to_db_value(), flush=True)
+        closest_label_repository.update_closest_labels(new_closest_label)
 
         return image_index
+
+
+def lists_have_same_elements(list1, list2):
+    return set(list1) == set(list2)
 
 
 def find_image_index_distance_dict(target_img) -> Dict[int, float]:
@@ -67,11 +81,11 @@ def find_image_index_distance_dict(target_img) -> Dict[int, float]:
 
     image_index_distance_dict, image_str_distance_dict = {}, {}
     for i, img in enumerate(get_images()):
-        image_as_array = np.array2string(np.array(img))
-        if image_as_array in image_str_distance_dict:
-            image_str_distance_dict[image_as_array] = euclidean_distance(target_image_hog, get_hog(img),
-                                                                         allow_not_equal=True)
-        image_index_distance_dict[i] = image_str_distance_dict[image_as_array]
+        image_key = hashlib.sha1(np.array(img).view(np.uint8)).hexdigest()
+        if image_key not in image_str_distance_dict:
+            image_str_distance_dict[image_key] = euclidean_distance(target_image_hog, get_hog(img),
+                                                                    allow_not_equal=True)
+        image_index_distance_dict[i] = image_str_distance_dict[image_key]
 
     return image_index_distance_dict
 

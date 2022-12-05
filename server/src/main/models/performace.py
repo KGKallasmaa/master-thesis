@@ -8,7 +8,10 @@ class Performance:
             "accuracy": None,
         })
         self.decision_tree = json.get("decisionTree", {
+            # how accurately it predicts the true labels
             "accuracy": None,
+            # how accurately it mimics the blackbox
+            "fidelity": None,
         })
         self.counterfactual = json.get("counterfactual", {
             "probability": None,
@@ -22,10 +25,13 @@ class Performance:
             'counterfactual': self.counterfactual,
         }
 
-    def update_decision_tree(self, accuracy: float):
+    def update_decision_tree(self, accuracy: float, fidelity: float):
         if accuracy > 1.0 or accuracy < 0.0:
             raise ValueError(f"Accuracy must be between 0 and 1, got {accuracy}")
+        if fidelity > 1.0 or fidelity < 0.0:
+            raise ValueError(f"Fidelity must be between 0 and 1, got {fidelity}")
         self.decision_tree["accuracy"] = accuracy
+        self.decision_tree["fidelity"] = fidelity
 
     def update_blackbox(self, accuracy: float):
         if accuracy > 1.0 or accuracy < 0.0:

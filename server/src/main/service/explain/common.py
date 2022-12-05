@@ -9,8 +9,9 @@ from main.service.pre_explanation.data_access import get_segments
 
 
 def encode_categorical_values(values: List[str]) -> preprocessing.LabelEncoder:
+    unique_values = sorted(list(set(values)))
     le = preprocessing.LabelEncoder()
-    le.fit(values)
+    le.fit(unique_values)
     return le
 
 
@@ -25,7 +26,7 @@ def get_training_row(user_selected_concepts: List[str], pic, mask) -> np.array:
     return row
 
 
-def train_decision_tree(x, y) -> Tuple[DecisionTreeClassifier, float]:
+def train_and_test_decision_tree(x, y) -> Tuple[DecisionTreeClassifier, float]:
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=0)
     clf = DecisionTreeClassifier()
     clf.fit(X_train, y_train)
