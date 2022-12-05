@@ -89,5 +89,6 @@ def find_image_index_distance_dict(target_img) -> Dict[int, float]:
 
     return image_index_distance_dict
 
-# thread = Thread(target=find_closest_for_existing_images)
-# thread.start()
+
+thread = Thread(target=find_closest_for_existing_images)
+thread.start()
