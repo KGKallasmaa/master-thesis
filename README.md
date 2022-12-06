@@ -54,31 +54,29 @@ The UI now asks you to choose initial concepts that will be used for generating 
 
 #### Decision tree explanation
 
-Decision tree explanations can only use a subset of concepts initially specified by the user. If the user wishes to use concepts they didn't initially select they need to restart the explanation process. 
+Decision tree explanations can only use a subset of concepts initially specified by the user. If the user wishes to use concepts they didn't initially select they need to restart the explanation process.
 
 ![Tree concepts](./docs/select_tree_concepts.png)
 
 For example, if we choose those concepts:<br>
 <br>
- mountain;mount
- sky
- tree
- river
- grass
- rock;stone
- water
- sea
- road;route
- hill
- <br>
+mountain;mount
+sky
+tree
+river
+grass
+rock;stone
+water
+sea
+road;route
+hill
+<br>
 
 then we get the following explanation
 
 ![Tree explain](./docs/tree_explain.png)
 
-
-This image is predicted to be a mountain, because of the presence of concepts <b>hill</b> (51.82%), <b>grass</b>  (29.61%), and <b>sky</b> (18.57%)<br/>
-
+This image is predicted to be a mountain, because of the presence of concepts <b>hill</b> (51.82%), <b>grass</b> (29.61%), and <b>sky</b> (18.57%)<br/>
 
 We're also reporting the performance metrics to the user
 
@@ -99,10 +97,9 @@ hill: 51.82 % vs 0
 grass:29.61% vs 26.16%
 sky:18.57% vs 73.84%
 
-
 <br/>
 
-UI suggests to users more concepts they could add in the order of relevancy.(<b>road;route</b>) 
+UI suggests to users more concepts they could add in the order of relevancy.(<b>road;route</b>)
 
 #### Counterfactual explanation
 
@@ -110,9 +107,7 @@ For counterfactual explanations, you need to select the counterfactual class fro
 
 ![Select counterfactual](./docs/select_mountain_snowy.png)
 
-
 ![Counterfactual explanations](./docs/counterfactual_explain.png)
-
 
 The image above chose two counterfactual examples. <br>
 The tool also shows the probability of that counterfactual example
