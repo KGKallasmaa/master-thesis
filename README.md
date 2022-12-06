@@ -26,15 +26,6 @@ npm run dev
 Before starting the server, please download [data](https://drive.google.com/file/d/1BLU0CALcHmnXzcoHmNB5ETasJwN_XIpZ/view?usp=sharing)
 and copy its content to the <b>data</b> folder in the server directory. This folder will hold the images and segments used for this demo.
 
-You also need to set the DB_URL env variable located in the .env file.
-This URL should be a valid Mongodb url. You can use MongoDb [Atlas](https://www.mongodb.com/atlas/database) for that
-
-This is a shared free image that can be used to run the code locally. Change it if you want to see the results in your own DB
-
-```bash
-DB_URL=mongodb+srv://master:0A1cwFHMiG0js25B0A1cwFHMiG0js25B@masterthesis.y4xd8th.mongodb.net/?retryWrites=true&w=majority
-```
-
 After that run the following command (requires [Docker](https://docs.docker.com/get-docker/))
 
 ```bash
@@ -59,42 +50,71 @@ We'll show you the image in our dataset that is closest to the image you uploade
 
 ### Select concepts
 
-This codebase is currently able to provide decision tree-based and counterfactual-based explanations. <br>
-By default decision, tree-based explanations are shown at first.
-
-To provide more user-centric explanations we're going to ask you to specify some concepts.<br>
+The UI now asks you to choose initial concepts that will be used for generating the first explanation iteration. <br>
 
 #### Decision tree explanation
 
-We're using all of the concepts specified by you to train a decision tree that explains the black box model responsible for classifying the image shown in the previous step.
+Decision tree explanations can only use a subset of concepts initially specified by the user. If the user wishes to use concepts they didn't initially select they need to restart the explanation process. 
 
 ![Tree concepts](./docs/select_tree_concepts.png)
 
-For example, if we choose those concepts (tree, sea, sky, rock; stone, sand) then we get the following explanation
+For example, if we choose those concepts:<br>
+<br>
+ mountain;mount
+ sky
+ tree
+ river
+ grass
+ rock;stone
+ water
+ sea
+ road;route
+ hill
+ <br>
+
+then we get the following explanation
 
 ![Tree explain](./docs/tree_explain.png)
 
-This image contains a few, but some are more important than others. For this specific instance the presence of <b>sea</b> (52.28%) and <b>sand</b> (39.02%) are mostly responsible for <b>beach</b> classification. Concept <b>rock; stone</b> (8.7%) also contributed to it, but <b>sand</b> and <b>tree</b> didn't contribute at all to this classification.
+
+This image is predicted to be a mountain, because of the presence of concepts <b>hill</b> (51.82%), <b>grass</b>  (29.61%), and <b>sky</b> (18.57%)<br/>
+
+
+We're also reporting the performance metrics to the user
+
+![Performane metrics](./docs/tree_explain_performance.png)
+
+Initially, the decision tree is expected to have a very high fidelity, because in this demo the blackbox model is a decision tree that's using all initial concepts.
+
 <br/>
-Overall, sand and tree contributed to the classification, but the feature importance order stayed the same.
+
+Let's say we're interested in reducing the number of concepts. For the sake of demonstration, lets keep only the 3 top concepts <b>hill</b>,<b>grass</b>, and <b>sea</b>
+
+![Tree explain 2](./docs/tree_explain_2.png)
+
+Removing these concepts changed the prediction from <b>mountain</b> to <b>game_room</b>. The relative importance of concepts also changed:<br/>
+
+(old vs new)
+hill: 51.82 % vs 0
+grass:29.61% vs 26.16%
+sky:18.57% vs 73.84%
+
+
+<br/>
+
+UI suggests to users more concepts they could add in the order of relevancy.(<b>road;route</b>) 
 
 #### Counterfactual explanation
 
 For counterfactual explanations, you need to select the counterfactual class from the dropdown
 
-![Select counterfactual](./docs/select_mountain.png)
+![Select counterfactual](./docs/select_mountain_snowy.png)
 
-And also the concepts from the counterfactual class <b>mountain</b>
-
-![Mountain concepts](./docs/mountain_concepts.png)
-
-The program generates 2 synthetic counterfactual explanations.
 
 ![Counterfactual explanations](./docs/counterfactual_explain.png)
 
-First, this image would be classified as <b>mountain</b> if 60% of the image would be a sky, 40% mountain, and 20% rock<br>
-Secondly, this image could be classified as a <b>mountain</b> if 70% of the image would be a mountain, 60% tree, and 50% sand.
 
-The concepts are not mutually exclusive, therefore the sum can be greater than 100%. For example, 60% of the image can be a sea, and 50% of the image can be a sky because there's an overlap between them. The concept representation sum can also be smaller than 100% because there typically are concepts that the user did not select as part of their explanation.
+The image above chose two counterfactual examples. <br>
+The tool also shows the probability of that counterfactual example
 
-These counterfactual explanations indicate that the presence of the sky paid an important role in classifying the previous image as a <b>beach</b>. The counterfactual explanations also indicate that the presence of a mountain would improve the chances of this image being classified as a <b>mountain</b>.
+![Counterfactual probability](./docs/counterfactual_probability.png)

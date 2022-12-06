@@ -1,7 +1,6 @@
 from typing import List, Dict
 
 
-from main.database.closest_labels import ClosestLabelsDb
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
@@ -13,15 +12,12 @@ from main.service.perfromance.performance_service import PerformanceService
 class DecisionTreeExplanationService:
     def __init__(self):
         self.requirement_db = ExplanationRequirementDb()
-        self.closest_label_db = ClosestLabelsDb()
         self.constraint_db = ConstraintDb()
         self.performance_service = PerformanceService()
 
     def explain(self, explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
         concepts = self.to_be_used_concepts(explanation_id)
-        response = self.__explain_using_decision_tree(
-            to_be_explained_image_index,
-            concepts)
+        response = self.__explain_using_decision_tree(to_be_explained_image_index,concepts)
         self.update_used_constraints(explanation_id=explanation_id,
                                         feature_encoder=response.feature_encoder,
                                      estimator=response.model)
@@ -29,10 +25,9 @@ class DecisionTreeExplanationService:
         self.performance_service.update_decision_tree_performance(response, explanation_id)
         return response.explanation
 
-    def __explain_using_decision_tree(self, to_be_explained_image_index: int,decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
-        closest = self.closest_label_db.get_by_image_id(to_be_explained_image_index)
-        valid_labels = [closest.label] + closest.closest
-        return explain_using_decision_tree(valid_labels, to_be_explained_image_index, decision_tree_concepts)
+    @staticmethod
+    def __explain_using_decision_tree(to_be_explained_image_index: int,decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
+        return explain_using_decision_tree(to_be_explained_image_index, decision_tree_concepts)
 
     def to_be_used_concepts(self, explanation_id: str) -> List[str]:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)

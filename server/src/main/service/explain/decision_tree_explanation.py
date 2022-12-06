@@ -6,7 +6,8 @@ from main.service.pre_explanation.data_access import get_labels, get_images, get
 import numpy as np
 
 
-def explain_using_decision_tree(valid_labels:List[str],to_be_explained_image_index: int,decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
+def explain_using_decision_tree(to_be_explained_image_index: int,
+                                decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
     label_encoder = encode_categorical_values(get_labels())
     feature_encoder = encode_categorical_values(decision_tree_concepts)
 
@@ -17,9 +18,8 @@ def explain_using_decision_tree(valid_labels:List[str],to_be_explained_image_ind
         label_as_nr = label_encoder.transform([label])
         X.append(row)
         y.append(label_as_nr)
-        if label in valid_labels:
-            X_train.append(row)
-            y_train.append(label_as_nr)
+        X_train.append(row)
+        y_train.append(label_as_nr)
 
     clf, accuracy = train_and_test_decision_tree(np.array(X_train), np.array(y_train))
 
