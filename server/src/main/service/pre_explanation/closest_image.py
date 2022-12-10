@@ -4,8 +4,8 @@ import numpy as np
 from threading import Thread
 from main.database.closest_labels import ClosestLabelsDb
 from main.models.closest_label import ClosestLabel
+from main.service.pre_explanation.common import euclidean_distance
 from main.service.pre_explanation.data_access import get_hog, get_images, get_labels
-from main.service.pre_explanation.kmeans import euclidean_distance
 from main.service.utils.dictionary import sort_dictionary
 import multiprocessing
 from multiprocessing import Pool
@@ -48,28 +48,30 @@ def find_closest_image_index(image: np.array, k_closest=TOP_K_CLOSEST) -> int:
         if image_index_label_dict[image_index] != most_popular_label:
             continue
 
-        new_closest_label = ClosestLabel({
+        existing_closest_labels = closest_label_repository.get_by_image_id(image_index)
+        existing_closest_labels = [] if existing_closest_labels is None else existing_closest_labels.closest
+
+        new_closest_labels = [label for label, _ in sorted_label_presence_count_dict[1:]]
+
+        if lists_have_same_elements(existing_closest_labels, new_closest_labels):
+            return image_index
+
+        new_closest_labels.extend(existing_closest_labels)
+        new_closest_labels = list(set(new_closest_labels))
+        if len(new_closest_labels) > k_closest:
+            new_closest_labels = new_closest_labels[:k_closest]
+        if len(new_closest_labels) == 0:
+            continue
+        new_closest_label_obj = ClosestLabel({
             "image_index": image_index,
             "label": most_popular_label,
-            "closest": [label for label, _ in sorted_label_presence_count_dict[1:]]
+            "closest": new_closest_labels
         })
-
-        existing_closest_labels = closest_label_repository.get_by_image_id(image_index).closest
-        if len(new_closest_label.closest) < k_closest and \
-                lists_have_same_elements(existing_closest_labels, new_closest_label.closest):
-            return image_index
-        if existing_closest_labels is not None:
-            new_closest_label.closest = existing_closest_labels
-            existing_closest_labels = [c for c in existing_closest_labels if
-                                       c not in new_closest_label.closest and c != most_popular_label]
-            new_closest_label.closest.extend(existing_closest_labels)
-        if len(new_closest_label.closest) > k_closest:
-            new_closest_label.closest = new_closest_label.closest[:k_closest]
-
-        print(new_closest_label.to_db_value(), flush=True)
-        closest_label_repository.update_closest_labels(new_closest_label)
-
+        print(new_closest_label_obj.to_db_value(), flush=True)
+        closest_label_repository.update_closest_labels(new_closest_label_obj)
         return image_index
+
+    return -1
 
 
 def lists_have_same_elements(list1, list2):

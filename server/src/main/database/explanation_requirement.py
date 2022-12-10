@@ -20,13 +20,6 @@ class ExplanationRequirementDb:
         except Exception:
             return False
 
-    def update_explanation_requirement_constraints(self, obj: ExplanationRequirement) -> bool:
-        try:
-            result = self.collection.update_one({'_id': obj.id}, {'$set': obj.constraints.to_db_value()}, upsert=True)
-            return result.matched_count > 0
-        except Exception:
-            return False
-
     def add_original_image_to_explanation(self, user_uploaded_image: any, explanation_id: str):
         update = {"original_image": user_uploaded_image}
         try:
