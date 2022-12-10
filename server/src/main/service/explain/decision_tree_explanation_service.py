@@ -2,7 +2,6 @@ from typing import List, Dict
 
 
 from main.database.constraint_db import ConstraintDb
-from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
 from main.models.enums import ExplanationType
 from main.service.explain.decision_tree_explanation import explain_using_decision_tree
@@ -11,7 +10,6 @@ from main.service.perfromance.performance_service import PerformanceService
 
 class DecisionTreeExplanationService:
     def __init__(self):
-        self.requirement_db = ExplanationRequirementDb()
         self.constraint_db = ConstraintDb()
         self.performance_service = PerformanceService()
 

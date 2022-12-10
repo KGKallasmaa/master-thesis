@@ -7,7 +7,6 @@ import pandas as pd
 
 from main.database.closest_labels import ClosestLabelsDb
 from main.database.constraint_db import ConstraintDb
-from main.database.explanation_requirement import ExplanationRequirementDb
 from main.models.enums import ExplanationType
 from main.service.explain.common import encode_categorical_values, get_training_row, train_and_test_decision_tree
 from main.service.perfromance.performance_service import PerformanceService
@@ -22,7 +21,6 @@ minimum_counterfactual_probability.reverse()
 
 class CounterFactualExplanationService:
     def __init__(self):
-        self.requirement_db = ExplanationRequirementDb()
         self.closest_label_db = ClosestLabelsDb()
         self.constraint_db = ConstraintDb()
         self.performance_service = PerformanceService()
