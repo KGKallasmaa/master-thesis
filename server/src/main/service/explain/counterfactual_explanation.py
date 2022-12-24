@@ -28,8 +28,6 @@ class CounterFactualExplanationService:
     def explain(self, explanation_id: str, counter_factual_class: str, to_be_explained_image_index: int):
         concepts = self.to_be_used_concepts(explanation_id)
 
-        feature_encoder = encode_categorical_values(concepts)
-
         estimator, probability, explanation = self.counterfactual_explanation(
             to_be_explained_image_index=to_be_explained_image_index,
             counter_factual_class=counter_factual_class,
@@ -37,6 +35,9 @@ class CounterFactualExplanationService:
 
         if explanation["error"] != "":
             return explanation
+
+        feature_encoder = encode_categorical_values(concepts)
+
         self.update_used_constraints(explanation_id=explanation_id, feature_encoder=feature_encoder,
                                      estimator=estimator)
         self.performance_service.update_counterfactual_probability(probability, explanation_id)

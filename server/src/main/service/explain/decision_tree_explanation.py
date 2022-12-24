@@ -9,19 +9,17 @@ import numpy as np
 def explain_using_decision_tree(to_be_explained_image_index: int,
                                 decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
     label_encoder = encode_categorical_values(get_labels())
-    feature_encoder = encode_categorical_values(decision_tree_concepts)
 
     X, y = [], []
-    X_train, y_train = [], []
     for label, pic, mask in zip(get_labels(), get_images(), get_masks()):
         row = get_training_row(decision_tree_concepts, pic, mask)
         label_as_nr = label_encoder.transform([label])
         X.append(row)
         y.append(label_as_nr)
-        X_train.append(row)
-        y_train.append(label_as_nr)
 
-    clf, accuracy = train_and_test_decision_tree(np.array(X_train), np.array(y_train))
+    clf, accuracy = train_and_test_decision_tree(np.array(X), np.array(y))
+
+    feature_encoder = encode_categorical_values(decision_tree_concepts)
 
     hre = HumanReadableExplanationService(label_encoder=label_encoder,
                                           feature_encoder=feature_encoder,

@@ -111,12 +111,15 @@ def edit_concept_constraint_view():
 
     match constraint_type:
         case "initially_proposed_concepts":
-            accuracy = black_box_service.execute(explanation_id,viable_concepts)
-            performance_service.update_blackbox_accuracy(accuracy,explanation_id)
+            accuracy = black_box_service.execute(explanation_id, viable_concepts)
+            performance_service.update_blackbox_accuracy(accuracy, explanation_id)
+            user_selected_concepts_handler.consept_suggestions(explanation_id, ExplanationType.DECISION_TREE, viable_concepts)
+            user_selected_concepts_handler.consept_suggestions(explanation_id, ExplanationType.COUNTERFACTUAL, viable_concepts)
         case _:
             user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
 
     return '', 204
+
 
 # TODO: can we converted to get request
 @api.route("/explanation-concepts", methods=["POST"])
