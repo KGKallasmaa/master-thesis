@@ -1,6 +1,5 @@
 from typing import List, Dict
 
-
 from main.database.constraint_db import ConstraintDb
 from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
 from main.models.enums import ExplanationType
@@ -15,17 +14,13 @@ class DecisionTreeExplanationService:
 
     def explain(self, explanation_id: str, to_be_explained_image_index: int) -> Dict[str, any]:
         concepts = self.to_be_used_concepts(explanation_id)
-        response = self.__explain_using_decision_tree(to_be_explained_image_index,concepts)
+        response = explain_using_decision_tree(to_be_explained_image_index, concepts)
         self.update_used_constraints(explanation_id=explanation_id,
-                                        feature_encoder=response.feature_encoder,
+                                     feature_encoder=response.feature_encoder,
                                      estimator=response.model)
 
         self.performance_service.update_decision_tree_performance(response, explanation_id)
         return response.explanation
-
-    @staticmethod
-    def __explain_using_decision_tree(to_be_explained_image_index: int,decision_tree_concepts: List[str]) -> DecisionTreeExplanationResponse:
-        return explain_using_decision_tree(to_be_explained_image_index, decision_tree_concepts)
 
     def to_be_used_concepts(self, explanation_id: str) -> List[str]:
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
