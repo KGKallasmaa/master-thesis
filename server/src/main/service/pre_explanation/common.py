@@ -13,11 +13,20 @@ def serve_pil_image(img: PIL) -> str:
     base64_str = base64.b64encode(byte_data)
     return base64_str.decode("utf-8")
 
+
 def base64_to_pil(base64_str: str) -> PIL:
     image = base64.b64decode(base64_str)
     image = BytesIO(image)
     image = Image.open(image)
     return image
+
+
+def array_to_image(ar: np.array) -> PIL:
+    return Image.fromarray(np.uint8(ar)).convert('RGB')
+
+
+def resize_img(img, width=100, height=100) -> PIL:
+    return img.resize((width, height), Image.ANTIALIAS)
 
 
 def euclidean_distance(a: np.array, b: np.array, allow_not_equal=False) -> float:
