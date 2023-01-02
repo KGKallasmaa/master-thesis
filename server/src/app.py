@@ -17,7 +17,7 @@ from main.service.perfromance.performance_service import PerformanceService
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
-from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS
+from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS, CENTER_MOST_CONCEPTS
 from main.service.suggestions.concept_handler import UserSelectedConceptsHandler
 from main.service.suggestions.concept_suggestion_service import ConceptSuggestionService
 
@@ -113,8 +113,10 @@ def edit_concept_constraint_view():
         case "initially_proposed_concepts":
             accuracy = black_box_service.execute(explanation_id, viable_concepts)
             performance_service.update_blackbox_accuracy(accuracy, explanation_id)
-            user_selected_concepts_handler.consept_suggestions(explanation_id, ExplanationType.DECISION_TREE, viable_concepts)
-            user_selected_concepts_handler.consept_suggestions(explanation_id, ExplanationType.COUNTERFACTUAL, viable_concepts)
+            user_selected_concepts_handler.consept_suggestions(explanation_id, ExplanationType.DECISION_TREE,
+                                                               viable_concepts)
+            user_selected_concepts_handler.consept_suggestions(explanation_id, ExplanationType.COUNTERFACTUAL,
+                                                               viable_concepts)
         case _:
             user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
 
@@ -170,6 +172,12 @@ def all_labels_view():
 def performance_metrics_view(explanation_id):
     performance = performance_db.get_by_explanation_requirement_id(explanation_id)
     return performance.to_db_value()
+
+
+# TODO: this is used
+@api.route("/center-most-concepts/<image-id>", methods=["GET"])
+def center_most_concepts_view(image_id: int):
+    return jsonify({"concepts": CENTER_MOST_CONCEPTS[image_id]})
 
 
 if __name__ == '__main__':
