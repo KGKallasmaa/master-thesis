@@ -13,7 +13,8 @@ type FeatureImportance = {
 };
 
 export default function DesisionTreeExplanation(props: { index: number }) {
-  const [intuitiveConceptsSelected, setIntuitiveConceptsSelected] = useState<false>();
+  const [intuitiveConceptsSelected, setIntuitiveConceptsSelected] =
+    useState<false>();
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -49,14 +50,14 @@ export default function DesisionTreeExplanation(props: { index: number }) {
     fetchDesisionTreeExplanation();
   }, [index]);
 
-  if (intuitiveConceptsSelected == false){
+  if (intuitiveConceptsSelected == false) {
     return (
       <IntuitiveConceptsStep
-      explanation_type="decision_tree"
-          onComplete={() => setIntuitiveConceptsSelected(true)}
-          index={index}
-        />
-    )
+        explanation_type="decision_tree"
+        onComplete={() => setIntuitiveConceptsSelected(true)}
+        index={index}
+      />
+    );
   }
 
   if (isLoading) {
