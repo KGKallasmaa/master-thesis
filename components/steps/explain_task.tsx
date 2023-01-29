@@ -7,11 +7,16 @@ import InitalConceptsStep from "./inital_concepts";
 import DesisionTreeExplanation from "../explain/desision_tree_explanation";
 import CounterFactualExplanation from "../explain/counterfactual_explanation";
 import PerformanceMetrics from "../performace/performace";
+import IntuitiveConceptsStep from "./intuitive_concepts";
 
 const explanationStep_TitelAndDescription = {
   inital_concepts: {
     title: "Select some concepts",
     description: "Select concepts that you think are important for the image.",
+  },
+  intuitive_concepts: {
+    title: "Confirm inuitive concepts",
+    description:"Are those concepts inuitive to you?",
   },
   choose_explanation_type: {
     title: "Choose what kind of explanation you want",
@@ -34,7 +39,7 @@ export default function ExplainTask(index: number) {
   const { title, description } =
     explanationStep_TitelAndDescription[explanationStep];
 
-  const explanationChoiceStepIsVisible = !["", "inital_concepts"].includes(
+  const explanationChoiceStepIsVisible = !["", "inital_concepts","intuitive_concepts"].includes(
     explanationStep
   );
 
@@ -59,6 +64,12 @@ export default function ExplainTask(index: number) {
           <br />
           {explanationStep === "inital_concepts" && (
             <InitalConceptsStep
+              onComplete={() => setExplanationStep("intuitive_concepts")}
+              index={index}
+            />
+          )}
+          {explanationStep === "intuitive_concepts" && (
+            <IntuitiveConceptsStep
               onComplete={() => setExplanationStep("choose_explanation_type")}
               index={index}
             />

@@ -131,6 +131,10 @@ def explanation_concepts():
     explanation_type = ExplanationType.from_str(payload["explanation_type"])
     return concept_suggestion_service.consept_suggestions(explanation_id, explanation_type).to_db_value()
 
+# TODO: this is used
+@api.route("/all-constraints/<explanation_id>", methods=["GET"])
+def all_constraints_view(explanation_id: str):
+    return constraint_db.get_constraint_by_explanation_requirement_id(explanation_id).to_db_value()
 
 # TODO: this is used
 @api.route("/decision-tree-explanation", methods=["POST"])
@@ -175,9 +179,14 @@ def performance_metrics_view(explanation_id):
 
 
 # TODO: this is used
-@api.route("/center-most-concepts/<image-id>", methods=["GET"])
-def center_most_concepts_view(image_id: int):
-    return jsonify({"concepts": CENTER_MOST_CONCEPTS[image_id]})
+@api.route("/center-most-concepts", methods=["POST"])
+def center_most_concepts_view():
+    payload = request.get_json()
+
+    return [
+        {"label": l, "center": CENTER_MOST_CONCEPTS[l]}
+        for l in payload["labels"]
+    ]
 
 
 if __name__ == '__main__':

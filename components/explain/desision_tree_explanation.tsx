@@ -4,6 +4,7 @@ import { getId } from "../common/storage";
 import { BidirectionalBar } from "@ant-design/plots";
 import ConceptsManager from "../concepts/propose_more_consepts";
 import { Skeleton } from "antd";
+import IntuitiveConceptsStep from "../steps/intuitive_concepts";
 
 type FeatureImportance = {
   featureName: string;
@@ -12,6 +13,7 @@ type FeatureImportance = {
 };
 
 export default function DesisionTreeExplanation(props: { index: number }) {
+  const [intuitiveConceptsSelected, setIntuitiveConceptsSelected] = useState<false>();
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -46,6 +48,16 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   useEffect(() => {
     fetchDesisionTreeExplanation();
   }, [index]);
+
+  if (intuitiveConceptsSelected == false){
+    return (
+      <IntuitiveConceptsStep
+      explanation_type="decision_tree"
+          onComplete={() => setIntuitiveConceptsSelected(true)}
+          index={index}
+        />
+    )
+  }
 
   if (isLoading) {
     return <Skeleton active />;
