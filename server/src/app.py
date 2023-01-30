@@ -183,10 +183,15 @@ def performance_metrics_view(explanation_id):
 def center_most_concepts_view():
     payload = request.get_json()
 
-    return [
-        {"label": l, "center": CENTER_MOST_CONCEPTS[l]}
-        for l in payload["labels"]
-    ]
+    label_mostpopular_concepts = {label: MOST_POPULAR_CONCEPTS[label] for label in payload.get("labels", [])}
+    results = {}
+    for label in payload.get("labels", []):
+        for concept in label_mostpopular_concepts[label]:
+            if concept in CENTER_MOST_CONCEPTS:
+                current_values = results.get(label, [])
+                current_values.append(CENTER_MOST_CONCEPTS[concept])
+                results[label] = current_values
+    return [{"label": label, "center": center} for label, center in results.items()]
 
 
 if __name__ == '__main__':

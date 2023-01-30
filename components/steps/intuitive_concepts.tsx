@@ -1,14 +1,35 @@
-import { Button, Skeleton } from "antd";
+import { Button, Col, Row, Skeleton } from "antd";
 import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { Checkbox } from "antd";
 import { getId } from "../common/storage";
-import { ConceptCard } from "../common/card";
 import toast from "react-hot-toast";
 
 type CenterMostConceptCheck = {
   label: string;
   value: string;
+};
+
+const CheckboxWithImage = ({ src, label,conceptChecked }) => {
+  const [checked, setChecked] = useState(false);
+  const handleChange = (e) => {
+    conceptChecked(!checked);
+    setChecked(e.target.checked);
+    conceptChecked();
+  };
+  return (
+    <Row align="middle">
+      <Col span={4}>
+        <Checkbox checked={checked} onChange={handleChange} />
+      </Col>
+      <Col span={8}>
+        <img src={src} />
+      </Col>
+      <Col span={12}>
+        <p>{label}</p>
+      </Col>
+    </Row>
+  );
 };
 
 export default function IntuitiveConceptsStep({
@@ -21,10 +42,22 @@ export default function IntuitiveConceptsStep({
   onComplete: () => void;
 }) {
   const [centerMostConcepts, setCenterMostConcepts] = useState({});
-  const [initallyProposedConcepts, setInitallyProposedConcepts] = useState<
-    string[]
-  >([]);
+  const [initallyProposedConcepts, setInitallyProposedConcepts] = useState<string[]>([]);
+  const [chosenIntuitiveConcepts, setChosenIntuitiveConcepts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleConceptSelected = (label:string,concept:string,wasChecked:boolean) => {
+    let currentValues = chosenIntuitiveConcepts[label];
+    if (!currentValues){
+      currentValues = [];
+    }
+    if(wasChecked){
+      currentValues.push(concept);
+    }else{
+      currentValues = currentValues.filter((el: string) => el !== concept);
+    }
+    setChosenIntuitiveConcepts({...chosenIntuitiveConcepts,[label]:currentValues});
+  }
 
   useEffect(() => {
     httpGet(`/all-constraints/${getId()}`)
@@ -52,14 +85,8 @@ export default function IntuitiveConceptsStep({
         center[label] = data.concepts.map((el) => {
           return {
             label: el.conceptName,
-            value: (
-              <ConceptCard
-                title={el.conceptName}
-                imageBase64={el.src}
-                imageWidth={200}
-                onSelected={null}
-              />
-            ),
+            value: <CheckboxWithImage conceptChecked={(wasChecked) =>handleConceptSelected(label,el.conceptName,wasChecked)} 
+            src={el.src} label={el.conceptName} />,
           };
         });
         setCenterMostConcepts(center);
@@ -84,6 +111,23 @@ export default function IntuitiveConceptsStep({
         toast.error(err);
       });
   };
+  useEffect(() => {
+    const payload = {
+      id: getId(),
+      img: index,
+      constraint_type: "intuitive",
+      explanation_type,
+      concepts: chosenIntuitiveConcepts,
+    };
+
+    // TODO: add it to backend
+    http("/intuitive-concept-constraint", payload)
+      .then((resp) => {})
+      .catch((err) => {
+        toast.error(err);
+      });
+
+  }, [chosenIntuitiveConcepts]);
 
   if (isLoading) {
     return <Skeleton active />;
@@ -95,7 +139,6 @@ export default function IntuitiveConceptsStep({
         return (
           <Checkbox.Group
             options={centerMostConcepts[el]}
-            onChange={(checkedValues) => onChange(el, checkedValues)}
           />
         );
       })}

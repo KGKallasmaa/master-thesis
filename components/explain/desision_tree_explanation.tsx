@@ -14,7 +14,7 @@ type FeatureImportance = {
 
 export default function DesisionTreeExplanation(props: { index: number }) {
   const [intuitiveConceptsSelected, setIntuitiveConceptsSelected] =
-    useState<false>();
+    useState<boolean>(false);
   const [isLoading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
