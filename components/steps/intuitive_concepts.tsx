@@ -10,7 +10,7 @@ type CenterMostConceptCheck = {
   value: string;
 };
 
-const CheckboxWithImage = ({ src, label,conceptChecked }) => {
+const CheckboxWithImage = ({ src, label, conceptChecked }) => {
   const [checked, setChecked] = useState(false);
   const handleChange = (e) => {
     conceptChecked(!checked);
@@ -42,22 +42,31 @@ export default function IntuitiveConceptsStep({
   onComplete: () => void;
 }) {
   const [centerMostConcepts, setCenterMostConcepts] = useState({});
-  const [initallyProposedConcepts, setInitallyProposedConcepts] = useState<string[]>([]);
+  const [initallyProposedConcepts, setInitallyProposedConcepts] = useState<
+    string[]
+  >([]);
   const [chosenIntuitiveConcepts, setChosenIntuitiveConcepts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleConceptSelected = (label:string,concept:string,wasChecked:boolean) => {
+  const handleConceptSelected = (
+    label: string,
+    concept: string,
+    wasChecked: boolean
+  ) => {
     let currentValues = chosenIntuitiveConcepts[label];
-    if (!currentValues){
+    if (!currentValues) {
       currentValues = [];
     }
-    if(wasChecked){
+    if (wasChecked) {
       currentValues.push(concept);
-    }else{
+    } else {
       currentValues = currentValues.filter((el: string) => el !== concept);
     }
-    setChosenIntuitiveConcepts({...chosenIntuitiveConcepts,[label]:currentValues});
-  }
+    setChosenIntuitiveConcepts({
+      ...chosenIntuitiveConcepts,
+      [label]: currentValues,
+    });
+  };
 
   useEffect(() => {
     httpGet(`/all-constraints/${getId()}`)
@@ -85,8 +94,15 @@ export default function IntuitiveConceptsStep({
         center[label] = data.concepts.map((el) => {
           return {
             label: el.conceptName,
-            value: <CheckboxWithImage conceptChecked={(wasChecked) =>handleConceptSelected(label,el.conceptName,wasChecked)} 
-            src={el.src} label={el.conceptName} />,
+            value: (
+              <CheckboxWithImage
+                conceptChecked={(wasChecked) =>
+                  handleConceptSelected(label, el.conceptName, wasChecked)
+                }
+                src={el.src}
+                label={el.conceptName}
+              />
+            ),
           };
         });
         setCenterMostConcepts(center);
@@ -126,7 +142,6 @@ export default function IntuitiveConceptsStep({
       .catch((err) => {
         toast.error(err);
       });
-
   }, [chosenIntuitiveConcepts]);
 
   if (isLoading) {
@@ -136,11 +151,7 @@ export default function IntuitiveConceptsStep({
   return (
     <>
       {Object.keys(centerMostConcepts).map((el) => {
-        return (
-          <Checkbox.Group
-            options={centerMostConcepts[el]}
-          />
-        );
+        return <Checkbox.Group options={centerMostConcepts[el]} />;
       })}
       <div>
         <Button type="primary" onClick={() => onComplete}>
