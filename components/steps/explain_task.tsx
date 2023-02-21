@@ -4,9 +4,10 @@ import { CurrentImage, OriginalImage } from "../concepts/current_image";
 import { useState } from "react";
 import ExplanationTypeChoiceStep from "./explaination_type_choice";
 import InitalConceptsStep from "./inital_concepts";
-import DesisionTreeExplanation from "../explain/desision_tree_explanation";
+import DecisionTreeExplanation from "../explain/decision_tree_explanation";
 import CounterFactualExplanation from "../explain/counterfactual_explanation";
 import PerformanceMetrics from "../performace/performace";
+import HealthCheck from "../common/health_check";
 
 const explanationStep_TitelAndDescription = {
   inital_concepts: {
@@ -18,7 +19,18 @@ const explanationStep_TitelAndDescription = {
     description:
       "Currently we're offering two types of explanations. Choose one of them.",
   },
-  desision_tree: {
+  intuitive_concepts_decision_tree: {
+    title: "Select some intuitive concepts for the decision tree",
+    description:
+      "Please address the intutive of these concepts to your decision tree explanation",
+  },
+  intuitive_concepts_counterfactual: {
+    title: "Select some intuitive concepts for the counterfactual",
+    description:
+      "Please address the intutive of these concepts to your counterfactual explanation",
+  },
+
+  decision_tree: {
     title: "Decision Tree Explanation",
     description: "This is a decision tree explanation",
   },
@@ -34,19 +46,14 @@ export default function ExplainTask(index: number) {
   const { title, description } =
     explanationStep_TitelAndDescription[explanationStep];
 
-  const explanationChoiceStepIsVisible = !["", "inital_concepts"].includes(
-    explanationStep
-  );
-
-  const handleSelect = (choice: string) => {
-    setExplanationStep(choice);
-  };
-  const showPerformanceMetrics = ["desision_tree", "counterfactual"].includes(
+  const showPerformanceMetrics = ["decision_tree", "counterfactual"].includes(
     explanationStep
   );
 
   return (
     <>
+      <br />
+      <HealthCheck />
       <br />
       <ExplainableHeader title={title} description={description} />
       <br />
@@ -63,17 +70,18 @@ export default function ExplainTask(index: number) {
               index={index}
             />
           )}
-          {explanationChoiceStepIsVisible && (
+          {explanationStep === "choose_explanation_type" && (
             <>
               <ExplanationTypeChoiceStep
-                onComplete={(choice) => handleSelect(choice)}
+                onComplete={(choice) => setExplanationStep(choice)}
               />
               <br />
               <br />
             </>
           )}
-          {explanationStep === "desision_tree" && (
-            <DesisionTreeExplanation index={index} />
+
+          {explanationStep === "decision_tree" && (
+            <DecisionTreeExplanation index={index} />
           )}
           {explanationStep === "counterfactual" && (
             <CounterFactualExplanation index={index} />

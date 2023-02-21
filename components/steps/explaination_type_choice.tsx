@@ -2,8 +2,8 @@ import { Select } from "antd";
 
 const options = [
   {
-    value: "desision_tree",
-    label: "Desision Tree",
+    value: "decision_tree",
+    label: "Decision Tree",
   },
   {
     value: "counterfactual",

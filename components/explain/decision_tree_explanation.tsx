@@ -12,7 +12,7 @@ type FeatureImportance = {
   global: number;
 };
 
-export default function DesisionTreeExplanation(props: { index: number }) {
+export default function DecisionTreeExplanation(props: { index: number }) {
   const [intuitiveConceptsSelected, setIntuitiveConceptsSelected] =
     useState<boolean>(false);
   const [isLoading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   const [trueLabel, setTrueLabel] = useState<string>("");
   const [predictedLabel, setPredictedLabel] = useState<string>("");
 
-  const fetchDesisionTreeExplanation = () => {
+  const fetchDecisionTreeExplanation = () => {
     setLoading(true);
     const payload = {
       img: index,
@@ -47,7 +47,7 @@ export default function DesisionTreeExplanation(props: { index: number }) {
   };
 
   useEffect(() => {
-    fetchDesisionTreeExplanation();
+    fetchDecisionTreeExplanation();
   }, [index]);
 
   if (intuitiveConceptsSelected == false) {
@@ -80,21 +80,21 @@ export default function DesisionTreeExplanation(props: { index: number }) {
       <br />
       <h3>Feature importance</h3>
       <br />
-      <p>Global - how imortant a feature is the desision tree (%)</p>
+      <p>Global - how imortant a feature is the decision tree (%)</p>
       <p>Local - how imortant a feature is explaining this instance (%)</p>
       <br />
       <ConceptsManager
         index={index}
         explanation_type={"decision_tree"}
-        onChangeCompleted={() => fetchDesisionTreeExplanation()}
+        onChangeCompleted={() => fetchDecisionTreeExplanation()}
       />
       <br />
-      <DesisionTreeGraph data={featureImportance} />
+      <DecisionTreeGraph data={featureImportance} />
     </div>
   );
 }
 
-function DesisionTreeGraph(props: { data: FeatureImportance[] }) {
+function DecisionTreeGraph(props: { data: FeatureImportance[] }) {
   const { data } = props;
   const config = {
     data,

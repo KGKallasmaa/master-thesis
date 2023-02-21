@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from main.database.constraint_db import ConstraintDb
-from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
+from main.models.decision_tree_explanation_response import DecisionTreeExplanationResponse
 from main.models.enums import ExplanationType
 from main.service.explain.decision_tree_explanation import explain_using_decision_tree
 from main.service.perfromance.performance_service import PerformanceService

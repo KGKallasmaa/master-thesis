@@ -47,11 +47,10 @@ export default function InitialConceptsStep({
     const payload = {
       id: getId(),
       img: index,
-      constraint_type: initalConceptConstraint,
       concepts: selectedConcepts,
     };
 
-    http("/concept-constraint", payload)
+    http("/initial-concept-constraint", payload)
       .then((resp) => {
         if (resp.status === 204) {
           onComplete();

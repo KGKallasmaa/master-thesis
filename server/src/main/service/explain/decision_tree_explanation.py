@@ -1,5 +1,5 @@
 from typing import List
-from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
+from main.models.decision_tree_explanation_response import DecisionTreeExplanationResponse
 from main.service.explain.common import encode_categorical_values, get_training_row, train_and_test_decision_tree
 from main.service.explain.human_readable_explanation import HumanReadableExplanationService
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks

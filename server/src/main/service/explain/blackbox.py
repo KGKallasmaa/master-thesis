@@ -2,8 +2,9 @@ from typing import List
 
 from main.database.constraint_db import ConstraintDb
 from main.database.explanation_requirement import ExplanationRequirementDb
-from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
+from main.models.decision_tree_explanation_response import DecisionTreeExplanationResponse
 from main.service.explain.decision_tree_explanation import explain_using_decision_tree
+
 
 class BlackBoxModelService:
     def __init__(self):

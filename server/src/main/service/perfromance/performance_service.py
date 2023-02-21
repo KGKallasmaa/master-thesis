@@ -2,7 +2,7 @@ from sklearn.metrics import accuracy_score
 
 from main.database.explanation_requirement import ExplanationRequirementDb
 from main.database.performance_db import PerformanceDb
-from main.models.desision_tree_explanation_response import DecisionTreeExplanationResponse
+from main.models.decision_tree_explanation_response import DecisionTreeExplanationResponse
 from main.service.explain.blackbox import BlackBoxModelService
 from main.service.pre_explanation.data_access import get_labels
 

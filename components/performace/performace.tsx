@@ -11,7 +11,7 @@ export default function PerformanceMetrics({
 }) {
   // blackbox metrics
   const [blackBoxAccuracy, setBlackBoxAccuracy] = useState<number>(0);
-  // desision tree metrics
+  // decision tree metrics
   const [desicionTreeAccuracy, setDesicionTreeAccuracy] = useState<number>(0);
   const [desicionTreeFidelity, setDesicionTreeFidelity] = useState<number>(0);
   // counterfactual metrics
@@ -30,19 +30,19 @@ export default function PerformanceMetrics({
       })
       .catch((err) => {
         console.error(err);
-        toast.error(err);
+        toast.error("Fetching metrics failed");
       });
   };
 
   useEffect(() => {
-    const interval = setInterval(() => updateMetrics(), 5 * 1000);
+    const interval = setInterval(() => updateMetrics(), 5_000);
     return () => {
       clearInterval(interval);
     };
   }, []);
 
-  const showBlackBoxMetrics = explanation_type === "desision_tree";
-  const showDesisionTreeMetrics = explanation_type === "desision_tree";
+  const showBlackBoxMetrics = explanation_type === "decision_tree";
+  const showDecisionTreeMetrics = explanation_type === "decision_tree";
   const showCounterFactualMetrics = explanation_type === "counterfactual";
 
   return (
@@ -59,12 +59,12 @@ export default function PerformanceMetrics({
         </Row>
       )}
 
-      {showDesisionTreeMetrics && (
+      {showDecisionTreeMetrics && (
         <>
           <Row>
             <Col span={24}>
               <Statistic
-                title="Desision tree accuracy"
+                title="Decision tree accuracy"
                 value={desicionTreeAccuracy}
                 precision={3}
               />
@@ -73,7 +73,7 @@ export default function PerformanceMetrics({
           <Row>
             <Col span={24}>
               <Statistic
-                title="Desision tree fidelity"
+                title="Decision tree fidelity"
                 value={desicionTreeFidelity}
                 precision={3}
               />

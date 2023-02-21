@@ -3,34 +3,6 @@ import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { Checkbox } from "antd";
 import { getId } from "../common/storage";
-import toast from "react-hot-toast";
-
-type CenterMostConceptCheck = {
-  label: string;
-  value: string;
-};
-
-const CheckboxWithImage = ({ src, label, conceptChecked }) => {
-  const [checked, setChecked] = useState(false);
-  const handleChange = (e) => {
-    conceptChecked(!checked);
-    setChecked(e.target.checked);
-    conceptChecked();
-  };
-  return (
-    <Row align="middle">
-      <Col span={4}>
-        <Checkbox checked={checked} onChange={handleChange} />
-      </Col>
-      <Col span={8}>
-        <img src={src} />
-      </Col>
-      <Col span={12}>
-        <p>{label}</p>
-      </Col>
-    </Row>
-  );
-};
 
 export default function IntuitiveConceptsStep({
   index,
@@ -69,6 +41,7 @@ export default function IntuitiveConceptsStep({
   };
 
   useEffect(() => {
+    alert("IntuitiveConceptsStep useEffect");
     httpGet(`/all-constraints/${getId()}`)
       .then((el) => el.json())
       .then((data) => {
@@ -81,7 +54,7 @@ export default function IntuitiveConceptsStep({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [index]);
+  }, []);
   useEffect(() => {
     const payload = {
       labels: initallyProposedConcepts,
@@ -89,44 +62,36 @@ export default function IntuitiveConceptsStep({
     http("/center-most-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
-        const label = data.label;
-        const center = {};
-        center[label] = data.concepts.map((el) => {
-          return {
-            label: el.conceptName,
-            value: (
-              <CheckboxWithImage
-                conceptChecked={(wasChecked) =>
-                  handleConceptSelected(label, el.conceptName, wasChecked)
-                }
-                src={el.src}
-                label={el.conceptName}
-              />
-            ),
-          };
-        });
-        setCenterMostConcepts(center);
+        const payload = {};
+
+        data.forEach(
+          (
+            item: { label: any; center: { conceptName: string; src: any }[] },
+            index: any
+          ) => {
+            const label = item.label;
+            payload[label] = item.center.map(
+              (el: { conceptName: string; src: any }) => {
+                return {
+                  label: el.conceptName,
+                  value: (
+                    <CheckboxWithImage
+                      conceptChecked={(wasChecked: boolean) =>
+                        handleConceptSelected(label, el.conceptName, wasChecked)
+                      }
+                      src={el.src}
+                      label={el.conceptName}
+                    />
+                  ),
+                };
+              }
+            );
+          }
+        );
+        setCenterMostConcepts(payload);
       });
   }, [initallyProposedConcepts]);
 
-  const onChange = (label: string, checkedValues: CenterMostConceptCheck[]) => {
-    // intutive concept name
-    const inuitiveConceptNames = checkedValues.map((el) => el.label);
-
-    const payload = {
-      id: getId(),
-      img: index,
-      constraint_type: "intuitive",
-      explanation_type: explanation_type,
-      concepts: inuitiveConceptNames,
-    };
-
-    http("/concept-constraint", payload)
-      .then((resp) => {})
-      .catch((err) => {
-        toast.error(err);
-      });
-  };
   useEffect(() => {
     const payload = {
       id: getId(),
@@ -137,10 +102,11 @@ export default function IntuitiveConceptsStep({
     };
 
     // TODO: add it to backend
-    http("/intuitive-concept-constraint", payload)
+    http("/concept-constraint", payload)
       .then((resp) => {})
       .catch((err) => {
-        toast.error(err);
+        console.log(err);
+        //  toast.error(err);
       });
   }, [chosenIntuitiveConcepts]);
 
@@ -161,3 +127,25 @@ export default function IntuitiveConceptsStep({
     </>
   );
 }
+
+const CheckboxWithImage = ({ src, label, conceptChecked }) => {
+  const [checked, setChecked] = useState(false);
+  const handleChange = (e) => {
+    conceptChecked(!checked);
+    setChecked(e.target.checked);
+    conceptChecked();
+  };
+  return (
+    <Row align="middle">
+      <Col span={4}>
+        <Checkbox checked={checked} onChange={handleChange} />
+      </Col>
+      <Col span={8}>
+        <img src={src} />
+      </Col>
+      <Col span={12}>
+        <p>{label}</p>
+      </Col>
+    </Row>
+  );
+};

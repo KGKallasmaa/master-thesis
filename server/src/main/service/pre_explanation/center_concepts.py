@@ -15,8 +15,8 @@ TOP_EXAMPLES_COUNT = 5
 
 
 class CenterMostConceptsService:
-    BATCH_SIZE = 5
-    MAX_WORKER_COUNT = 8
+    BATCH_SIZE = 100
+    MAX_WORKER_COUNT = 20
 
     """
               Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
@@ -57,7 +57,7 @@ class CenterMostConceptsService:
         for label in set(labels):
             images = self.label_images[label]
             masks = self.label_masks[label]
-            k_means_segments = self.__kmeans(images, masks  )
+            k_means_segments = self.__kmeans(images, masks)
             partial_results[label] = self.__sort_and_remove(k_means_segments)
         return partial_results
 
@@ -81,14 +81,13 @@ class CenterMostConceptsService:
 
         kmeans = KMeans(n_clusters=TOP_SEGMENTS_COUNT, random_state=0).fit(all_segments)
 
-        results = []
-        for label_index, segment in zip(kmeans.labels_, all_segments):
-            results.append(CenterMostConcept({
-                "conceptName": segment_labels[label_index],
-                "src": serve_pil_image(array_to_image(segment_lookup[str(segment)])),
-                "distance": euclidean_distance(kmeans.cluster_centers_[label_index], segment)
-            }))
-        return results
+        return [
+            CenterMostConcept({"conceptName": segment_labels[label_index],
+                               "src": serve_pil_image(array_to_image(segment_lookup[str(segment)])),
+                               "distance": euclidean_distance(kmeans.cluster_centers_[label_index], segment)
+                               })
+            for label_index, segment in zip(kmeans.labels_, all_segments)
+        ]
 
     @staticmethod
     def __sort_and_remove(k_means_segments: List[CenterMostConcept]) -> Dict[str, List[CenterMostConcept]]:

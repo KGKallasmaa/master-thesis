@@ -8,10 +8,12 @@ class ExplanationType(str, Enum):
 
     @staticmethod
     def from_str(label):
-        if label == "decision_tree":
-            return ExplanationType.DECISION_TREE
-        elif label == "counterfactual":
-            return ExplanationType.COUNTERFACTUAL
-        elif label == "black_box":
-            return ExplanationType.BLACK_BOX
-        raise ValueError(f"Invalid explanation type: {label}")
+        match label:
+            case "decision_tree":
+                return ExplanationType.DECISION_TREE
+            case "counterfactual":
+                return ExplanationType.COUNTERFACTUAL
+            case "black_box":
+                return ExplanationType.BLACK_BOX
+            case _:
+                raise ValueError(f"Invalid explanation type: {label}")

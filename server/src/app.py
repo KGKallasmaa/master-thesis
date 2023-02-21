@@ -35,6 +35,11 @@ user_selected_concepts_handler = UserSelectedConceptsHandler()
 black_box_service = BlackBoxModelService()
 performance_service = PerformanceService()
 
+#TODO: this is used
+@api.route("/health", methods=["GET"])
+def health_check_view():
+    return jsonify({"message": "success"})
+
 
 # TODO: this is used
 @api.route("/upload-image", methods=["POST"])
@@ -87,6 +92,7 @@ def most_popular_concepts():
 
 
 # TODO: this is used
+# TODO: get rid of this
 @api.route("/concept-constraint", methods=["POST"])
 def edit_concept_constraint_view():
     # TODO: we should do some validation before submitting data
@@ -96,8 +102,9 @@ def edit_concept_constraint_view():
     viable_concepts = payload["concepts"]
     explanation_id = payload["id"]
     image_id = payload["img"]
-    explanation_type = ExplanationType.from_str(
-        payload["explanation_type"]) if constraint_type != "initially_proposed_concepts" else None
+    explanation_type = None
+    if constraint_type != "initially_proposed_concepts":
+        explanation_type = ExplanationType.from_str(payload["explanation_type"])
 
     if constraint_type is None or explanation_id is None or viable_concepts is None:
         return '', 400
@@ -105,9 +112,6 @@ def edit_concept_constraint_view():
     explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
     explanation_requirement.original_image_id = image_id
     explanation_requirement_db.update_explanation_requirement(explanation_requirement)
-
-    user_selected_concepts_handler.new_constraints_selected(explanation_id, constraint_type, explanation_type,
-                                                            viable_concepts)
 
     match constraint_type:
         case "initially_proposed_concepts":
@@ -117,7 +121,12 @@ def edit_concept_constraint_view():
                                                                viable_concepts)
             user_selected_concepts_handler.consept_suggestions(explanation_id, ExplanationType.COUNTERFACTUAL,
                                                                viable_concepts)
+        case "intuitive":
+            user_selected_concepts_handler.intuitive_concepts(explanation_id, explanation_type, viable_concepts)
+
         case _:
+            user_selected_concepts_handler.new_constraints_selected(explanation_id, constraint_type, explanation_type,
+                                                                    viable_concepts)
             user_selected_concepts_handler.consept_suggestions(explanation_id, explanation_type, viable_concepts)
 
     return '', 204
@@ -131,10 +140,12 @@ def explanation_concepts():
     explanation_type = ExplanationType.from_str(payload["explanation_type"])
     return concept_suggestion_service.consept_suggestions(explanation_id, explanation_type).to_db_value()
 
+
 # TODO: this is used
 @api.route("/all-constraints/<explanation_id>", methods=["GET"])
 def all_constraints_view(explanation_id: str):
     return constraint_db.get_constraint_by_explanation_requirement_id(explanation_id).to_db_value()
+
 
 # TODO: this is used
 @api.route("/decision-tree-explanation", methods=["POST"])
@@ -182,16 +193,53 @@ def performance_metrics_view(explanation_id):
 @api.route("/center-most-concepts", methods=["POST"])
 def center_most_concepts_view():
     payload = request.get_json()
-
-    label_mostpopular_concepts = {label: MOST_POPULAR_CONCEPTS[label] for label in payload.get("labels", [])}
+    labels = payload.get("labels", [])
+    label_mostpopular_concepts = {label: MOST_POPULAR_CONCEPTS.get(label,[]) for label in labels}
     results = {}
-    for label in payload.get("labels", []):
-        for concept in label_mostpopular_concepts[label]:
-            if concept in CENTER_MOST_CONCEPTS:
-                current_values = results.get(label, [])
-                current_values.append(CENTER_MOST_CONCEPTS[concept])
-                results[label] = current_values
-    return [{"label": label, "center": center} for label, center in results.items()]
+    for label in labels:
+        concepts = [c for c in label_mostpopular_concepts[label] if c in CENTER_MOST_CONCEPTS]
+        for concept in concepts:
+            current_values = results.get(label, [])
+            current_values.append(CENTER_MOST_CONCEPTS[concept])
+            results[label] = current_values
+
+    answer =  [{"label": label, "center": center} for label, center in results.items()]
+    return jsonify(answer)
+
+
+# initially proposed concepts
+# TODO: this i used
+@api.route("/initial-concept-constraint", methods=["POST"])
+def initially_proposed_concepts_view():
+    payload = request.get_json()
+
+    viable_concepts = payload["concepts"]
+    explanation_id = payload["id"]
+    image_id = payload["img"]
+
+    explanation_requirement = explanation_requirement_db.get_explanation_requirement(explanation_id)
+    explanation_requirement.original_image_id = image_id
+    explanation_requirement_db.update_explanation_requirement(explanation_requirement)
+
+    user_selected_concepts_handler.initially_proposed_concepts(explanation_id, viable_concepts)
+
+    return '', 204
+
+
+# intuitive concepts
+@api.route("/intuitive-concept-constraint", methods=["POST"])
+def intuitive_concepts_view():
+    payload = request.get_json()
+    explanation_id = payload["id"]
+    explanation_type = ExplanationType.from_str(payload["explanation_type"])
+    viable_concepts = payload["concepts"]
+
+    user_selected_concepts_handler.intuitive_concepts(explanation_id, explanation_type, viable_concepts)
+
+    return '', 204
+
+
+# concept constraint
 
 
 if __name__ == '__main__':

@@ -10,7 +10,15 @@ class UserSelectedConceptsHandler:
         self.constraint_db = ConstraintDb()
         self.intuitiveness_db = IntuitivenessDb()
 
+    def initially_proposed_concepts(self,explanation_id: str, concepts: List[str]):
+        constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
+        constraints.change_concept_constraint("initially_proposed_concepts", ExplanationType.COUNTERFACTUAL, concepts)
+        constraints.change_concept_constraint("initially_proposed_concepts", ExplanationType.DECISION_TREE, concepts)
+        self.constraint_db.update_constraint(constraints)
+
+
     def consept_suggestions(self, explanation_id: str, explanation_type: ExplanationType, new_concepts: List[str]):
+        raise NotImplementedError
 
         constraints = self.constraint_db.get_constraint_by_explanation_requirement_id(explanation_id)
 
@@ -18,13 +26,9 @@ class UserSelectedConceptsHandler:
         added_concepts = [concept for concept in new_concepts if concept not in user_selected_concepts]
         removed_concepts = [concept for concept in user_selected_concepts if concept not in new_concepts]
 
-        # TODO: these can be improved by query grouping
-        for concept in added_concepts:
-            new_value = self.intuitiveness_db.get_constraint_by_concept(concept).increment_count()
-            self.intuitiveness_db.update_intuitiveness(new_value)
-        for concept in removed_concepts:
-            new_value = self.intuitiveness_db.get_constraint_by_concept(concept).decrement_count()
-            self.intuitiveness_db.update_intuitiveness(new_value)
+    def intuitive_concepts(self, explanation_id: str, explanation_type: ExplanationType,
+                           label_intuitive_concepts_map: dict):
+        raise NotImplementedError
 
     def new_constraints_selected(self, explanation_id: str,
                                  constraint_type: str,
