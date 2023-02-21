@@ -28,6 +28,7 @@ class UserSelectedConceptsHandler:
 
     def intuitive_concepts(self, explanation_id: str, explanation_type: ExplanationType,
                            label_intuitive_concepts_map: dict):
+        
         raise NotImplementedError
 
     def new_constraints_selected(self, explanation_id: str,

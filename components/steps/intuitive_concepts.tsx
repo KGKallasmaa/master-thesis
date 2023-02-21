@@ -56,9 +56,13 @@ export default function IntuitiveConceptsStep({
       });
   }, []);
   useEffect(() => {
+    if (initallyProposedConcepts.length === 0) {
+      return;
+    }
     const payload = {
       labels: initallyProposedConcepts,
     };
+    
     http("/center-most-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
@@ -120,7 +124,7 @@ export default function IntuitiveConceptsStep({
         return <Checkbox.Group options={centerMostConcepts[el]} />;
       })}
       <div>
-        <Button type="primary" onClick={() => onComplete}>
+        <Button type="primary" onClick={onComplete}>
           Finish
         </Button>
       </div>
