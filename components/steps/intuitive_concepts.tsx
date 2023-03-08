@@ -13,7 +13,7 @@ export default function IntuitiveConceptsStep({
   explanation_type: string;
   onComplete: () => void;
 }) {
-  console.count("IntuitiveConceptsStep")
+  console.count("IntuitiveConceptsStep");
   const [centerMostConcepts, setCenterMostConcepts] = useState({});
   const [initallyProposedConcepts, setInitallyProposedConcepts] = useState<
     string[]

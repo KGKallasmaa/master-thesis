@@ -4,11 +4,10 @@ from collections import defaultdict
 from main.service.pre_explanation.data_access import get_segments
 from main.service.utils.dictionary import sort_dictionary
 
-from typing import Dict, List
+from typing import Dict, List, Set
 from mpire import WorkerPool
 from main.service.pre_explanation.data_access import get_masks, get_images, get_labels
 import numpy as np
-from functools import reduce
 
 num_cpu_cores = multiprocessing.cpu_count()
 BATCH_SIZE = 100
@@ -25,17 +24,22 @@ class MostPopularConcepts:
         self.label_images_map = defaultdict(list)
         self.label_masks_map = defaultdict(list)
 
-    def static_most_popular_concepts(self) -> Dict[str, List[any]]:
+    def static_most_popular_concepts(self) -> Dict[str, Set[any]]:
         for label, image, mask in zip(get_labels(), get_images(), get_masks()):
             self.label_images_map[label].append(image)
             self.label_masks_map[label].append(mask)
 
         with WorkerPool(n_jobs=self.nr_of_jobs) as pool:
-            return reduce(lambda a, b: {**a, **b},
-                          pool.map(self.__extract_most_popular_concepts, self.labels_in_chunks))
+            results = pool.map(self.__extract_most_popular_concepts, self.labels_in_chunks)
 
-    def __extract_most_popular_concepts(self, labels: List[str]) -> Dict[str, List[any]]:
-        partial_results = {}
+        final_results = defaultdict(set)
+        for partial_results in results:
+            for label, most_popular_concepts in partial_results.items():
+                final_results[label].update(most_popular_concepts)
+        return final_results
+
+    def __extract_most_popular_concepts(self, labels: List[str]) -> Dict[str, List[str]]:
+        partial_results: Dict[str, List[str]] = {}
         for label in labels:
             images = self.label_images_map[label]
             masks = self.label_masks_map[label]
