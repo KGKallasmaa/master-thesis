@@ -1,3 +1,6 @@
+import multiprocessing
+from collections import defaultdict
+
 from main.service.pre_explanation.data_access import get_segments
 from main.service.utils.dictionary import sort_dictionary
 
@@ -7,32 +10,25 @@ from main.service.pre_explanation.data_access import get_masks, get_images, get_
 import numpy as np
 from functools import reduce
 
+num_cpu_cores = multiprocessing.cpu_count()
+BATCH_SIZE = 100
+MAX_WORKER_COUNT = int(num_cpu_cores * (1 + (5 / num_cpu_cores)))
+
 
 class MostPopularConcepts:
-    BATCH_SIZE = 10
-    MAX_WORKER_COUNT = 8
-
     def __init__(self):
         all_labels = np.array(list(set(get_labels())))
-        chunk_size = max(1, int(all_labels.size / self.BATCH_SIZE))
+        chunk_size = max(1, int(all_labels.size / BATCH_SIZE))
         self.labels_in_chunks = np.array_split(all_labels, chunk_size)
-        self.nr_of_jobs = min(self.MAX_WORKER_COUNT, len(self.labels_in_chunks))
+        self.nr_of_jobs = min(MAX_WORKER_COUNT, len(self.labels_in_chunks))
 
-        self.label_images_map = {}
-        self.label_masks_map = {}
-
-        self.image_most_popular_concepts = self.static_most_popular_concepts()
+        self.label_images_map = defaultdict(list)
+        self.label_masks_map = defaultdict(list)
 
     def static_most_popular_concepts(self) -> Dict[str, List[any]]:
         for label, image, mask in zip(get_labels(), get_images(), get_masks()):
-            current_images = self.label_images_map.get(label, [])
-            current_maks = self.label_masks_map.get(label, [])
-
-            current_images.append(image)
-            current_maks.append(mask)
-
-            self.label_images_map[label] = current_images
-            self.label_masks_map[label] = current_maks
+            self.label_images_map[label].append(image)
+            self.label_masks_map[label].append(mask)
 
         with WorkerPool(n_jobs=self.nr_of_jobs) as pool:
             return reduce(lambda a, b: {**a, **b},

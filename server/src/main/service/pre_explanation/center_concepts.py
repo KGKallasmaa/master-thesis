@@ -1,3 +1,5 @@
+import multiprocessing
+from collections import defaultdict
 from typing import List, Dict
 
 from sklearn.cluster import KMeans
@@ -10,14 +12,14 @@ import numpy as np
 from mpire import WorkerPool
 from functools import reduce
 
+num_cpu_cores = multiprocessing.cpu_count()
+BATCH_SIZE = 100
+MAX_WORKER_COUNT = int(num_cpu_cores * (1 + (5 / num_cpu_cores)))
 TOP_SEGMENTS_COUNT = 10
 TOP_EXAMPLES_COUNT = 5
 
 
 class CenterMostConceptsService:
-    BATCH_SIZE = 100
-    MAX_WORKER_COUNT = 20
-
     """
               Every image (e.g. bedroom) is filled with segments (e.g bed, lamp, window).
               Our task is to give user top K(k=10) segments that best describe the image.
@@ -28,24 +30,17 @@ class CenterMostConceptsService:
 
     def __init__(self):
         all_labels = np.array(list(set(get_labels())))
-        chunk_size = max(1, int(all_labels.size / self.BATCH_SIZE))
+        chunk_size = max(1, int(all_labels.size / BATCH_SIZE))
         self.labels_in_chunks = np.array_split(all_labels, chunk_size)
-        self.nr_of_jobs = min(self.MAX_WORKER_COUNT, len(self.labels_in_chunks))
+        self.nr_of_jobs = min(MAX_WORKER_COUNT, len(self.labels_in_chunks))
 
-        self.label_images = {}
-        self.label_masks = {}
-        self.center_most_concepts = self.__get_center_most_concept()
+        self.label_images = defaultdict(list)
+        self.label_masks = defaultdict(list)
 
-    def __get_center_most_concept(self) -> Dict[str, Dict[str, List[CenterMostConcept]]]:
+    def get_center_most_concept(self) -> Dict[str, Dict[str, List[CenterMostConcept]]]:
         for label, image, mask in zip(get_labels(), get_images(), get_masks()):
-            current_images = self.label_images.get(label, [])
-            current_maks = self.label_masks.get(label, [])
-
-            current_images.append(image)
-            current_maks.append(mask)
-
-            self.label_images[label] = current_images
-            self.label_masks[label] = current_maks
+            self.label_images[label].append(image)
+            self.label_masks[label].append(mask)
 
         with WorkerPool(n_jobs=self.nr_of_jobs) as pool:
             return reduce(lambda a, b: {**a, **b},
@@ -53,13 +48,15 @@ class CenterMostConceptsService:
                                    self.labels_in_chunks))
 
     def __partial_center_most_concepts(self, labels: List[str]) -> Dict[str, Dict[str, List[CenterMostConcept]]]:
-        partial_results = {}
+        partial_results = defaultdict(list)
+
         for label in set(labels):
             images = self.label_images[label]
             masks = self.label_masks[label]
             k_means_segments = self.__kmeans(images, masks)
-            partial_results[label] = self.__sort_and_remove(k_means_segments)
-        return partial_results
+            partial_results[label].extend(self.__sort_and_remove(k_means_segments))
+
+        return dict(partial_results)
 
     @staticmethod
     def __kmeans(images, masks) -> List[CenterMostConcept]:
@@ -91,11 +88,9 @@ class CenterMostConceptsService:
 
     @staticmethod
     def __sort_and_remove(k_means_segments: List[CenterMostConcept]) -> Dict[str, List[CenterMostConcept]]:
-        concept_examples_map = {}
+        concept_examples_map = defaultdict(list)
         for segment in k_means_segments:
-            current_examples = concept_examples_map.get(segment.concept_name, [])
-            current_examples.append(segment)
-            concept_examples_map[segment.concept_name] = current_examples
+            concept_examples_map[segment.concept_name].append(segment)
         # we want to prevent duplicates. removing exact distance matches
         for concept, examples in concept_examples_map.items():
             examples.sort(key=lambda x: x.distance)

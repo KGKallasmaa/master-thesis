@@ -35,7 +35,8 @@ user_selected_concepts_handler = UserSelectedConceptsHandler()
 black_box_service = BlackBoxModelService()
 performance_service = PerformanceService()
 
-#TODO: this is used
+
+# TODO: this is used
 @api.route("/health", methods=["GET"])
 def health_check_view():
     return jsonify({"message": "success"})
@@ -194,16 +195,20 @@ def performance_metrics_view(explanation_id):
 def center_most_concepts_view():
     payload = request.get_json()
     labels = payload.get("labels", [])
-    label_mostpopular_concepts = {label: MOST_POPULAR_CONCEPTS.get(label,[]) for label in labels}
+    print(MOST_POPULAR_CONCEPTS.keys(),flush=True)
+    label_mostpopular_concepts = {label: MOST_POPULAR_CONCEPTS.get(label, []) for label in labels}
+    print(CENTER_MOST_CONCEPTS.keys(),flush=True)
     results = {}
     for label in labels:
         concepts = [c for c in label_mostpopular_concepts[label] if c in CENTER_MOST_CONCEPTS]
+        print(label_mostpopular_concepts[label],flush=True)
+        print(concepts,flush=True)
         for concept in concepts:
             current_values = results.get(label, [])
             current_values.append(CENTER_MOST_CONCEPTS[concept])
             results[label] = current_values
 
-    answer =  [{"label": label, "center": center} for label, center in results.items()]
+    answer = [{"label": label, "center": center} for label, center in results.items()]
     return jsonify(answer)
 
 

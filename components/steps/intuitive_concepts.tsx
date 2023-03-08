@@ -13,6 +13,7 @@ export default function IntuitiveConceptsStep({
   explanation_type: string;
   onComplete: () => void;
 }) {
+  console.count("IntuitiveConceptsStep")
   const [centerMostConcepts, setCenterMostConcepts] = useState({});
   const [initallyProposedConcepts, setInitallyProposedConcepts] = useState<
     string[]
@@ -62,7 +63,7 @@ export default function IntuitiveConceptsStep({
     const payload = {
       labels: initallyProposedConcepts,
     };
-    
+
     http("/center-most-concepts", payload)
       .then((el) => el.json())
       .then((data) => {
@@ -97,6 +98,7 @@ export default function IntuitiveConceptsStep({
   }, [initallyProposedConcepts]);
 
   useEffect(() => {
+    /*
     const payload = {
       id: getId(),
       img: index,
@@ -112,6 +114,7 @@ export default function IntuitiveConceptsStep({
         console.log(err);
         //  toast.error(err);
       });
+      */
   }, [chosenIntuitiveConcepts]);
 
   if (isLoading) {
