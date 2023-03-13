@@ -1,4 +1,5 @@
 import base64
+from collections import defaultdict
 
 import numpy as np
 from flask import Flask
@@ -14,6 +15,7 @@ from main.service.explain.blackbox import BlackBoxModelService
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation_service import DecisionTreeExplanationService
 from main.service.perfromance.performance_service import PerformanceService
+from main.service.pre_explanation.center_most_concept_service import get_center_most_concepts
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
@@ -195,18 +197,8 @@ def performance_metrics_view(explanation_id):
 def center_most_concepts_view():
     payload = request.get_json()
     labels = payload.get("labels", [])
-    label_mostpopular_concepts = {label: MOST_POPULAR_CONCEPTS.get(label, []) for label in labels}
-    results = {}
-    for label in labels:
-        concepts = [c for c in label_mostpopular_concepts[label] if c in CENTER_MOST_CONCEPTS]
-        for concept in concepts:
-            current_values = results.get(label, [])
-            current_values.append(CENTER_MOST_CONCEPTS[concept])
-            results[label] = current_values
-
-    answer = [{"label": label, "center": center} for label, center in results.items()]
-    return jsonify(answer)
-
+    results = get_center_most_concepts(labels)
+    return jsonify(results)
 
 # initially proposed concepts
 # TODO: this i used

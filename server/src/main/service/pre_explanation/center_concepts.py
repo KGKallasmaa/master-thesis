@@ -1,7 +1,5 @@
-import heapq
 import multiprocessing
-from collections import defaultdict
-from typing import List, Dict
+from typing import List, Dict, Set
 
 from sklearn.cluster import KMeans
 
@@ -13,10 +11,10 @@ import numpy as np
 from mpire import WorkerPool
 
 num_cpu_cores = multiprocessing.cpu_count()
-BATCH_SIZE = 100
-MAX_WORKER_COUNT = int(num_cpu_cores * (1 + (5 / num_cpu_cores)))
-TOP_SEGMENTS_COUNT = 10
-TOP_EXAMPLES_COUNT = 5
+BATCH_SIZE = 200
+MAX_WORKER_COUNT = int(num_cpu_cores * (1 + (3 / num_cpu_cores)))
+TOP_SEGMENTS_COUNT = 100
+TOP_EXAMPLES_COUNT = 100
 
 
 class CenterMostConceptsService:
@@ -39,7 +37,7 @@ class CenterMostConceptsService:
         self.label_images = {}
         self.label_masks = {}
 
-    def get_center_most_concept(self) -> Dict[str, List[CenterMostConcept]]:
+    def get_center_most_concept(self) -> Dict[str, Set[CenterMostConcept]]:
         for label, image, mask in zip(get_labels(), get_images(), get_masks()):
             current_images = self.label_images.get(label, [])
             current_images.append(image)
@@ -49,39 +47,40 @@ class CenterMostConceptsService:
             current_masks.append(mask)
             self.label_masks[label] = current_masks
 
-        grouped_results: Dict[str, Dict[str, List[CenterMostConcept]]] = {}
         with WorkerPool(n_jobs=self.nr_of_jobs) as pool:
             results = pool.map(self.__partial_center_most_concepts, self.labels_in_chunks)
 
-            for partial_results in results:
-                for concept, center_most_concepts in partial_results.items():
-                    current_results = grouped_results.get(concept, [])
-                    current_results.extend(center_most_concepts)
-                    grouped_results[concept] = current_results
+        grouped_results: Dict[str, Set[CenterMostConcept]] = {}
+        for partial_results in results:
+            for concept, center_most_concepts_dict in partial_results.items():
+                flattened_set = set()
+                for center_most_concepts in center_most_concepts_dict.values():
+                    flattened_set = flattened_set.union(center_most_concepts)
+                print("concept", concept)
+                print("center_most_concepts_dict_v", type(center_most_concepts_dict.values()))
+                print("flattened_set", type(flattened_set))
+                current_values = grouped_results.get(concept, set())
+                grouped_results[concept] = current_values.union(flattened_set)
 
-        final_results: Dict[str, List[CenterMostConcept]] = {}
+        final_results: Dict[str, Set[CenterMostConcept]] = {}
 
-        for concept, center_most_concepts_dict in grouped_results.items():
-            unique_key_center_map = {}
-            for center_most_concepts in center_most_concepts_dict.values():
-                for c in center_most_concepts:
-                    unique_key_center_map[c.unique_key()] = c
-
-            center_most_concepts = sorted(list(unique_key_center_map.values()), key=lambda x: x.distance)[
-                                   :TOP_EXAMPLES_COUNT]
+        for concept, center_most_concepts in grouped_results.items():
+            #center_most_concepts = list(set(center_most_concepts))
+            #center_most_concepts.sort(key=lambda x: x.distance)
+            #final_results[concept] = center_most_concepts[:TOP_EXAMPLES_COUNT]
             final_results[concept] = center_most_concepts
 
         return final_results
 
-    def __partial_center_most_concepts(self, labels: List[str]) -> Dict[str, Dict[str, List[CenterMostConcept]]]:
-        partial_results: Dict[str, Dict[str, List[CenterMostConcept]]] = {}
+    def __partial_center_most_concepts(self, labels: List[str]) -> Dict[str, Dict[str, Set[CenterMostConcept]]]:
 
+        partial_results: Dict[str, Dict[str, Set[CenterMostConcept]]] = {}
         for label in labels:
             images = self.label_images[label]
             masks = self.label_masks[label]
             k_means_segments = self.__kmeans(images, masks)
-            partial_results[label] = self.__sort_and_remove(k_means_segments)
-        return dict(partial_results)
+            partial_results[label] = self.__group_by_concept_name(k_means_segments)
+        return partial_results
 
     def __kmeans(self, images, masks) -> List[CenterMostConcept]:
         all_segments = []
@@ -101,29 +100,21 @@ class CenterMostConceptsService:
                 segment_labels.append(segment_class)
 
         kmeans = KMeans(n_clusters=TOP_SEGMENTS_COUNT, random_state=0).fit(all_segments)
-
-        debug = [segment_labels[label_index] for label_index, segment in zip(kmeans.labels_, all_segments)]
-        for el in set(debug):
-            print(el)
-        print("xx")
-
-        return [
-            CenterMostConcept({"conceptName": segment_labels[label_index],
-                               "src": serve_pil_image(array_to_image(segment_lookup[str(segment)])),
-                               "distance": euclidean_distance(kmeans.cluster_centers_[label_index], segment)
-                               })
-            for label_index, segment in zip(kmeans.labels_, all_segments)
-        ]
+        results = []
+        for label_index, segment in zip(kmeans.labels_, all_segments):
+            results.append(CenterMostConcept(
+                {"conceptName": segment_labels[label_index],
+                 "src": serve_pil_image(array_to_image(segment_lookup[str(segment)])),
+                 "distance": euclidean_distance(kmeans.cluster_centers_[label_index], segment)
+                 })
+            )
+        return results
 
     @staticmethod
-    def __sort_and_remove(k_means_segments: List[CenterMostConcept]) -> Dict[str, List[CenterMostConcept]]:
-        concept_examples_map = defaultdict(set)
+    def __group_by_concept_name(k_means_segments: List[CenterMostConcept]) -> Dict[str, Set[CenterMostConcept]]:
+        concept_examples_map = {}
         for segment in k_means_segments:
-            concept_examples_map[segment.concept_name].add(segment)
-
-        top_examples_map = {}
-        for concept, examples in concept_examples_map.items():
-            top_examples = heapq.nsmallest(TOP_EXAMPLES_COUNT, examples, key=lambda x: x.distance)
-            top_examples_map[concept] = top_examples
-
-        return top_examples_map
+            current = concept_examples_map.get(segment.concept_name, set())
+            current.add(segment)
+            concept_examples_map[segment.concept_name] = current
+        return concept_examples_map
