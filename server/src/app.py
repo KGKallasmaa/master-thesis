@@ -15,11 +15,11 @@ from main.service.explain.blackbox import BlackBoxModelService
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation_service import DecisionTreeExplanationService
 from main.service.perfromance.performance_service import PerformanceService
-from main.service.pre_explanation.center_most_concept_service import get_center_most_concepts
+from main.service.pre_explanation.center_most_concept_service import CenterMostConceptsService
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
 from main.service.pre_explanation.data_access import get_labels, get_images
-from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS, CENTER_MOST_CONCEPTS
+from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS
 from main.service.suggestions.concept_handler import UserSelectedConceptsHandler
 from main.service.suggestions.concept_suggestion_service import ConceptSuggestionService
 
@@ -36,6 +36,7 @@ concept_suggestion_service = ConceptSuggestionService()
 user_selected_concepts_handler = UserSelectedConceptsHandler()
 black_box_service = BlackBoxModelService()
 performance_service = PerformanceService()
+center_most_concepts_service = CenterMostConceptsService()
 
 
 # TODO: this is used
@@ -197,8 +198,10 @@ def performance_metrics_view(explanation_id):
 def center_most_concepts_view():
     payload = request.get_json()
     labels = payload.get("labels", [])
-    results = get_center_most_concepts(labels)
-    return jsonify(results)
+    results = center_most_concepts_service.get_center_most_concepts(labels)
+    results_as_dict = [result.to_db_value() for result in results]
+    return jsonify(results_as_dict)
+
 
 # initially proposed concepts
 # TODO: this i used

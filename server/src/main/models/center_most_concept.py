@@ -23,4 +23,5 @@ class CenterMostConcept:
         }
 
     def unique_key(self):
-        return self.concept_name + self.src + str(self.distance)
+        # return self.concept_name + self.src + str(self.distance)
+        return str(self.distance)

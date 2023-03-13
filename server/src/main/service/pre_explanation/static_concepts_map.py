@@ -33,7 +33,7 @@ def build_concepts():
     return center_most_concepts, most_popular_concepts
 
 
-CENTER_MOST_CONCEPTS, MOST_POPULAR_CONCEPTS= build_concepts()
+CENTER_MOST_CONCEPTS, MOST_POPULAR_CONCEPTS = build_concepts()
 
 
 def bs_detector():

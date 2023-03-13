@@ -1,22 +1,97 @@
-from typing import List, Dict, Set
+from typing import List, Dict
 
 from main.models.center_most_concept import CenterMostConcept
 from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEPTS, CENTER_MOST_CONCEPTS
 
 
-def get_center_most_concepts(labels: List[str]) -> Dict[str, Dict[str, List[CenterMostConcept]]]:
-    results: Dict[str, Dict[str, List[CenterMostConcept]]] = {}
+class ConceptInClass:
+    # TODo: remove concept_name
+    conceptName: str
+    distanceToCenter: float
+    src: str
 
-    for label in labels:
+    def __init__(self, concept_name: str, distance_to_center: float, src: str):
+        self.conceptName = concept_name
+        self.distanceToCenter = distance_to_center
+        self.src = src
+
+    def to_db_value(self) -> Dict[str, any]:
+        return {
+            'conceptName': self.conceptName,
+            'distanceToCenter': self.distanceToCenter,
+            'src': self.src,
+        }
+
+
+class ImageConcept:
+    name: str
+    examples: List[ConceptInClass]
+
+    def __init__(self, name: str):
+        self.name = name
+        self.examples = []
+
+    def add_example(self, example: ConceptInClass):
+        self.examples.append(example)
+        self.examples.sort(key=lambda x: x.distanceToCenter)
+
+    def add_examples(self, examples: List[ConceptInClass]):
+        self.examples.extend(examples)
+        self.examples.sort(key=lambda x: x.distanceToCenter)
+
+    def to_db_value(self) -> Dict[str, any]:
+        return {
+            'name': self.name,
+            'examples': [e.to_db_value() for e in self.examples],
+        }
+
+
+class CenterConceptInClass:
+    label: str
+    concepts: List[ImageConcept]
+
+    def __init__(self, label: str, concepts: List[ImageConcept]):
+        self.label = label
+        self.concepts = concepts
+
+    def to_db_value(self) -> Dict[str, any]:
+        return {
+            'label': self.label,
+            'concepts': [c.to_db_value() for c in self.concepts],
+        }
+
+
+class CenterMostConceptsService:
+    def get_center_most_concepts(self, labels: List[str]) -> List[CenterConceptInClass]:
+        return [self.__get_center_most_concepts(label) for label in labels]
+
+    @staticmethod
+    def __get_center_most_concepts(label: str) -> CenterConceptInClass:
+        image_concepts: List[ImageConcept] = []
+
         concepts = MOST_POPULAR_CONCEPTS.get(label, [])
         concepts: List[str] = [c for c in concepts if c in CENTER_MOST_CONCEPTS]
 
-        concept_center_map = {}
-        for concept in concepts:
-            center_most_concepts: Set[CenterMostConcept] = CENTER_MOST_CONCEPTS.get(concept, set())
-            current_center = concept_center_map.get(concept, set())
-            concept_center_map[concept] = current_center.union(center_most_concepts)
-        for key, value in concept_center_map.items():
-            concept_center_map[key] = [c.to_db_value() for c in list(value)]
-        results[label] = concept_center_map
-    return results
+        for conceptName in concepts:
+            image_concept = ImageConcept(conceptName)
+            center_most_concepts: List[CenterMostConcept] = CENTER_MOST_CONCEPTS.get(conceptName, set())
+            example_concepts: List[ConceptInClass] = [
+                ConceptInClass(center_most_concept.concept_name, center_most_concept.distance, "")
+                for center_most_concept in center_most_concepts
+            ]
+            """
+             example_concepts: List[ConceptInClass] = [
+                ConceptInClass(center_most_concept.distance, center_most_concept.src)
+                for center_most_concept in center_most_concepts
+            ]
+            """
+            debug = {c.concept_name for c in center_most_concepts}
+            if len(debug) != 1:
+                print("exclude concept names", conceptName, flush=True)
+                print("current unique concept names", debug, flush=True)
+                raise Exception("exclude concept names")
+
+            image_concept.add_examples(example_concepts)
+            image_concepts.append(image_concept)
+
+        return CenterConceptInClass(label, image_concepts)
