@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { http, httpGet } from "../common/http";
 import { Checkbox } from "antd";
 import { getId } from "../common/storage";
+import CenterMostConsept from "../explain/models/center_comost_consept";
 
 export default function IntuitiveConceptsStep({
   index,
@@ -14,7 +15,7 @@ export default function IntuitiveConceptsStep({
   onComplete: () => void;
 }) {
   console.count("IntuitiveConceptsStep");
-  const [centerMostConcepts, setCenterMostConcepts] = useState({});
+  const [centerMostConcepts, setCenterMostConcepts] = useState([]);
   const [initallyProposedConcepts, setInitallyProposedConcepts] = useState<
     string[]
   >([]);
@@ -66,34 +67,30 @@ export default function IntuitiveConceptsStep({
 
     http("/center-most-concepts", payload)
       .then((el) => el.json())
-      .then((data) => {
-        const payload = {};
-
-        data.forEach(
-          (
-            item: { label: any; center: { conceptName: string; src: any }[] },
-            index: any
-          ) => {
-            const label = item.label;
-            payload[label] = item.center.map(
-              (el: { conceptName: string; src: any }) => {
+      .then((data:CenterMostConsept.CenterConsept[]) => {
+        data.filter(item=>item.concepts.length > 0).forEach( (item:CenterMostConsept.CenterConsept, index: any) => {
+          const label = item.label;
+          const concepts = item.concepts.map((concept) => {
+              const conceptName = concept.name;
+              return concept.examples.map((example) => {
                 return {
-                  label: el.conceptName,
+                  label,
                   value: (
                     <CheckboxWithImage
                       conceptChecked={(wasChecked: boolean) =>
-                        handleConceptSelected(label, el.conceptName, wasChecked)
+                        handleConceptSelected(label, conceptName, wasChecked)
                       }
-                      src={el.src}
-                      label={el.conceptName}
+                      src={example.src}
+                      label={conceptName}
                     />
                   ),
                 };
-              }
-            );
-          }
-        );
-        setCenterMostConcepts(payload);
+                
+          })
+         
+        });
+          setCenterMostConcepts(concepts);
+        });
       });
   }, [initallyProposedConcepts]);
 
@@ -123,9 +120,13 @@ export default function IntuitiveConceptsStep({
 
   return (
     <>
-      {Object.keys(centerMostConcepts).map((el) => {
-        return <Checkbox.Group options={centerMostConcepts[el]} />;
-      })}
+    {centerMostConcepts.map((el,index) => {
+        return <Checkbox.Group key={index} options={el} />;
+        })
+}
+
+<h1>size {centerMostConcepts.length}</h1>
+
       <div>
         <Button type="primary" onClick={onComplete}>
           Finish
@@ -136,19 +137,22 @@ export default function IntuitiveConceptsStep({
 }
 
 const CheckboxWithImage = ({ src, label, conceptChecked }) => {
+  alert("Hi")
   const [checked, setChecked] = useState(false);
   const handleChange = (e) => {
     conceptChecked(!checked);
     setChecked(e.target.checked);
     conceptChecked();
   };
+ const imgSrc = `data:image/jpeg;base64,${src}`;
+ console.log(imgSrc)
   return (
     <Row align="middle">
       <Col span={4}>
         <Checkbox checked={checked} onChange={handleChange} />
       </Col>
       <Col span={8}>
-        <img src={src} />
+        <img src={imgSrc} />
       </Col>
       <Col span={12}>
         <p>{label}</p>

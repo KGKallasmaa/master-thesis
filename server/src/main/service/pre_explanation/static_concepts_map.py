@@ -2,7 +2,6 @@ from multiprocessing import Manager
 from multiprocessing.context import Process
 
 from main.service.pre_explanation.center_concepts import CenterMostConceptsService
-from main.service.pre_explanation.data_access import get_labels
 from main.service.pre_explanation.most_popular_concepts import MostPopularConcepts
 
 
@@ -29,24 +28,7 @@ def build_concepts():
 
     center_process.join()
     popular_process.join()
-    # return dict(center_most_concepts), dict(most_popular_concepts),center_most_concepts
     return center_most_concepts, most_popular_concepts
 
 
 CENTER_MOST_CONCEPTS, MOST_POPULAR_CONCEPTS = build_concepts()
-
-
-def bs_detector():
-    label_mostpopular_concepts = {label: MOST_POPULAR_CONCEPTS.get(label, []) for label in set(get_labels())}
-    return [
-        label
-        for label in set(get_labels())
-        if any(
-            c in CENTER_MOST_CONCEPTS.keys()
-            for c in label_mostpopular_concepts[label]
-        )
-    ]
-
-
-print("Labels with concepts:")
-print(bs_detector())

@@ -92,7 +92,9 @@ def most_popular_concepts():
     if img is None:
         return jsonify({"concepts": []})
     label = get_labels()[img]
-    return jsonify({"concepts": MOST_POPULAR_CONCEPTS[label]})
+    return jsonify({
+        "concepts": list(MOST_POPULAR_CONCEPTS[label])
+    })
 
 
 # TODO: this is used
