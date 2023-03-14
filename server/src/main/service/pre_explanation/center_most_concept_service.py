@@ -5,19 +5,15 @@ from main.service.pre_explanation.static_concepts_map import MOST_POPULAR_CONCEP
 
 
 class ConceptInClass:
-    # TODo: remove concept_name
-    conceptName: str
     distanceToCenter: float
     src: str
 
-    def __init__(self, concept_name: str, distance_to_center: float, src: str):
-        self.conceptName = concept_name
+    def __init__(self, distance_to_center: float, src: str):
         self.distanceToCenter = distance_to_center
         self.src = src
 
     def to_db_value(self) -> Dict[str, any]:
         return {
-            'conceptName': self.conceptName,
             'distanceToCenter': self.distanceToCenter,
             'src': self.src,
         }
@@ -76,21 +72,9 @@ class CenterMostConceptsService:
             image_concept = ImageConcept(conceptName)
             center_most_concepts: List[CenterMostConcept] = CENTER_MOST_CONCEPTS.get(conceptName, set())
             example_concepts: List[ConceptInClass] = [
-                ConceptInClass(center_most_concept.concept_name, center_most_concept.distance, "")
-                for center_most_concept in center_most_concepts
-            ]
-            """
-             example_concepts: List[ConceptInClass] = [
                 ConceptInClass(center_most_concept.distance, center_most_concept.src)
                 for center_most_concept in center_most_concepts
             ]
-            """
-            debug = {c.concept_name for c in center_most_concepts}
-            if len(debug) != 1:
-                print("exclude concept names", conceptName, flush=True)
-                print("current unique concept names", debug, flush=True)
-                raise Exception("exclude concept names")
-
             image_concept.add_examples(example_concepts)
             image_concepts.append(image_concept)
 

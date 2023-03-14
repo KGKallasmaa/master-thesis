@@ -15,7 +15,7 @@ num_cpu_cores = multiprocessing.cpu_count()
 BATCH_SIZE = 200
 MAX_WORKER_COUNT = int(num_cpu_cores * (1 + (3 / num_cpu_cores)))
 TOP_SEGMENTS_COUNT = 10
-TOP_EXAMPLES_COUNT = 10
+TOP_EXAMPLES_COUNT = 5
 
 
 class CenterMostConceptsService:
@@ -51,28 +51,19 @@ class CenterMostConceptsService:
         with WorkerPool(n_jobs=self.nr_of_jobs) as pool:
             results = pool.map(self.__partial_center_most_concepts, self.labels_in_chunks)
 
-        grouped_results: Dict[str, Set[CenterMostConcept]] = {}
+        grouped_by_conceptname: Dict[str, Set[CenterMostConcept]] = {}
         for partial_results in results:
-            print(partial_results.keys(), flush=True)
-            for concept, center_most_concepts_dict in partial_results.items():
-                current_values = grouped_results.get(concept, set())
-                grouped_results[concept] = current_values.union(*center_most_concepts_dict.values())
-                debug = {c.concept_name for c in grouped_results[concept]}
-                if len(debug) > 1:
-                    print(debug, flush=True)
-                    raise Exception("concept, center_most_concepts_dict in partial_results.items()")
+            for label, center_most_concepts_dict in partial_results.items():
+                for concept, center_most_concepts in center_most_concepts_dict.items():
+                    current_values = grouped_by_conceptname.get(concept, set())
+                    grouped_by_conceptname[concept] = current_values.union(center_most_concepts)
 
         final_results: Dict[str, List[CenterMostConcept]] = {}
 
-        for concept, center_most_concepts in grouped_results.items():
+        for concept, center_most_concepts in grouped_by_conceptname.items():
             center_most_concepts = list(set(center_most_concepts))
             center_most_concepts.sort(key=lambda x: x.distance)
             final_results[concept] = center_most_concepts[:TOP_EXAMPLES_COUNT]
-
-            debug = {c.concept_name for c in final_results[concept]}
-            if len(debug) > 1:
-                print(debug, flush=True)
-                raise Exception("for concept, center_most_concepts in grouped_results.items()")
 
         return final_results
 
@@ -121,10 +112,4 @@ class CenterMostConceptsService:
         concept_examples_map = defaultdict(set)
         for segment in k_means_segments:
             concept_examples_map[segment.concept_name].add(segment)
-        for k, v in concept_examples_map.items():
-            unique_concepts = {c.concept_name for c in v}
-            if len(unique_concepts) > 1:
-                print(k)
-                print(unique_concepts)
-                raise Exception("Concepts should be unique")
         return concept_examples_map
