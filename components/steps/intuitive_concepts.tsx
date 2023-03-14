@@ -67,10 +67,12 @@ export default function IntuitiveConceptsStep({
 
     http("/center-most-concepts", payload)
       .then((el) => el.json())
-      .then((data:CenterMostConsept.CenterConsept[]) => {
-        data.filter(item=>item.concepts.length > 0).forEach( (item:CenterMostConsept.CenterConsept, index: any) => {
-          const label = item.label;
-          const concepts = item.concepts.map((concept) => {
+      .then((data: CenterMostConsept.CenterConsept[]) => {
+        data
+          .filter((item) => item.concepts.length > 0)
+          .forEach((item: CenterMostConsept.CenterConsept, index: any) => {
+            const label = item.label;
+            const concepts = item.concepts.map((concept) => {
               const conceptName = concept.name;
               return concept.examples.map((example) => {
                 return {
@@ -85,12 +87,10 @@ export default function IntuitiveConceptsStep({
                     />
                   ),
                 };
-                
-          })
-         
-        });
-          setCenterMostConcepts(concepts);
-        });
+              });
+            });
+            setCenterMostConcepts(concepts);
+          });
       });
   }, [initallyProposedConcepts]);
 
@@ -120,12 +120,11 @@ export default function IntuitiveConceptsStep({
 
   return (
     <>
-    {centerMostConcepts.map((el,index) => {
+      {centerMostConcepts.map((el, index) => {
         return <Checkbox.Group key={index} options={el} />;
-        })
-}
+      })}
 
-<h1>size {centerMostConcepts.length}</h1>
+      <h1>size {centerMostConcepts.length}</h1>
 
       <div>
         <Button type="primary" onClick={onComplete}>
@@ -137,15 +136,15 @@ export default function IntuitiveConceptsStep({
 }
 
 const CheckboxWithImage = ({ src, label, conceptChecked }) => {
-  alert("Hi")
+  alert("Hi");
   const [checked, setChecked] = useState(false);
   const handleChange = (e) => {
     conceptChecked(!checked);
     setChecked(e.target.checked);
     conceptChecked();
   };
- const imgSrc = `data:image/jpeg;base64,${src}`;
- console.log(imgSrc)
+  const imgSrc = `data:image/jpeg;base64,${src}`;
+  console.log(imgSrc);
   return (
     <Row align="middle">
       <Col span={4}>
