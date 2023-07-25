@@ -33,7 +33,7 @@ class PerformanceService:
         performance.update_decision_tree(accuracy, fidelity)
         self.performance_repository.update(performance)
 
-    def update_counterfactual_probability(self, probability: float, explanation_requirement_id: str):
+    def update_counterfactual_probability(self,fidelity: float, probability: float, explanation_requirement_id: str):
         performance = self.performance_repository.get_by_explanation_requirement_id(explanation_requirement_id)
-        performance.update_counterfactual(probability)
+        performance.update_counterfactual(fidelity,probability)
         self.performance_repository.update(performance)

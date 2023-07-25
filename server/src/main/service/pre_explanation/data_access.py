@@ -21,6 +21,8 @@ with open(img_path, 'rb') as f:
 with open(labels_path, 'rb') as f:
     labels = np.array(pickle.load(f))
 
+
+
 ade_classes = pd.read_csv(ade_path)
 
 
@@ -64,3 +66,8 @@ def get_hog(image: np.array):
     _, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
                        cells_per_block=(1, 1), visualize=True, channel_axis=-1)
     return hog_image
+
+hogs = [get_hog(img) for img in imgs]
+
+def get_hogs() -> np.array:
+    return hogs

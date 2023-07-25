@@ -17,6 +17,8 @@ export default function PerformanceMetrics({
   // counterfactual metrics
   const [counterfactualProbability, setCounterFactualProbability] =
     useState<number>(0);
+  const [counterfactualFidelity, setCounterFactualFidelity] =
+    useState<number>(0);
 
   const updateMetrics = () => {
     httpGet(`/performance-metrics/${getId()}`)
@@ -27,6 +29,7 @@ export default function PerformanceMetrics({
         setDesicionTreeAccuracy(decisionTree.accuracy);
         setDesicionTreeFidelity(decisionTree.fidelity);
         setCounterFactualProbability(counterfactual.probability);
+        setCounterFactualFidelity(counterfactual.fidelity);
       })
       .catch((err) => {
         console.error(err);
@@ -83,15 +86,26 @@ export default function PerformanceMetrics({
       )}
 
       {showCounterFactualMetrics && (
-        <Row>
-          <Col span={24}>
-            <Statistic
-              title="Counterfactual probability"
-              value={counterfactualProbability}
-              precision={3}
-            />
-          </Col>
-        </Row>
+        <>
+          <Row>
+            <Col span={24}>
+              <Statistic
+                title="Counterfactual probability"
+                value={counterfactualProbability}
+                precision={3}
+              />
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24}>
+              <Statistic
+                title="Counterfactual fidelity"
+                value={counterfactualFidelity}
+                precision={3}
+              />
+            </Col>
+          </Row>
+        </>
       )}
     </>
   );

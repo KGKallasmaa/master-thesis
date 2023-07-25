@@ -10,6 +10,7 @@ from main.database.constraint_db import ConstraintDb
 from main.models.enums import ExplanationType
 from main.service.explain.common import encode_categorical_values, get_training_row, train_and_test_decision_tree
 from main.service.perfromance.performance_service import PerformanceService
+from main.service.pre_explanation.common import euclidean_distance
 from main.service.pre_explanation.data_access import get_labels, get_images, get_masks
 
 COUNTERFACTUAL_LABEL = 1
@@ -28,7 +29,7 @@ class CounterFactualExplanationService:
     def explain(self, explanation_id: str, counter_factual_class: str, to_be_explained_image_index: int):
         concepts = self.to_be_used_concepts(explanation_id)
 
-        estimator, probability, explanation = self.counterfactual_explanation(
+        estimator, fidelity,probability, explanation = self.counterfactual_explanation(
             to_be_explained_image_index=to_be_explained_image_index,
             counter_factual_class=counter_factual_class,
             available_concepts=concepts)
@@ -40,11 +41,11 @@ class CounterFactualExplanationService:
 
         self.update_used_constraints(explanation_id=explanation_id, feature_encoder=feature_encoder,
                                      estimator=estimator)
-        self.performance_service.update_counterfactual_probability(probability, explanation_id)
+        self.performance_service.update_counterfactual_probability(fidelity,probability, explanation_id)
         return explanation
 
     def counterfactual_explanation(self, to_be_explained_image_index: int, counter_factual_class: str,
-                                   available_concepts: List[str]) -> Tuple[any, float, any]:
+                                   available_concepts: List[str]) -> Tuple[any, float,float, any]:
 
         X, y, black_box_model = self.__find_blackbox_model(available_concepts,
                                                            counter_factual_class,
@@ -102,8 +103,8 @@ class CounterFactualExplanationService:
                     "minimumAcceptanceProbability": minimum_acceptance_probability,
                     "counterfactuals": counterfactual_view,
                 }
-
-                return black_box_model, minimum_acceptance_probability, explanation
+                normalized_euclidean_distance = euclidean_distance(test_instance_as_array, counterfactual["cfs_list"][0])
+                return black_box_model,normalized_euclidean_distance ,minimum_acceptance_probability, explanation
 
             except Exception as e:
                 explanation = {
@@ -117,7 +118,7 @@ class CounterFactualExplanationService:
                     "counterfactuals": [],
                 }
 
-        return black_box_model, 0.0, explanation
+        return black_box_model, 0.0,0.0, explanation
 
     @staticmethod
     def __transform_data_for_dice(X, y, concepts: List[str]):
@@ -180,3 +181,10 @@ class CounterFactualExplanationService:
 
         constraints.change_concept_constraint("most_predictive_concepts", ExplanationType.COUNTERFACTUAL, most_predictive_features)
         self.constraint_db.update_constraint(constraints)
+
+    @staticmethod
+    def __calculate_normalized_euclidian_distance(test_instance:List[float], counterfactual_instance:List[float])->float:
+        reverse_array = [1 - el for el in test_instance]
+        max_euclidean_distance = euclidean_distance(reverse_array, test_instance)
+        euclidean_distance_cf = euclidean_distance(test_instance, counterfactual_instance)
+        return euclidean_distance_cf/max_euclidean_distance

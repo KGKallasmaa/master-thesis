@@ -13,6 +13,7 @@ from main.models.enums import ExplanationType
 from main.service.explain.blackbox import BlackBoxModelService
 from main.service.explain.counterfactual_explanation import CounterFactualExplanationService
 from main.service.explain.decision_tree_explanation_service import DecisionTreeExplanationService
+from main.service.perfromance.lime import average_lime_fidelity
 from main.service.perfromance.performance_service import PerformanceService
 from main.service.pre_explanation.closest_image import find_closest_image_index
 from main.service.pre_explanation.common import serve_pil_image, base64_to_pil
@@ -34,6 +35,9 @@ concept_suggestion_service = ConceptSuggestionService()
 user_selected_concepts_handler = UserSelectedConceptsHandler()
 black_box_service = BlackBoxModelService()
 performance_service = PerformanceService()
+
+images = get_images()
+image_indexes =[i for i in range(0, len(images))]
 
 
 # TODO: this is used
@@ -179,6 +183,13 @@ def performance_metrics_view(explanation_id):
 def center_most_concepts_view(image_id: int):
     return jsonify({"concepts": CENTER_MOST_CONCEPTS[image_id]})
 
+@api.route("/lime", methods=["GET"])
+def lime_fidelity_view():
+    results = {
+        "fidelity": average_lime_fidelity(image_indexes),
+    }
+    return jsonify(results)
+
 
 if __name__ == '__main__':
-    api.run(host='0.0.0.0', port=8000, debug=False)
+    api.run(host='0.0.0.0', port=8000, debug=False,threaded=True)
