@@ -44,21 +44,25 @@ def get_labels() -> np.array:
 
 
 def get_segments(img, mask, threshold=0.05):
-    ade_classes = get_ade_classes()
     segs = np.unique(mask)
     segments = []
     total = mask.shape[0] * mask.shape[1]
     segments_classes = []
+
     for seg in segs:
         idxs = mask == seg
         sz = np.sum(idxs)
         if sz < threshold * total:
             continue
-        segment = img * idxs[..., None]
-        w, h, _ = np.nonzero(segment)
-        segment = segment[np.min(w):np.max(w), np.min(h):np.max(h), :]
-        segments.append(segment)
+        coords = np.argwhere(idxs)
+        x_min, y_min = coords.min(axis=0)
+        x_max, y_max = coords.max(axis=0)
+
+        segment_img = img[x_min:x_max+1, y_min:y_max+1, :]
+
+        segments.append(segment_img)
         segments_classes.append(ade_classes['Name'].loc[ade_classes['Idx'] == seg].iloc[0])
+
     return segments, segments_classes
 
 

@@ -11,3 +11,4 @@ dice-ml == 0.9
 mpire == 2.6.0
 lime == 0.2.0.1
 tensorflow == 2.13.0
+matplotlib == 3.7.1
