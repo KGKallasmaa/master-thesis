@@ -113,7 +113,7 @@ class ConceptSuggestionService:
 
             predictive_concept, intuitive_concept = combination
 
-            if self.__should_append_predictive_concept(predictive_concept, proposed_concepts, added_intuitive_concepts):
+            if self.__should_append_predictive_concept(predictive_concept, proposed_concepts, added_predictive_concepts):
                 proposed_concepts.append(predictive_concept)
                 added_predictive_concepts.add(predictive_concept)
 
